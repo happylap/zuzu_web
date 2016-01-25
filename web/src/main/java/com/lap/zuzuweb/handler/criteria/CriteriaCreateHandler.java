@@ -5,6 +5,7 @@ import java.util.Map;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.CriteriaCreatePayload;
+import com.lap.zuzuweb.model.Criteria;
 import com.lap.zuzuweb.service.CriteriaService;
 
 public class CriteriaCreateHandler extends AbstractRequestHandler<CriteriaCreatePayload>{
@@ -17,7 +18,7 @@ public class CriteriaCreateHandler extends AbstractRequestHandler<CriteriaCreate
     }
 	@Override
 	protected Answer processImpl(CriteriaCreatePayload value, Map<String, String> urlParams) {
-        String criteriaId = service.createCriteria(value);
+		String criteriaId = service.createCriteria(value.toCriteria());
         return new Answer(201, criteriaId);
 	}
 

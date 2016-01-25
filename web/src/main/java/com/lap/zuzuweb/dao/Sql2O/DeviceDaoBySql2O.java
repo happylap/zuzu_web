@@ -11,13 +11,13 @@ import com.lap.zuzuweb.model.Device;
 public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 {
 	static private String SQL_GET_ALL_DEVICES = "SELECT device_id, user_id, register_time, enabled, register_time, last_notify_time"
-			+ "FROM \"Device\" ";
+			+ " FROM \"Device\" ";
 		
 	static private String SQL_GET_DEVICES_BY_USER = "SELECT device_id, user_id, register_time, enabled, register_time, last_notify_time"
-			+ "FROM \"Device\" WHERE user_id=:user_id";
+			+ " FROM \"Device\" WHERE user_id=:user_id";
 	
 	static private String SQL_GET_DEVICE = "SELECT device_id, user_id, register_time, enabled, register_time, last_notify_time"
-			+ "FROM \"Device\" WHERE user_id=:user_id AND device_id=:device_id";
+			+ " FROM \"Device\" WHERE user_id=:user_id AND device_id=:device_id";
 	
 	static private String SQL_CREATE_DEVICE = "INSERT INTO \"Device\"(device_id, user_id, register_time, enabled)"
 			+ " VALUES (:device_id, :user_id, :register_time, :enabled)";

@@ -64,7 +64,7 @@ public class App
         put("/device", new DeviceUpdateHandler(deviceSvc));
         delete("/device/userid/:userid", new DeviceDeleteHandler(deviceSvc)); //remove devices belonging to some user
         delete("/device/:deviceid", new DeviceDeleteHandler(deviceSvc)); // remove a device
-        get("/device/", new DeviceQueryHandler(deviceSvc)); // get all devices
+        get("/device", new DeviceQueryHandler(deviceSvc)); // get all devices
         get("/device/:userid", new DeviceQueryHandler(deviceSvc)); // get devices belonging to some user
         
         // criteria
