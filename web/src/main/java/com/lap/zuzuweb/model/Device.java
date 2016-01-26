@@ -14,5 +14,5 @@ public class Device {
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private Date register_time;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
-    private Date last_notify_time;
+    private Date receive_notify_time;
 }

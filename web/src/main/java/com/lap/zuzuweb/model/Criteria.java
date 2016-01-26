@@ -36,5 +36,6 @@ public class Criteria
     private Date expire_time;
     private String apple_product_id;
     private PGobject filters;
-    
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
+    private Date last_notify_time;
 }

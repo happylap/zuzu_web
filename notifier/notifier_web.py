@@ -2,10 +2,10 @@
 
 import requests
 import json, datetime
-import CommonUtils
-from web_model import Device, Criteria
+import CommonUtils, TimeUtils
+from notifier_model import Device, Criteria
 
-class RHCWeb(object):
+class NotifierWeb(object):
     def __init__(self):
         self.logger = CommonUtils.getLogger()
         #self.web_url = "http://ec2-52-76-69-228.ap-southeast-1.compute.amazonaws.com:8983/solr/rhc"
@@ -33,7 +33,7 @@ class RHCWeb(object):
             criteria = Criteria(data)
             if criteria.enabled == False or criteria.user_id is None or criteria.expire_time is None:
                 continue
-            if CommonUtils.get_Now() > criteria.expire_time:
+            if TimeUtils.get_Now() > criteria.expire_time:
                 continue
             result.append(criteria)
 

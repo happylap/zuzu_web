@@ -20,7 +20,7 @@ public class CriteriaUpdatePayload extends CriteriaCreatePayload implements Vali
 	public Criteria toCriteria()
 	{
 		Criteria c = super.toCriteria();
-		c.setCriteria_id(this.getCriteria_id());
+		c.setCriteria_id(this.criteria_id);
 		return c;
 	}
 }

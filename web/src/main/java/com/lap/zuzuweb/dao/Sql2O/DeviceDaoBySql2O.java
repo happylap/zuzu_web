@@ -10,19 +10,19 @@ import com.lap.zuzuweb.model.Device;
 
 public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 {
-	static private String SQL_GET_ALL_DEVICES = "SELECT device_id, user_id, register_time, enabled, register_time, last_notify_time"
+	static private String SQL_GET_ALL_DEVICES = "SELECT device_id, user_id, register_time, enabled, register_time, receive_notify_time"
 			+ " FROM \"Device\" ";
 		
-	static private String SQL_GET_DEVICES_BY_USER = "SELECT device_id, user_id, register_time, enabled, register_time, last_notify_time"
+	static private String SQL_GET_DEVICES_BY_USER = "SELECT device_id, user_id, register_time, enabled, register_time, receive_notify_time"
 			+ " FROM \"Device\" WHERE user_id=:user_id";
 	
-	static private String SQL_GET_DEVICE = "SELECT device_id, user_id, register_time, enabled, register_time, last_notify_time"
+	static private String SQL_GET_DEVICE = "SELECT device_id, user_id, register_time, enabled, register_time, receive_notify_time"
 			+ " FROM \"Device\" WHERE user_id=:user_id AND device_id=:device_id";
 	
 	static private String SQL_CREATE_DEVICE = "INSERT INTO \"Device\"(device_id, user_id, register_time, enabled)"
 			+ " VALUES (:device_id, :user_id, :register_time, :enabled)";
 	
-	static private String SQL_UPDATE_DEVICE = "UPDATE \"Device\" SET enabled=:enabled, last_notify_time=:last_notify_time"
+	static private String SQL_UPDATE_DEVICE = "UPDATE \"Device\" SET enabled=:enabled, receive_notify_time=:receive_notify_time"
 			+ " WHERE device_id=:device_id AND user_id=:user_id";
 	
 	static private String SQL_REMOVE_DEVICE = "DELETE FROM \"Device\" WHERE device_id=:device_id";
@@ -91,7 +91,7 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
             		.addParameter("device_id", device.getDevice_id())
             		.addParameter("user_id", device.getUser_id())
             		.addParameter("enabled", device.isEnabled())
-                    .addParameter("last_notify_time", device.getLast_notify_time())
+                    .addParameter("receive_notify_time", device.getReceive_notify_time())
                     .executeUpdate();
             conn.commit();
             return device.getDevice_id();

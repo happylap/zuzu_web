@@ -9,18 +9,18 @@ import com.lap.zuzuweb.model.Criteria;
 
 public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDao {
 
-	static private String SQL_GET_CRITERIA = "SELECT criteria_id, user_id, enabled, expire_time, apple_product_id, "
-			+ " filters FROM \"Criteria\"";
+	static private String SQL_GET_CRITERIA = "SELECT criteria_id, user_id, enabled, expire_time, apple_product_id,"
+			+ " last_notify_time, filters FROM \"Criteria\"";
 	
 	static private String SQL_GET_CRITERIA_BY_USER = "SELECT criteria_id, user_id, enabled, expire_time, apple_product_id, "
-			+ " filters FROM \"Criteria\" WHERE user_id=:user_id";
+			+ " last_notify_time, filters FROM \"Criteria\" WHERE user_id=:user_id";
 	
 	static private String SQL_CREATE_CRITERIA = "INSERT INTO \"Criteria\"(criteria_id, user_id, enabled, expire_time, "
-			+ " apple_product_id, filters) "
-			+ " VALUES (:criteria_id, :user_id, :enabled, :expire_time, :apple_product_id, :filters)";
+			+ " apple_product_id, last_notify_time, filters) "
+			+ " VALUES (:criteria_id, :user_id, :enabled, :expire_time, :apple_product_id, :last_notify_time, :filters)";
 
 	static private String SQL_UPDATE_CRITERIA = "UPDATE \"Criteria\" SET enabled=:enabled, expire_time=:expire_time, "
-			+ " apple_product_id=:apple_product_id, filters=:filters "
+			+ " apple_product_id=:apple_product_id, last_notify_time, filters=:filters "
 			+ " WHERE criteria_id=:criteria_id AND user_id=:user_id";
 	
 	static private String SQL_REMOVE_CRITERIA = "DELETE FROM \"Criteria\" Where criteria_id=:criteria_id";
@@ -55,6 +55,7 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
             		.addParameter("enabled", criteria.isEnabled())
                     .addParameter("expire_time", criteria.getExpire_time())
                     .addParameter("apple_product_id", criteria.getApple_product_id())
+                    .addParameter("last_notify_time", criteria.getLast_notify_time())
                     .addParameter("filters", criteria.getFilters())
                     .executeUpdate();
             conn.commit();
@@ -71,6 +72,7 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
             		.addParameter("enabled", criteria.isEnabled())
                     .addParameter("expire_time", criteria.getExpire_time())
                     .addParameter("apple_product_id", criteria.getApple_product_id())
+                    .addParameter("last_notify_time", criteria.getLast_notify_time())
                     .addParameter("filters", criteria.getFilters())
                     .executeUpdate();
             conn.commit();
