@@ -18,34 +18,54 @@ class NotifierWeb(object):
                 js = json.loads(r.content)
                 return js
             else:
-                self.logger.error("Fail to get get resource: " + resource)
+                self.logger.error("Fail to get resource: " + resource)
                 return None
         except:
             self.logger.error("Exception while getting resource: " + resource)
             return None
 
+    def post(self, resource, payload):
+        try:
+            data = {"items":payload}
+            items = json.dumps(data)
+            r = requests.post(self.web_url+resource, data=items, headers={'Content-Type': 'application/json'})
+            if r.ok == True:
+                return True
+            else:
+                self.logger.error("Fail to post resource: " + resource +" , payload="+str(payload))
+                return False
+        except:
+            self.logger.error("Exception while getting resource: " + resource +" , payload="+str(payload))
+            return False
 
     def getEffectiveCriteria(self):
         result = []
         resource  = "/criteria"
-        list = self.get(resource)
-        for data in list:
+        criteria_list = self.get(resource)
+        if criteria_list is None or len(criteria_list) < 1:
+            return result
+
+        for data in criteria_list:
             criteria = Criteria(data)
             if criteria.enabled == False or criteria.user_id is None or criteria.expire_time is None:
                 continue
             if TimeUtils.get_Now() > criteria.expire_time:
                 continue
             result.append(criteria)
+        return result
 
     def getEnabledDevices(self):
         result = []
         resource  = "/device"
         devices = self.get(resource)
-        if devices is not None:
-            for data in devices:
-                device = Device(data)
-                if device.enabled == True:
-                    result.append(device)
-
+        if devices is None or len(devices) < 1:
+            return result
+        for data in devices:
+            device = Device(data)
+            if device.enabled == True:
+                result.append(device)
         return result
 
+    def saveNotifyItems(self, notify_items):
+        resource  = "/notifyitem/batch"
+        self.post(resource, notify_items)

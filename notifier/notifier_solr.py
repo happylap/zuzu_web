@@ -23,22 +23,23 @@ class NotifierSolr(object):
         query = "*:*"
         filters = {}
         filters["post_time"] = "["+post_time+" TO *]"
+        filters["-parent"] = "*"
         columns = ["*"]
         sort = ["post_time asc"]
         rows = self._get_rows(query, filters)
-        if rows:
+        if rows > 0:
             r = self.solr.query(query=query, filters=filters, columns= columns, rows=rows, sort=sort)
             docs = r.documents
             return docs
         else:
             return None
 
-    def getNotifyItems(self, post_time, filters):
-        query = "post_time:["+post_time+" TO *]"
+    def getNotifyItems(self, query, filters, post_time):
         filters = filters
-        columns = ["*"]
+        filters["post_time"] = "["+post_time+" TO *]"
+        columns = ["id, title, price, size house_type, purpose_type, addr, img"]
         sort = ["post_time asc"]
-        rows = self._get_rows(query, filters)
+        rows = self._get_rows(query=query, filters=filters)
         if rows:
             r = self.solr.query(query=query, filters=filters, columns= columns, rows=rows, sort=sort)
             docs = r.documents
@@ -46,8 +47,8 @@ class NotifierSolr(object):
         else:
             return None
 
-    def add(self):
-        self.solr.add()
+    def add(self, item):
+        self.solr.add(item)
 
     def commit(self):
         self.solr.commit()

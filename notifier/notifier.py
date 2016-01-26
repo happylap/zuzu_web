@@ -8,6 +8,9 @@ from notifier_solr import  NotifierSolr
 
 
 class Notifier(object):
+
+    nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
+
     def __init__(self):
         self.logger = CommonUtils.getLogger()
         self.json = JsonUtils.getNotifierJson()
@@ -50,35 +53,43 @@ class Notifier(object):
             except:
                 self.logger.error("Fail to add item: "+item["id"])
 
-
-
     def updateLastPostTime(self):
-        new_time_String = TimeUtils.plusOneSecondAsString(self.json["last_post_time"])
+        new_time_String = TimeUtils.plusOneSecondAsString(self.json["last_post_time"], TimeUtils.UTC_FORMT)
         self.json["last_post_time"] = new_time_String
         JsonUtils.updateNotifierJson(self.json)
 
     def performQueryAndNotify(self, criteria_list, device_list):
         for criteria in criteria_list:
-            filters = self.getFilters(criteria)
-            query_post_time = self.getPostTimeForQuery(criteria)
-            notify_items = self.getNotifyItems(query_post_time, filters)
-            self.saveNotifyItems(notify_items)
+            notify_items = self.getNotifyItems(criteria)
+            self.notifierWeb.saveNotifyItems(notify_items)
             devices = self.getDevices(device_list, criteria.user_id)
             self.sendNotifications(notify_items, devices)
+            #self.updateNotifyTime(notify_items, criteria)
 
     def getNotifyItems(self, criteria):
         query_post_time = self.getNextQueryPostTime(criteria.last_notify_time)
-        filters = criteria.getFilters()
-        notify_items = self.notifierSolr.getNotifyItems(query_post_time, filters)
+        query = self.getQuery(criteria)
+        print query
+        notify_items = self.notifierSolr.getNotifyItems(query["query"],query["filters"], query_post_time)
+        for item in notify_items:
+            item["item_id"] = item["id"]
+            item["criteria_id"] = criteria.criteria_id
+            item["user_id"] = criteria.user_id
+            img_list = item.get("img")
+            if  img_list is not None and len(img_list) > 0:
+                item["first_img_url"] = img_list[0]
+            item.pop("img", None)
+            item.pop("id", None)
         return notify_items
 
 
     def getNextQueryPostTime(self, last_post_time):
         query_post_time = ""
-        if last_post_time is None or last_post_time == "":
+        if last_post_time is None:
             query_post_time = TimeUtils.getOneHourAgoAsString(TimeUtils.UTC_FORMT)
         else:
-            query_post_time = TimeUtils.plusOneSecondAsString(last_post_time, TimeUtils.UTC_FORMT)
+            time_string = last_post_time.strftime(TimeUtils.UTC_FORMT)
+            query_post_time = TimeUtils.plusOneSecondAsString(time_string, TimeUtils.UTC_FORMT)
         return query_post_time
 
     def getDevices(self, device_list, user_id):
@@ -88,11 +99,63 @@ class Notifier(object):
                 result.append(device)
         return result
 
-    def saveNotifyItems(self,notify_items):
+    def sendNotifications(self,notify_items, devices):
+        if len(notify_items) < 1:
+            return
         pass
 
-    def sendNotifications(self,notify_items, devices):
-        pass
+    def getQuery(self, criteria):
+        query = {}
+        filters = {}
+        region = ""
+        city = ""
+        input_filters = JsonUtils.loadsJSONStr(criteria.filters, JsonUtils.UTF8_ENCODE)
+        keys = input_filters.keys()
+        for field in keys:
+            field = str(field)
+            filter_string = ""
+            obj = input_filters.get(field)
+            if isinstance(obj, unicode) or isinstance(obj, str) or isinstance(obj, int) or isinstance(obj, bool):
+                if field in self.nearby_fileds:
+                    filter_string = "( * )"
+                elif field == "basement":
+                    filter_string = "{0 TO *}"
+                    field = "floor"
+                elif field == "shortest_lease":
+                    filter_string = "{0 TO "+str(obj)+"}"
+                else:
+                    filter_string= str(obj)
+            elif isinstance(obj, dict):
+                if obj.get("from") is not None:
+                    fromVal =  str(obj.get("from"))
+                    toVal =  str(obj.get("to"))
+                    filter_string = "[ " +fromVal + " TO " + toVal +" ]"
+                elif obj.get("operator") is not None:
+                    opt = str(obj.get("operator"))
+                    values = obj.get("value")
+                    filter_string = "("
+                    for v in values:
+                        if filter_string == "(":
+                            filter_string = filter_string + " " + str(v) + " "
+                        else:
+                            filter_string = filter_string + opt + " " + str(v) + " "
+                    filter_string = filter_string+")"
+            if filter_string != "":
+                if field == "region" or field == "city":
+                    query[field] = filter_string
+                else:
+                    filters[field] = filter_string
+
+        query["filters"] = filters
+
+        if query["city"] is not None and  query["region"] is not None:
+            query["query"] = "city:"+query["city"]+" OR " + "region:"+query["region"]
+        elif query["city"] is not None:
+            query["query"] = "city:"+query["city"]
+        elif query["region"] is not None:
+            query["query"] = "region:"+query["region"]
+
+        return query
 
 def main():
     logname = "log/notifier"+"_%s.log" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")

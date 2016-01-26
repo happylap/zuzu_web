@@ -19,7 +19,7 @@ public class NotifyItemBatchCreatePayload implements Validable{
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 

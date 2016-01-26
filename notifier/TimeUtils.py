@@ -2,8 +2,6 @@
 
 import datetime
 
-
-GENERAL_FORMAT = "%Y-%m-%d %H:%M:%S"
 UTC_FORMT = "%Y-%m-%dT%H:%M:%SZ"
 
 def get_Now():

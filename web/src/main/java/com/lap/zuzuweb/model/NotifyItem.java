@@ -11,7 +11,7 @@ public class NotifyItem {
     private String item_id;
     private String user_id;
     private String criteria_id;
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss", timezone="Asia/Taipei")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="Asia/Taipei")
     private Date notify_time;
     private boolean is_read;
     private int price;
