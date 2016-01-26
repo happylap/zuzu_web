@@ -27,15 +27,16 @@ public class Criteria
 		{
 			System.out.println(e.getMessage());
 		}
+
 	}
 	
     private String criteria_id;
     private String user_id ;
     private boolean enabled ;
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss", timezone="Asia/Taipei")
     private Date expire_time;
     private String apple_product_id;
     private PGobject filters;
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss", timezone="Asia/Taipei")
     private Date last_notify_time;
 }

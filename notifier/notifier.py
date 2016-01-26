@@ -60,16 +60,20 @@ class Notifier(object):
     def performQueryAndNotify(self, criteria_list, device_list):
         for criteria in criteria_list:
             filters = self.getFilters(criteria)
-            devices = self.getDevices(device_list, criteria.user_id)
-            query_post_time = self.getPostTimeForQuery(devices)
-            notify_items = self.notifierSolr.getNotifyItems(query_post_time, filters)
+            query_post_time = self.getPostTimeForQuery(criteria)
+            notify_items = self.getNotifyItems(query_post_time, filters)
             self.saveNotifyItems(notify_items)
+            devices = self.getDevices(device_list, criteria.user_id)
             self.sendNotifications(notify_items, devices)
 
-    def getPostTimeForQuery(self, devices):
-        last_post_time = ""
-        for device in devices:
-            last_post_time = TimeUtils.getLatest(last_post_time, device.last_notify_time, TimeUtils.GENERAL_FORMAT)
+    def getNotifyItems(self, criteria):
+        query_post_time = self.getNextQueryPostTime(criteria.last_notify_time)
+        filters = criteria.getFilters()
+        notify_items = self.notifierSolr.getNotifyItems(query_post_time, filters)
+        return notify_items
+
+
+    def getNextQueryPostTime(self, last_post_time):
         query_post_time = ""
         if last_post_time is None or last_post_time == "":
             query_post_time = TimeUtils.getOneHourAgoAsString(TimeUtils.UTC_FORMT)

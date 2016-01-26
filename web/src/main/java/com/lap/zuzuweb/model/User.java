@@ -2,12 +2,15 @@ package com.lap.zuzuweb.model;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Data;
 
 @Data
 public class User
 {
     private String user_id;
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss", timezone="Asia/Taipei")
     private Date register_time;
     private String facebook_id;
     private String facebook_name;
