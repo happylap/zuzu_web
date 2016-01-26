@@ -26,9 +26,8 @@ class NotifierWeb(object):
 
     def post(self, resource, payload):
         try:
-            data = {"items":payload}
-            items = json.dumps(data)
-            r = requests.post(self.web_url+resource, data=items, headers={'Content-Type': 'application/json'})
+            data = json.dumps(payload)
+            r = requests.post(self.web_url+resource, data=data, headers={'Content-Type': 'application/json'})
             if r.ok == True:
                 return True
             else:
@@ -68,4 +67,5 @@ class NotifierWeb(object):
 
     def saveNotifyItems(self, notify_items):
         resource  = "/notifyitem/batch"
-        self.post(resource, notify_items)
+        payload = {"items":notify_items}
+        self.post(resource, payload)
