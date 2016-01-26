@@ -1,0 +1,64 @@
+{
+   "user_id": "test",
+   "enabled": false,
+   "expire_time": null,
+   "apple_product_id": "apple",
+   "query_string": 
+   {
+      "restr_sex": "1",
+      "allow_pet": "true",
+      "allow_cooking": "true", 
+      "parking_lot": "true",        
+      "nearby_bus": "true",
+      "nearby_mrt": "true",
+      "basement: "false",
+      "rooftop_addition": "false",
+      "shortest_lease": 180,
+   	"region":[106,220],
+   	"purpose_type":[1,4],
+      "house_type":[1,2],
+      "agent_type":[1,2],
+      "num_bedroom":[2,3],
+      "restr_profile": [1,2],
+      "furniture": [1,2],
+   	"surrounding":[1,2],
+   	"priceFrom":"5000",
+      "priceTo":"10000",
+   	"sizeFrom":"10",
+      "sizeTo":"20"
+   }
+}
+
+"restr_sex:1"
+"allow_pet:true"
+"allow_cooking:true"
+"parking_lot:true"
+"rooftop_addition:false"
+"nearby_bus:( * )"
+"nearby_mrt:( * )"
+"floor:{0 TO *}"
+"shortest_lease:[0 TO 180]"
+
+"region:(106 OR 220)"
+"purpose_type:(1 OR 4)"
+"house_type:( 1 OR 2 )"
+"agent_type:( 1 OR 2 )"
+"num_bedroom:( 2 OR 3 )"
+"restr_profile:( 1 OR 2 )"
+"furniture:( 1 AND 2 )"
+"facility:( 1 AND 2 )"
+"surrounding:( 1 AND 2 )"
+
+"price:[5000 TO 10000]"
+"size:[10 TO 20]"
+
+
+
+
+
+"-parent:*"
+
+sort
+"post_time desc"  0x00007fe43b450a30
+
+    
