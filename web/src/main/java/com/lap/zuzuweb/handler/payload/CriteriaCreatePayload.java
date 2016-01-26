@@ -14,7 +14,7 @@ public class CriteriaCreatePayload implements Validable {
     private boolean enabled ;
     private Date expire_time;
     private String apple_product_id;
-    private JsonNode query_string;
+    private JsonNode filetrs;
     
 	@Override
 	public boolean isValid() {
@@ -28,7 +28,7 @@ public class CriteriaCreatePayload implements Validable {
 		c.setEnabled(this.enabled);
 		c.setExpire_time(this.expire_time);
 		c.setApple_product_id(this.apple_product_id);
-		c.setQuery_string(this.query_string.toString());
+		c.setFiltersValue(this.filetrs.toString());
 		return c;
 	}
 }

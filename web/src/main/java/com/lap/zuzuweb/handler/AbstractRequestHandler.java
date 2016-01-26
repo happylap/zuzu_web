@@ -29,7 +29,6 @@ public abstract class AbstractRequestHandler<V extends Validable> implements Req
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             return mapper.writeValueAsString(data);
         } catch (IOException e){
-        	e.printStackTrace();
             throw new RuntimeException("IOException from a StringWriter?");
         }
     }

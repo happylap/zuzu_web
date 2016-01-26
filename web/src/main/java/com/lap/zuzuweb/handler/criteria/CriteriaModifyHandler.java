@@ -17,7 +17,7 @@ public class CriteriaModifyHandler extends AbstractRequestHandler<CriteriaUpdate
     }
 	@Override
 	protected Answer processImpl(CriteriaUpdatePayload value, Map<String, String> urlParams) {
-        String criteriaId = service.updateCriteria(value);
+        String criteriaId = service.updateCriteria(value.toCriteria());
         return new Answer(201, criteriaId);
 	}
 
