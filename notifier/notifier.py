@@ -61,6 +61,8 @@ class Notifier(object):
     def performQueryAndNotify(self, criteria_list, device_list):
         for criteria in criteria_list:
             notify_items = self.getNotifyItems(criteria)
+            if notify_items is None or len(notify_items) < 1:
+                continue
             self.notifierWeb.saveNotifyItems(notify_items)
             devices = self.getDevices(device_list, criteria.user_id)
             self.sendNotifications(notify_items, devices)
@@ -70,6 +72,9 @@ class Notifier(object):
         query_post_time = self.getNextQueryPostTime(criteria.last_notify_time)
         query = self.getQuery(criteria)
         notify_items = self.notifierSolr.getNotifyItems(query["query"],query["filters"], query_post_time)
+        if notify_items is None or len(notify_items) < 1:
+            return notify_items
+
         for item in notify_items:
             item["item_id"] = item["id"]
             item["criteria_id"] = criteria.criteria_id
@@ -106,15 +111,11 @@ class Notifier(object):
         return result
 
     def sendNotifications(self,notify_items, devices):
-        if len(notify_items) < 1:
-            return
         pass
 
     def getQuery(self, criteria):
         query = {}
         filters = {}
-        region = ""
-        city = ""
         input_filters = JsonUtils.loadsJSONStr(criteria.filters, JsonUtils.UTF8_ENCODE)
         keys = input_filters.keys()
         for field in keys:
