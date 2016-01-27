@@ -17,8 +17,14 @@ public class CriteriaModifyHandler extends AbstractRequestHandler<CriteriaUpdate
     }
 	@Override
 	protected Answer processImpl(CriteriaUpdatePayload value, Map<String, String> urlParams) {
-        String criteriaId = service.updateCriteria(value.toCriteria());
-        return new Answer(201, criteriaId);
+    	if (!urlParams.containsKey(":criteriaid") || !urlParams.containsKey(":userid")) {
+            throw new IllegalArgumentException();
+        }
+    	
+    	String criteriaId = urlParams.get(":criteriaid");
+    	String userId = urlParams.get(":userid");
+        String updateId = service.updateCriteria(value.toCriteria(criteriaId, userId));
+        return new Answer(201, updateId);
 	}
 
 }

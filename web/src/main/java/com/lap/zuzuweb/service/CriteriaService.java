@@ -2,11 +2,14 @@ package com.lap.zuzuweb.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import com.lap.zuzuweb.model.Criteria;
 
 public interface CriteriaService
 {
+	public Optional<Criteria> getCriteria(String criteriaId,String userID);
+	
 	public List<Criteria> getCriteria(String userID);
 	
 	public List<Criteria> getAllCriteria();
@@ -15,7 +18,7 @@ public interface CriteriaService
 	
 	public String updateCriteria(Criteria criteria);
 	
-	public String deleteCriteria(String criteriaId);
+	public String deleteCriteria(String criteriaId, String userId);
 	
 	public boolean deleteCriteriaByUser(String userId);
 	

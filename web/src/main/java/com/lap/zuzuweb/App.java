@@ -22,8 +22,7 @@ import com.lap.zuzuweb.handler.criteria.CriteriaCreateHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaModifyHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaPatchHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaRemoveHandler;
-import com.lap.zuzuweb.handler.criteria.GetCriteriaHandler;
-import com.lap.zuzuweb.handler.criteria.GetUserCriteriaHandler;
+import com.lap.zuzuweb.handler.criteria.CriteriaQueryHandler;
 import com.lap.zuzuweb.handler.device.DeviceCreateHandler;
 import com.lap.zuzuweb.handler.device.DeviceDeleteHandler;
 import com.lap.zuzuweb.handler.device.DeviceQueryHandler;
@@ -71,12 +70,13 @@ public class App
         
         // criteria
         post("/criteria", new CriteriaCreateHandler(criteriaSvc)); // add a criteria
-        put("/criteria", new CriteriaModifyHandler(criteriaSvc)); // modify criteria
+        put("/criteria/:criteriaid/:userid", new CriteriaModifyHandler(criteriaSvc)); // modify criteria
         patch("/criteria/:criteriaid/:userid", new CriteriaPatchHandler(criteriaSvc));
-        delete("/criteria/userid/:userid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria belonging to some user
-        delete("/criteria/:criteriaid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria
-        get("/criteria", new GetCriteriaHandler(criteriaSvc)); // get all criteria
-        get("/criteria/userid/:userid", new GetUserCriteriaHandler(criteriaSvc)); // get criteria belonging to some user
+        delete("/criteria/:criteriaid/:userid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria
+        delete("/criteria/:userid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria belonging to some user
+        get("/criteria", new CriteriaQueryHandler(criteriaSvc)); // get all criteria
+        get("/criteria/:criteriaid/:userid", new CriteriaQueryHandler(criteriaSvc)); // get criteria belonging to some user
+        get("/criteria/:userid", new CriteriaQueryHandler(criteriaSvc)); // get criteria belonging to some user
         
         // notify
         post("/notifyitem/batch", new NotifyItemBatchCreateHandler(notifyItemSvc)); // add a list of notify items

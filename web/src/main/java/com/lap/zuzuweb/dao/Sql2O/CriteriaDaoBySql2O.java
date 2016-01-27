@@ -30,7 +30,7 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 	/*static private String SQL_UPDATE_ENABLE = "UPDATE \"Criteria\" SET enabled=:enabled"
 			+ " WHERE criteria_id=:criteria_id AND user_id=:user_id";*/
 	
-	static private String SQL_REMOVE_CRITERIA = "DELETE FROM \"Criteria\" Where criteria_id=:criteria_id";
+	static private String SQL_REMOVE_CRITERIA = "DELETE FROM \"Criteria\" Where criteria_id=:criteria_id AND user_id=:user_id";
 	
 	static private String SQL_REMOVE_CRITERIA_BY_USER = "DELETE FROM \"Criteria\" Where user_id=:user_id";
 	
@@ -105,10 +105,11 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 	}
 
 	@Override
-	public String deleteCriteria(String criteriaId) {
+	public String deleteCriteria(String criteriaId, String userId) {
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_REMOVE_CRITERIA)
             		.addParameter("criteria_id", criteriaId)
+            		.addParameter("user_id", userId)
                     .executeUpdate();
             conn.commit();
             return criteriaId;

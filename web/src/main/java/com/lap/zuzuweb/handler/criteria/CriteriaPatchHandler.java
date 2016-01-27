@@ -35,7 +35,7 @@ public class CriteriaPatchHandler extends AbstractRequestArrayHandler{
 	}
 
 	private void handleReplace(Map<String, String> urlParams, String path, String value) {
-    	if (!urlParams.containsKey(":criteriaid") && !urlParams.containsKey(":userid")) {
+    	if (!urlParams.containsKey(":criteriaid") || !urlParams.containsKey(":userid")) {
             throw new IllegalArgumentException();
         }
     	

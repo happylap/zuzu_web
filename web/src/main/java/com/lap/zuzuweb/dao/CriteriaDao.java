@@ -17,7 +17,7 @@ public interface CriteriaDao
 	
 	public String updateCriteria(Criteria criteria);
 	
-	public String deleteCriteria(String criteriaId);
+	public String deleteCriteria(String criteriaId, String userId);
 	
 	public boolean deleteCriteriaByUser(String userId);
 }

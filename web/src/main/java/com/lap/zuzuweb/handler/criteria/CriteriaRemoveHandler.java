@@ -22,15 +22,18 @@ public class CriteriaRemoveHandler extends AbstractRequestHandler<EmptyPayload>{
             throw new IllegalArgumentException();
         }
     	
-    	if (urlParams.containsKey(":criteriaid")){
+    	if (urlParams.containsKey(":criteriaid") && urlParams.containsKey(":userid")){
         	String criteriaId = urlParams.get(":criteriaid");
-            service.deleteCriteria(criteriaId);
+        	String userId = urlParams.get(":userid");
+            service.deleteCriteria(criteriaId, userId);
             return new Answer(200, criteriaId);   		
     	}
-    	else{
-        	String userid = urlParams.get(":userid");
-            service.deleteCriteriaByUser(userid);
+    	else if (urlParams.containsKey(":userid")){
+        	String userId = urlParams.get(":userid");
+            service.deleteCriteriaByUser(userId);
             return new Answer(200, Answer.SUCCESS);       		
+    	}else{
+    		throw new IllegalArgumentException();
     	}
     	
 
