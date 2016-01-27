@@ -22,7 +22,8 @@ class Notifier(object):
 
     def run(self):
         newItems = self.getNewItems()
-        self.addItems(newItems)
+        if newItems is not None and len(newItems) > 0:
+            self.addItems(newItems)
         self.updateLastPostTime()
         criteria_list = self.getCriteria()
         device_list = self.notifierWeb.getEnabledDevices()
@@ -30,11 +31,7 @@ class Notifier(object):
         pass
 
     def getNewItems(self):
-        new_items = self.rhcSolr.getNewPostItems(self.json["last_post_time"])
-        if new_items is None or len(new_items) < 1:
-            self.logger.info("No new items! Exit")
-            sys.exit()
-        return new_items
+        return self.rhcSolr.getNewPostItems(self.json["last_post_time"])
 
     def getCriteria(self):
         criteria = self.notifierWeb.getEffectiveCriteria()
