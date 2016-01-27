@@ -37,7 +37,7 @@ class NotifierSolr(object):
     def getNotifyItems(self, query, filters, post_time):
         filters = filters
         filters["post_time"] = "["+post_time+" TO *]"
-        columns = ["id, title, price, size house_type, purpose_type, addr, img"]
+        columns = ["id, title, price, size house_type, purpose_type, addr, img, post_time"]
         sort = ["post_time asc"]
         rows = self._get_rows(query=query, filters=filters)
         if rows:

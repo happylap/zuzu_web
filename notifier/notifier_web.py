@@ -34,7 +34,25 @@ class NotifierWeb(object):
                 self.logger.error("Fail to post resource: " + resource +" , payload="+str(payload))
                 return False
         except:
-            self.logger.error("Exception while getting resource: " + resource +" , payload="+str(payload))
+            self.logger.error("Exception while post resource: " + resource +" , payload="+str(payload))
+            return False
+
+    def patch_replace(self, resource, path, value):
+        try:
+            payload = {}
+            payload["op"] = "replace"
+            payload["path"] = path
+            payload["value"] = value
+            patch_list = [payload]
+            data = json.dumps(patch_list)
+            r = requests.patch(self.web_url+resource, data=data, headers={'Content-Type': 'application/json'})
+            if r.ok == True:
+                return True
+            else:
+                self.logger.error("Fail to patch resource: " + resource +" , path="+str(path) +" , value="+str(value))
+                return False
+        except:
+            self.logger.error("Exception while patch resource: " + resource +" , path="+str(path)+" , value="+str(value))
             return False
 
     def getEffectiveCriteria(self):
@@ -65,7 +83,15 @@ class NotifierWeb(object):
                 result.append(device)
         return result
 
+    def updateCriteriaLastNotifyTime(self, criteria_id, user_id, last_notify_time):
+        resource  = "/criteria/"+criteria_id+"/"+user_id
+        path = "/lastNotifyTime"
+        value = last_notify_time
+        self.patch_replace(resource, path, value)
+
     def saveNotifyItems(self, notify_items):
         resource  = "/notifyitem/batch"
         payload = {"items":notify_items}
         self.post(resource, payload)
+
+

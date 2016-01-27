@@ -1,5 +1,6 @@
 package com.lap.zuzuweb.service;
 
+import java.util.Date;
 import java.util.List;
 
 import com.lap.zuzuweb.model.Criteria;
@@ -17,4 +18,8 @@ public interface CriteriaService
 	public String deleteCriteria(String criteriaId);
 	
 	public boolean deleteCriteriaByUser(String userId);
+	
+	public void setEnable(String criteriaId, String userId, boolean enabled);
+	
+	public void setLastNotifyTime(String criteriaId, String userId, Date lastNotifyTime);
 }

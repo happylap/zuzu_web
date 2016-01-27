@@ -23,9 +23,9 @@ public class CriteriaRemoveHandler extends AbstractRequestHandler<EmptyPayload>{
         }
     	
     	if (urlParams.containsKey(":criteriaid")){
-        	String deviceId = urlParams.get(":criteriaid");
-            service.deleteCriteria(deviceId);
-            return new Answer(200, deviceId);   		
+        	String criteriaId = urlParams.get(":criteriaid");
+            service.deleteCriteria(criteriaId);
+            return new Answer(200, criteriaId);   		
     	}
     	else{
         	String userid = urlParams.get(":userid");

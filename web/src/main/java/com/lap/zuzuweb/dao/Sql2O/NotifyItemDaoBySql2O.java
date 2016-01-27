@@ -10,13 +10,13 @@ import com.lap.zuzuweb.model.NotifyItem;
 public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyItemDao{
 
 	static private String SQL_GET_ITEM_BY_USER = "SELECT item_id, user_id, criteria_id, is_read, notify_time, "
-			+ " price, size, first_img_url, house_type, purpose_type, title, addr"
+			+ " post_time, price, size, first_img_url, house_type, purpose_type, title, addr"
 			+ " FROM \"Notify_item\" WHERE user_id=:user_id";
 
 	static private String SQL_CREATE_ITEM = "INSERT INTO \"Notify_item\"(item_id, user_id, criteria_id, is_read, "
-			+ " notify_time, price, size, first_img_url, house_type, purpose_type, title, addr) "
-			+ " VALUES (:item_id, :user_id, :criteria_id, :is_read, :notify_time, :price, :size, "
-			+ " :first_img_url, :house_type, :purpose_type, :title, :addr)";
+			+ " notify_time, post_time, price, size, first_img_url, house_type, purpose_type, title, addr) "
+			+ " VALUES (:item_id, :user_id, :criteria_id, :is_read, :notify_time, :post_time, "
+			+ " :price, :size, :first_img_url, :house_type, :purpose_type, :title, :addr)";
 	
 	@Override
 	public List<NotifyItem> getItems(String userID) {
@@ -39,6 +39,7 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
         		.addParameter("criteria_id", item.getCriteria_id())
         		.addParameter("is_read", item.is_read())
                 .addParameter("notify_time", item.getNotify_time())
+                .addParameter("post_time", item.getPost_time())
                 .addParameter("price", item.getPrice())
                 .addParameter("size", item.getSize())
                 .addParameter("first_img_url", item.getFirst_img_url())

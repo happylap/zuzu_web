@@ -1,9 +1,12 @@
 package com.lap.zuzuweb.service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import com.lap.zuzuweb.dao.CriteriaDao;
 import com.lap.zuzuweb.model.Criteria;
+import com.lap.zuzuweb.model.User;
 
 public class CriteriaServiceImpl implements CriteriaService{
 	
@@ -45,4 +48,33 @@ public class CriteriaServiceImpl implements CriteriaService{
 		return this.dao.deleteCriteriaByUser(userId);
 	}
 
+	@Override
+	public void setEnable(String criteriaId, String userId, boolean enabled) {
+		Criteria c =  this.getCriteria(criteriaId, userId);
+        if (c != null && c.isEnabled() != enabled) {
+        	c.setEnabled(enabled);
+        	this.dao.updateCriteria(c);
+        }
+	}
+
+	@Override
+	public void setLastNotifyTime(String criteriaId, String userId, Date lastNotifyTime) {
+		Criteria c =  this.getCriteria(criteriaId, userId);
+        if (c != null) {
+        	c.setLast_notify_time(lastNotifyTime);
+        	this.dao.updateCriteria(c);
+        }
+	}
+
+	
+	private Criteria getCriteria(String criteriaId, String userId){
+        Optional<Criteria> existCriteria = this.dao.getCriteria(userId, criteriaId);
+        if (existCriteria.isPresent()) {
+        	Criteria c =  existCriteria.get();
+        	return c;
+        }
+        
+        return null;
+	}
+	
 }

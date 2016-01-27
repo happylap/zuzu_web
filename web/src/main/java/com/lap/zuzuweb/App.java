@@ -3,6 +3,7 @@ package com.lap.zuzuweb;
 import static spark.Spark.get;
 import static spark.Spark.post;
 import static spark.Spark.put;
+import static spark.Spark.patch;
 import static spark.Spark.delete;
 
 import spark.Request;
@@ -19,6 +20,7 @@ import com.lap.zuzuweb.dao.Sql2O.NotifyItemDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.UserDaoBySql2O;
 import com.lap.zuzuweb.handler.criteria.CriteriaCreateHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaModifyHandler;
+import com.lap.zuzuweb.handler.criteria.CriteriaPatchHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaRemoveHandler;
 import com.lap.zuzuweb.handler.criteria.GetCriteriaHandler;
 import com.lap.zuzuweb.handler.criteria.GetUserCriteriaHandler;
@@ -70,6 +72,7 @@ public class App
         // criteria
         post("/criteria", new CriteriaCreateHandler(criteriaSvc)); // add a criteria
         put("/criteria", new CriteriaModifyHandler(criteriaSvc)); // modify criteria
+        patch("/criteria/:criteriaid/:userid", new CriteriaPatchHandler(criteriaSvc));
         delete("/criteria/userid/:userid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria belonging to some user
         delete("/criteria/:criteriaid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria
         get("/criteria", new GetCriteriaHandler(criteriaSvc)); // get all criteria

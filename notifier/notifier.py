@@ -21,9 +21,9 @@ class Notifier(object):
         self.notifierSolr = NotifierSolr(self.notifier_solr_url)
 
     def run(self):
-        #newItems = self.getNewItems()
-        #self.addItems(newItems)
-        #self.updateLastPostTime()
+        newItems = self.getNewItems()
+        self.addItems(newItems)
+        self.updateLastPostTime()
         criteria_list = self.getCriteria()
         device_list = self.notifierWeb.getEnabledDevices()
         self.performQueryAndNotify(criteria_list, device_list)
@@ -64,12 +64,11 @@ class Notifier(object):
             self.notifierWeb.saveNotifyItems(notify_items)
             devices = self.getDevices(device_list, criteria.user_id)
             self.sendNotifications(notify_items, devices)
-            #self.updateNotifyTime(notify_items, criteria)
+
 
     def getNotifyItems(self, criteria):
         query_post_time = self.getNextQueryPostTime(criteria.last_notify_time)
         query = self.getQuery(criteria)
-        print query
         notify_items = self.notifierSolr.getNotifyItems(query["query"],query["filters"], query_post_time)
         for item in notify_items:
             item["item_id"] = item["id"]
@@ -80,8 +79,15 @@ class Notifier(object):
                 item["first_img_url"] = img_list[0]
             item.pop("img", None)
             item.pop("id", None)
+            criteria.last_notify_time = item["post_time"]
+        self.updateNotifyTime(criteria)
         return notify_items
 
+    def updateNotifyTime(self, criteria):
+        criteria_id = criteria.criteria_id
+        user_id = criteria.user_id
+        last_notify_time = criteria.last_notify_time
+        self.notifierWeb.updateCriteriaLastNotifyTime(criteria_id, user_id, last_notify_time)
 
     def getNextQueryPostTime(self, last_post_time):
         query_post_time = ""
