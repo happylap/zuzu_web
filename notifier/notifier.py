@@ -12,7 +12,7 @@ class Notifier(object):
 
     nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
     NOTIFY_ITEMS_LIMIT = 10
-    TITLE_LENGTH = 30
+    TITLE_LENGTH = 15
     def __init__(self):
         self.logger = CommonUtils.getLogger()
         self.json = JsonUtils.getNotifierJson()
@@ -30,7 +30,6 @@ class Notifier(object):
             self.updateLastPostTime()
         criteria_list = self.getCriteria()
         self.performQueryAndNotify(criteria_list)
-        pass
 
     def getNewItems(self):
         return self.rhcSolr.getNewPostItems(self.json["last_post_time"])
@@ -121,13 +120,12 @@ class Notifier(object):
         item_size = len(notify_items)
         if item_size == 1:
             item = notify_items[0]
-            msg = u"租金:"+item.price+"\n"
-            msg = msg + item.tile[:self.TITLE_LENGTH]
+            price = str(item.get("price"))
+            title = item.get("title")
+            title = title[:self.TITLE_LENGTH]
+            msg = u"一筆新刊登租屋符合您的需求\n租金:"+price+"\n"+u"標題:"+title
         else:
-            item = notify_items[0]
-            msg = u"租金:"+item.price+"\n"
-            msg = msg + item.tile[:self.TITLE_LENGTH]
-            #msg = str(item_size)+u"筆新刊登租屋符合您的需求"
+            msg = str(item_size)+u"筆新刊登租屋符合您的需求"
         return msg
 
     def getQuery(self, criteria):
