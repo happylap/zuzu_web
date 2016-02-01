@@ -435,11 +435,6 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/notifier_push.py</url>
-          <line>57</line>
-          <option name="timeStamp" value="149" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/notifier.py</url>
           <line>133</line>
           <option name="timeStamp" value="150" />
