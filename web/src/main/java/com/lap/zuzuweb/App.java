@@ -1,14 +1,10 @@
 package com.lap.zuzuweb;
 
+import static spark.Spark.delete;
 import static spark.Spark.get;
+import static spark.Spark.patch;
 import static spark.Spark.post;
 import static spark.Spark.put;
-import static spark.Spark.patch;
-import static spark.Spark.delete;
-
-import spark.Request;
-import spark.Response;
-import spark.Route;
 
 import com.lap.zuzuweb.dao.CriteriaDao;
 import com.lap.zuzuweb.dao.DeviceDao;
@@ -21,14 +17,15 @@ import com.lap.zuzuweb.dao.Sql2O.UserDaoBySql2O;
 import com.lap.zuzuweb.handler.criteria.CriteriaCreateHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaModifyHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaPatchHandler;
-import com.lap.zuzuweb.handler.criteria.CriteriaRemoveHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaQueryHandler;
+import com.lap.zuzuweb.handler.criteria.CriteriaRemoveHandler;
 import com.lap.zuzuweb.handler.device.DeviceCreateHandler;
 import com.lap.zuzuweb.handler.device.DeviceDeleteHandler;
 import com.lap.zuzuweb.handler.device.DeviceQueryHandler;
 import com.lap.zuzuweb.handler.device.DeviceUpdateHandler;
 import com.lap.zuzuweb.handler.notifyItem.GetUserNotifyItemHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemBatchCreateHandler;
+import com.lap.zuzuweb.handler.notifyItem.NotifyItemPatchHandler;
 import com.lap.zuzuweb.handler.user.UserCreateHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
 import com.lap.zuzuweb.service.CriteriaService;
@@ -39,6 +36,10 @@ import com.lap.zuzuweb.service.NotifyItemService;
 import com.lap.zuzuweb.service.NotifyItemServiceImpl;
 import com.lap.zuzuweb.service.UserService;
 import com.lap.zuzuweb.service.UserServiceImpl;
+
+import spark.Request;
+import spark.Response;
+import spark.Route;
 
 public class App 
 {
@@ -81,6 +82,7 @@ public class App
         // notify
         post("/notifyitem/batch", new NotifyItemBatchCreateHandler(notifyItemSvc)); // add a list of notify items
         get("/notifyitem/:userid", new GetUserNotifyItemHandler(notifyItemSvc)); // get notify belonging to some user
+        patch("/notifyitem/:itemid/:userid", new NotifyItemPatchHandler(notifyItemSvc)); 
         
         
         get("/alive", new Route() {
