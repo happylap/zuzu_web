@@ -74,7 +74,6 @@ class Notifier(object):
         if notify_items is None or len(notify_items) < 1:
             return notify_items
 
-        latest = None
         for item in notify_items:
             item["item_id"] = item["id"]
             item["criteria_id"] = criteria.criteria_id
@@ -84,11 +83,7 @@ class Notifier(object):
                 item["first_img_url"] = img_list[0]
             item.pop("img", None)
             item.pop("id", None)
-
-            post_time = TimeUtils.convertTime(item["post_time"],TimeUtils.UTC_FORMT)
-            if latest is None or post_time > latest:
-                latest = post_time
-        criteria.last_notify_time = latest
+            criteria.last_notify_time = item["post_time"]
         self.updateNotifyTime(criteria)
         return notify_items[:self.NOTIFY_ITEMS_LIMIT]
 
