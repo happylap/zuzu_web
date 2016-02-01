@@ -4,13 +4,15 @@ import sys
 import logging, datetime
 import JsonUtils, TimeUtils, CommonUtils
 from notifier_web import NotifierWeb
-from notifier_solr import  NotifierSolr
+from notifier_solr import NotifierSolr
+from notifier_push import RHC_SNS
 
 
 class Notifier(object):
 
     nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
-
+    NOTIFY_ITEMS_LIMIT = 10
+    TITLE_LENGTH = 30
     def __init__(self):
         self.logger = CommonUtils.getLogger()
         self.json = JsonUtils.getNotifierJson()
@@ -19,15 +21,15 @@ class Notifier(object):
         self.notifier_solr_url = "http://ec2-52-77-238-225.ap-southeast-1.compute.amazonaws.com:8983/solr/newpost"
         self.rhcSolr = NotifierSolr(self.rhc_solr_url)
         self.notifierSolr = NotifierSolr(self.notifier_solr_url)
+        self.sns = RHC_SNS()
 
     def run(self):
         newItems = self.getNewItems()
         if newItems is not None and len(newItems) > 0:
             self.addItems(newItems)
-        self.updateLastPostTime()
+            self.updateLastPostTime()
         criteria_list = self.getCriteria()
-        device_list = self.notifierWeb.getEnabledDevices()
-        self.performQueryAndNotify(criteria_list, device_list)
+        self.performQueryAndNotify(criteria_list)
         pass
 
     def getNewItems(self):
@@ -55,14 +57,13 @@ class Notifier(object):
         self.json["last_post_time"] = new_time_String
         JsonUtils.updateNotifierJson(self.json)
 
-    def performQueryAndNotify(self, criteria_list, device_list):
+    def performQueryAndNotify(self, criteria_list):
         for criteria in criteria_list:
             notify_items = self.getNotifyItems(criteria)
             if notify_items is None or len(notify_items) < 1:
                 continue
             self.notifierWeb.saveNotifyItems(notify_items)
-            devices = self.getDevices(device_list, criteria.user_id)
-            self.sendNotifications(notify_items, devices)
+            self.sendNotifications(notify_items, criteria)
 
 
     def getNotifyItems(self, criteria):
@@ -72,6 +73,7 @@ class Notifier(object):
         if notify_items is None or len(notify_items) < 1:
             return notify_items
 
+        latest = None
         for item in notify_items:
             item["item_id"] = item["id"]
             item["criteria_id"] = criteria.criteria_id
@@ -81,9 +83,13 @@ class Notifier(object):
                 item["first_img_url"] = img_list[0]
             item.pop("img", None)
             item.pop("id", None)
-            criteria.last_notify_time = item["post_time"]
+
+            post_time = TimeUtils.convertTime(item["post_time"],TimeUtils.UTC_FORMT)
+            if latest is None or post_time > latest:
+                latest = post_time
+        criteria.last_notify_time = latest
         self.updateNotifyTime(criteria)
-        return notify_items
+        return notify_items[:self.NOTIFY_ITEMS_LIMIT]
 
     def updateNotifyTime(self, criteria):
         criteria_id = criteria.criteria_id
@@ -92,13 +98,11 @@ class Notifier(object):
         self.notifierWeb.updateCriteriaLastNotifyTime(criteria_id, user_id, last_notify_time)
 
     def getNextQueryPostTime(self, last_post_time):
-        query_post_time = ""
         if last_post_time is None:
-            query_post_time = TimeUtils.getOneHourAgoAsString(TimeUtils.UTC_FORMT)
+            return TimeUtils.getOneHourAgoAsString(TimeUtils.UTC_FORMT)
         else:
             time_string = last_post_time.strftime(TimeUtils.UTC_FORMT)
-            query_post_time = TimeUtils.plusOneSecondAsString(time_string, TimeUtils.UTC_FORMT)
-        return query_post_time
+            return TimeUtils.plusOneSecondAsString(time_string, TimeUtils.UTC_FORMT)
 
     def getDevices(self, device_list, user_id):
         result = []
@@ -107,8 +111,24 @@ class Notifier(object):
                 result.append(device)
         return result
 
-    def sendNotifications(self,notify_items, devices):
-        pass
+    def sendNotifications(self,notify_items, criteria):
+        msg = self.composeMessage(notify_items)
+        endpoint_list = self.sns.getEndpoints(criteria.user_id)
+        for e in endpoint_list:
+            self.sns.send(e, msg)
+
+    def composeMessage(self, notify_items):
+        item_size = len(notify_items)
+        if item_size == 1:
+            item = notify_items[0]
+            msg = u"租金:"+item.price+"\n"
+            msg = msg + item.tile[:self.TITLE_LENGTH]
+        else:
+            item = notify_items[0]
+            msg = u"租金:"+item.price+"\n"
+            msg = msg + item.tile[:self.TITLE_LENGTH]
+            #msg = str(item_size)+u"筆新刊登租屋符合您的需求"
+        return msg
 
     def getQuery(self, criteria):
         query = {}
@@ -152,11 +172,11 @@ class Notifier(object):
 
         query["filters"] = filters
 
-        if query["city"] is not None and  query["region"] is not None:
+        if query.get("city") is not None and  query.get("region") is not None:
             query["query"] = "city:"+query["city"]+" OR " + "region:"+query["region"]
-        elif query["city"] is not None:
+        elif query.get("city") is not None:
             query["query"] = "city:"+query["city"]
-        elif query["region"] is not None:
+        elif query.get("region") is not None:
             query["query"] = "region:"+query["region"]
 
         return query

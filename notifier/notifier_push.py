@@ -16,6 +16,8 @@ class RHC_Enpoint(object):
             self.enabled = False
         if user_data is not None:
             self.user_data = user_data
+        else:
+            self.user_data = None
 
 
 class RHC_SNS(object):
@@ -27,8 +29,9 @@ class RHC_SNS(object):
             aws_secret_access_key="6rv8CLtggjI1IQc1nOzBegFYPmjhQXH1bUDRPUX5",
             region=region,
         )
+        self.endpoint_list = self.initEnpoints()
 
-    def getEnpoints(self):
+    def initEnpoints(self):
         endpoint_list = []
         try:
             response = self.sns.list_endpoints_by_platform_application("arn:aws:sns:ap-northeast-1:994273935857:app/APNS_SANDBOX/zuzurentals_development")
@@ -42,11 +45,21 @@ class RHC_SNS(object):
                 endpoint_list.append(RHC_Enpoint(arn,enable,user_data))
         except:
             pass
-    
         return endpoint_list
 
-    def send(self, msg):
-        endpoint_list = self.getEnpoints()
+    def getEndpoints(self, user_id):
+        result = []
+        for e in self.endpoint_list:
+            if e.user_data is not None and e.user_data == user_id and e.enabled == True:
+                result.append(e)
+        return result
+
+    def send(self, endpoint, msg):
+        publish_result = self.sns.publish(target_arn=endpoint.arn, message=msg)
+        pprint.pprint(publish_result)
+
+    def sendAll(self, msg):
+        endpoint_list = self.endpoint_list
         for endpoint in endpoint_list:
             endpoint_arn= endpoint.arn
             if endpoint_arn is not None and endpoint.enabled:
@@ -56,7 +69,7 @@ class RHC_SNS(object):
 
 '''
 zuzu = RHC_SNS()
-text1 = u"這是測試中文的長度!這是測試中文的長度!這是測試中文的長度!這是測試中文的長度!這是測試中文的長度!這是測試中文的長度!這是測試中文的長度!"
-text2 = "777"
-zuzu.send(text2)
+text = u"這是測試中文的長度!這是測試中文的長度!這是測試中文的長度!這是測試中文的長度!這是測試中文的長度!這是測試中文的長度!這是測試中文的長度!"
+#text2 = "777"
+zuzu.sendAll(text)
 '''
