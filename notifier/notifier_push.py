@@ -54,8 +54,8 @@ class RHC_SNS(object):
                 result.append(e)
         return result
 
-    def send(self, endpoint, msg):
-        publish_result = self.sns.publish(target_arn=endpoint.arn, message=msg)
+    def send(self, endpoint, msg, msg_structure):
+        publish_result = self.sns.publish(target_arn=endpoint.arn, message=msg, message_structure=msg_structure)
         pprint.pprint(publish_result)
 
     def sendAll(self, msg):

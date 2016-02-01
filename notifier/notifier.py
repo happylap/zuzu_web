@@ -9,10 +9,11 @@ from notifier_push import RHC_SNS
 
 
 class Notifier(object):
-
+    PRODUCT_MODE = False
     nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
     NOTIFY_ITEMS_LIMIT = 10
     TITLE_LENGTH = 15
+    NOTIFY_SOUND = "bingbong.aiff"
     def __init__(self):
         self.logger = CommonUtils.getLogger()
         self.json = JsonUtils.getNotifierJson()
@@ -28,6 +29,7 @@ class Notifier(object):
         if newItems is not None and len(newItems) > 0:
             self.addItems(newItems)
             self.updateLastPostTime()
+
         criteria_list = self.getCriteria()
         self.performQueryAndNotify(criteria_list)
 
@@ -114,7 +116,7 @@ class Notifier(object):
         msg = self.composeMessage(notify_items)
         endpoint_list = self.sns.getEndpoints(criteria.user_id)
         for e in endpoint_list:
-            self.sns.send(e, msg)
+            self.sns.send(e, msg, 'json')
 
     def composeMessage(self, notify_items):
         item_size = len(notify_items)
@@ -126,7 +128,21 @@ class Notifier(object):
             msg = u"一筆新刊登租屋符合您的需求\n租金:"+price+"\n"+u"標題:"+title
         else:
             msg = str(item_size)+u"筆新刊登租屋符合您的需求"
-        return msg
+        return self.composeAPNS(msg, item_size)
+
+    def composeAPNS(self, alert, badge):
+        apns_dict = {}
+        body = {}
+        body["alert"] = alert
+        body["badge"] = badge
+        body["sound"] = self.NOTIFY_SOUND
+        apns_dict["aps"] = body
+        apns_string = JsonUtils.dumps(apns_dict,JsonUtils.UTF8_ENCODE)
+        if self.PRODUCT_MODE == True:
+            message = {'APNS':apns_string}
+        else:
+            message = {'APNS_SANDBOX':apns_string}
+        return JsonUtils.dumps(message, JsonUtils.UTF8_ENCODE)
 
     def getQuery(self, criteria):
         query = {}

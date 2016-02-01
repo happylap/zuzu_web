@@ -25,6 +25,9 @@ def loadJSON(filePath, fileEncoding):
         jsonFile.close()
         return js
 
+def dumps(dic_data, fileEncoding):
+    return json.dumps(dic_data,encoding=fileEncoding)
+
 def updateJSON(filePath, data, fileEncoding):
     with open(filePath, "w+") as jsonFile:
         jsonFile.write(json.dumps(data).encode(fileEncoding))
