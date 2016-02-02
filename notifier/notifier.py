@@ -25,8 +25,7 @@ class Notifier(object):
         self.sns = RHC_SNS()
 
     def run(self):
-        newItems = None
-        #newItems = self.getNewItems()
+        newItems = self.getNewItems()
         if newItems is not None and len(newItems) > 0:
             self.addItems(newItems)
             self.updateLastPostTime()
@@ -89,7 +88,7 @@ class Notifier(object):
             if latest is None or post_time > latest:
                 latest = post_time
         criteria.last_notify_time = latest
-        #self.updateNotifyTime(criteria)
+        self.updateNotifyTime(criteria)
         return notify_items[:self.NOTIFY_ITEMS_LIMIT]
 
     def updateNotifyTime(self, criteria):
