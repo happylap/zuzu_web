@@ -25,7 +25,8 @@ class Notifier(object):
         self.sns = RHC_SNS()
 
     def run(self):
-        newItems = self.getNewItems()
+        newItems = None
+        #newItems = self.getNewItems()
         if newItems is not None and len(newItems) > 0:
             self.addItems(newItems)
             self.updateLastPostTime()
@@ -88,7 +89,7 @@ class Notifier(object):
             if latest is None or post_time > latest:
                 latest = post_time
         criteria.last_notify_time = latest
-        self.updateNotifyTime(criteria)
+        #self.updateNotifyTime(criteria)
         return notify_items[:self.NOTIFY_ITEMS_LIMIT]
 
     def updateNotifyTime(self, criteria):
@@ -114,7 +115,7 @@ class Notifier(object):
     def sendNotifications(self,notify_items, criteria):
         badge = self.notifierWeb.getUnreadNotifyItemNum(criteria.user_id)
         alert = self.composeMessageBody(notify_items)
-        msg = self.composeAPNS(alert, badge)
+        msg = self.composeAPNSMessage(alert, badge)
         endpoint_list = self.sns.getEndpoints(criteria.user_id)
         for e in endpoint_list:
             self.sns.send(e, msg, 'json')
