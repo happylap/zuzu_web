@@ -94,4 +94,11 @@ class NotifierWeb(object):
         payload = {"items":notify_items}
         self.post(resource, payload)
 
+    def getUnreadNotifyItemNum(self, user_id):
+        resource  = "/notifyitem/"+user_id
+        items = self.get(resource)
+        if items is None:
+            return 0
+        else:
+            return len(items)
 

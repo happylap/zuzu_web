@@ -112,12 +112,14 @@ class Notifier(object):
         return result
 
     def sendNotifications(self,notify_items, criteria):
-        msg = self.composeMessage(notify_items)
+        badge = self.notifierWeb.getUnreadNotifyItemNum(criteria.user_id)
+        alert = self.composeMessageBody(notify_items)
+        msg = self.composeAPNS(alert, badge)
         endpoint_list = self.sns.getEndpoints(criteria.user_id)
         for e in endpoint_list:
             self.sns.send(e, msg, 'json')
 
-    def composeMessage(self, notify_items):
+    def composeMessageBody(self, notify_items):
         item_size = len(notify_items)
         if item_size == 1:
             item = notify_items[0]
@@ -127,9 +129,9 @@ class Notifier(object):
             msg = u"一筆新刊登租屋符合您的需求\n租金:"+price+"\n"+u"標題:"+title
         else:
             msg = str(item_size)+u"筆新刊登租屋符合您的需求"
-        return self.composeAPNS(msg, item_size)
+        return msg
 
-    def composeAPNS(self, alert, badge):
+    def composeAPNSMessage(self, alert, badge):
         apns_dict = {}
         body = {}
         body["alert"] = alert
