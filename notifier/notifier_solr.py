@@ -24,7 +24,7 @@ class NotifierSolr(object):
         filters = {}
         filters["post_time"] = "["+post_time+" TO *]"
         filters["-parent"] = "*"
-        columns = ["*"]
+        columns = ["id, title, price, size house_type, purpose_type, addr, img, post_time"]
         sort = ["post_time asc"]
         rows = self._get_rows(query, filters)
         if rows > 0:
