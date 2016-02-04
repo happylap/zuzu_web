@@ -74,4 +74,8 @@ public class CriteriaServiceImpl implements CriteriaService{
        return this.dao.getCriteria(userId, criteriaId);
 	}
 	
+	public Optional<Criteria> getSingleCriteria(String userID) {
+		return this.dao.getSingleCriteria(userID);
+	}
+	
 }

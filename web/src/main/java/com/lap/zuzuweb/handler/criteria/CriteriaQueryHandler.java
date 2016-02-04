@@ -1,10 +1,12 @@
 package com.lap.zuzuweb.handler.criteria;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
+import com.lap.zuzuweb.model.Criteria;
 import com.lap.zuzuweb.service.CriteriaService;
 
 public class CriteriaQueryHandler extends AbstractRequestHandler<EmptyPayload>{
@@ -25,13 +27,25 @@ public class CriteriaQueryHandler extends AbstractRequestHandler<EmptyPayload>{
     	else if (urlParams.containsKey(":criteriaid") && urlParams.containsKey(":userid")){
     		String criteriaId = urlParams.get(":criteriaid");
     		String userID = urlParams.get(":userid");
-    		String json = dataToJson(this.service.getCriteria(criteriaId, userID));
-    		return Answer.ok(json); 
+    		
+    		Optional<Criteria> existCriteria = this.service.getCriteria(criteriaId, userID);
+            if (existCriteria.isPresent()) {
+            	String json = dataToJson(existCriteria.get());
+        		return Answer.ok(json);
+            } else {
+            	throw new RuntimeException("Criteria is not found. (criteriaId: " + criteriaId + ", userId: " + userID + ")");
+            } 
     	}
     	else if(urlParams.containsKey(":userid")){
         	String userID = urlParams.get(":userid");
-            String json = dataToJson(this.service.getCriteria(userID));
-            return Answer.ok(json);    		
+            
+            Optional<Criteria> existCriteria = this.service.getSingleCriteria(userID);
+            if (existCriteria.isPresent()) {
+            	String json = dataToJson(existCriteria.get());
+        		return Answer.ok(json);
+            } else {
+            	throw new RuntimeException("Criteria is not found. (userId: " + userID + ")");
+            }
     	}else{
     		throw new IllegalArgumentException();
     	}

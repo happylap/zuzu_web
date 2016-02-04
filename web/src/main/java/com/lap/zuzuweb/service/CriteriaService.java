@@ -9,6 +9,8 @@ import com.lap.zuzuweb.model.Criteria;
 public interface CriteriaService
 {
 	public Optional<Criteria> getCriteria(String criteriaId,String userID);
+
+	public Optional<Criteria> getSingleCriteria(String userID);
 	
 	public List<Criteria> getCriteria(String userID);
 	

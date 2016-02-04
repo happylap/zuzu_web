@@ -14,7 +14,7 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 			+ " last_notify_time, filters FROM \"Criteria\"";
 	
 	static private String SQL_GET_CRITERIA_BY_USER = "SELECT criteria_id, user_id, enabled, expire_time, apple_product_id, "
-			+ " last_notify_time, filters FROM \"Criteria\" WHERE user_id=:user_id";
+			+ " last_notify_time, filters FROM \"Criteria\" WHERE user_id=:user_id ORDER BY criteria_id desc";
 
 	static private String SQL_GET_SINGLE_SINGLE_CRITERIA = "SELECT criteria_id, user_id, enabled, expire_time, apple_product_id, "
 			+ " last_notify_time, filters FROM \"Criteria\" WHERE user_id=:user_id AND criteria_id = :criteria_id";
@@ -44,6 +44,22 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
         }
 	}
 
+	@Override
+	public Optional<Criteria> getSingleCriteria(String userID) {
+		try (Connection conn = sql2o.open()) {
+            List<Criteria> criteria = conn.createQuery(SQL_GET_CRITERIA_BY_USER)
+                    .addParameter("user_id", userID)
+                    .executeAndFetch(Criteria.class);
+            if (criteria.size() == 0) {
+                return Optional.empty();
+            } else if (criteria.size() >= 1) {
+                return Optional.of(criteria.get(0));
+            } else {
+                throw new RuntimeException();
+            }
+        }
+	}
+	
 	@Override
 	public Optional<Criteria> getCriteria(String userID, String criteria_id) {
         try (Connection conn = sql2o.open()) {

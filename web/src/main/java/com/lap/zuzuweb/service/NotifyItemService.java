@@ -15,4 +15,6 @@ public interface NotifyItemService {
 	public void setRead(String itemid, String userID, boolean read);
 
 	public Optional<NotifyItem> getItem(String itemid, String userID);
+	
+	public long getUnreadCount(String userID);
 }

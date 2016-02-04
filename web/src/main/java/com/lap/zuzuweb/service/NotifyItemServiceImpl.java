@@ -56,4 +56,9 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 	public Optional<NotifyItem> getItem(String itemid, String userID) {
 		return this.dao.getItem(userID, itemid);
 	}
+	
+	@Override
+	public long getUnreadCount(String userID) {
+		return this.dao.getUnreadCount(userID);
+	}
 }

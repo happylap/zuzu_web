@@ -9,6 +9,8 @@ public interface CriteriaDao
 {
 	public List<Criteria> getCriteria(String userID);
 	
+	public Optional<Criteria> getSingleCriteria(String userID);
+	
 	public Optional<Criteria> getCriteria(String userID, String criteria_id);
 	
 	public List<Criteria> getAllCriteria();

@@ -14,4 +14,6 @@ public interface NotifyItemDao
 	public String updateItem(NotifyItem item);
 	
 	public Optional<NotifyItem> getItem(String userID, String itemid);
+	
+	public long getUnreadCount(String userID);
 }
