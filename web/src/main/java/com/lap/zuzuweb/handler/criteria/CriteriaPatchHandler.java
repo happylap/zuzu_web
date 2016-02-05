@@ -46,7 +46,7 @@ public class CriteriaPatchHandler extends AbstractRequestArrayHandler{
 		{
 			boolean enabled = Boolean.valueOf(value).booleanValue();
 			this.service.setEnable(criteriaId, userId, enabled);
-		}else if (path.equalsIgnoreCase("/lastNotifyTime")){
+		} else if (path.equalsIgnoreCase("/lastNotifyTime")){
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 			try
 			{

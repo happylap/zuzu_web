@@ -72,7 +72,7 @@ public class App
         
         // criteria
         post("/criteria", new CriteriaCreateHandler(criteriaSvc)); // add a criteria
-        put("/criteria/:criteriaid/:userid", new CriteriaModifyHandler(criteriaSvc)); // modify criteria
+        put("/criteria/update/:criteriaid/:userid", new CriteriaModifyHandler(criteriaSvc)); // modify criteria
         patch("/criteria/:criteriaid/:userid", new CriteriaPatchHandler(criteriaSvc));
         delete("/criteria/:criteriaid/:userid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria
         delete("/criteria/:userid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria belonging to some user

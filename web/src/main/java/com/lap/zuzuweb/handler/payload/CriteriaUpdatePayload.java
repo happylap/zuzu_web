@@ -14,7 +14,7 @@ public class CriteriaUpdatePayload implements Validable
     private boolean enabled ;
     private Date expire_time;
     private String apple_product_id;
-    private JsonNode filetrs;
+    private JsonNode filters;
     private Date last_notify_time;
 	
 	
@@ -31,7 +31,7 @@ public class CriteriaUpdatePayload implements Validable
 		c.setEnabled(this.enabled);
 		c.setExpire_time(this.expire_time);
 		c.setApple_product_id(this.apple_product_id);
-		c.setFiltersValue(this.filetrs.toString());
+		c.setFiltersValue(this.filters.toString());
 		c.setLast_notify_time(this.last_notify_time);
 		return c;
 	}
