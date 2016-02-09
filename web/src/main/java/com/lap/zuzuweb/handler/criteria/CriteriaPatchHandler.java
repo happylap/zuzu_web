@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import org.postgresql.util.PGobject;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lap.zuzuweb.handler.AbstractRequestArrayHandler;
@@ -42,7 +44,17 @@ public class CriteriaPatchHandler extends AbstractRequestArrayHandler{
     	String criteriaId = urlParams.get(":criteriaid");
     	String userId = urlParams.get(":userid");
     	
-		if (path.equalsIgnoreCase("/enabled"))
+    	if (path.equalsIgnoreCase("/filters"))
+		{
+    		PGobject filters = new PGobject();
+    		filters.setType("json");
+    		try {
+    			filters.setValue(value);
+    			this.service.setFilters(criteriaId, userId, filters);
+    		} catch (final Exception e) {
+    		    throw new IllegalArgumentException();
+    		}
+		} else if (path.equalsIgnoreCase("/enabled"))
 		{
 			boolean enabled = Boolean.valueOf(value).booleanValue();
 			this.service.setEnable(criteriaId, userId, enabled);

@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.postgresql.util.PGobject;
+
 import com.lap.zuzuweb.dao.CriteriaDao;
 import com.lap.zuzuweb.model.Criteria;
 
@@ -68,6 +70,16 @@ public class CriteriaServiceImpl implements CriteriaService{
         	this.dao.updateCriteria(c);
         }
 	}
+	
+	@Override
+    public void setFilters(String criteriaId, String userId, PGobject filters) {
+		Optional<Criteria> existCriteria =  this.getCriteria(criteriaId, userId);
+        if (existCriteria.isPresent()) {
+        	Criteria c =  existCriteria.get();
+        	c.setFilters(filters);
+        	this.dao.updateCriteria(c);
+        }
+    }
 
 	@Override
 	public Optional<Criteria> getCriteria(String criteriaId, String userId){

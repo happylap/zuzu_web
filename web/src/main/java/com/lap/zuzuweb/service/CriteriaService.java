@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.postgresql.util.PGobject;
+
 import com.lap.zuzuweb.model.Criteria;
 
 public interface CriteriaService
@@ -27,4 +29,6 @@ public interface CriteriaService
 	public void setEnable(String criteriaId, String userId, boolean enabled);
 	
 	public void setLastNotifyTime(String criteriaId, String userId, Date lastNotifyTime);
+	
+    public void setFilters(String criteriaId, String userId, PGobject filters);
 }
