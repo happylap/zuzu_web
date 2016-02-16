@@ -21,10 +21,11 @@ import com.lap.zuzuweb.handler.criteria.CriteriaQueryHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaRemoveHandler;
 import com.lap.zuzuweb.handler.device.DeviceCreateHandler;
 import com.lap.zuzuweb.handler.device.DeviceDeleteHandler;
+import com.lap.zuzuweb.handler.device.DevicePatchHandler;
 import com.lap.zuzuweb.handler.device.DeviceQueryHandler;
 import com.lap.zuzuweb.handler.device.DeviceUpdateHandler;
-import com.lap.zuzuweb.handler.notifyItem.GetUserUnreadNotifyItemCountHandler;
 import com.lap.zuzuweb.handler.notifyItem.GetUserNotifyItemHandler;
+import com.lap.zuzuweb.handler.notifyItem.GetUserUnreadNotifyItemCountHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemBatchCreateHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemPatchHandler;
 import com.lap.zuzuweb.handler.user.UserCreateHandler;
@@ -69,6 +70,7 @@ public class App
         delete("/device/:deviceid", new DeviceDeleteHandler(deviceSvc)); // remove a device
         get("/device", new DeviceQueryHandler(deviceSvc)); // get all devices
         get("/device/:userid", new DeviceQueryHandler(deviceSvc)); // get devices belonging to some user
+        patch("/device/:deviceid/:userid", new DevicePatchHandler(deviceSvc));
         
         // criteria
         post("/criteria", new CriteriaCreateHandler(criteriaSvc)); // add a criteria

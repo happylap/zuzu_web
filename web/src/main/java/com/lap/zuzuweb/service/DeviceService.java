@@ -1,6 +1,8 @@
 package com.lap.zuzuweb.service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import com.lap.zuzuweb.model.Device;
 
@@ -17,4 +19,6 @@ public interface DeviceService
 	public String deleteDevice(String deviceId);
 	
 	public boolean deleteDevicesByUser(String userId);
+	
+	public void setReceiveNotifyTime(String deviceId, String userId, Date receiveNotifyTime);
 }

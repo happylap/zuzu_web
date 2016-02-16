@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.lap.zuzuweb.dao.DeviceDao;
+import com.lap.zuzuweb.model.Criteria;
 import com.lap.zuzuweb.model.Device;
 import com.lap.zuzuweb.model.User;
 
@@ -26,7 +27,7 @@ public class DeviceServiceImpl implements DeviceService
 	public List<Device> getDevices(String userID) {
 		return this.dao.getDevices(userID);
 	}
-
+	
 	@Override
 	public String createDevice(Device device) {
         Optional<Device> exist = this.dao.getDevice(device.getUser_id(), device.getDevice_id());
@@ -52,4 +53,13 @@ public class DeviceServiceImpl implements DeviceService
 		return this.dao.deleteDevicesByUser(userId);
 	}
 
+	@Override
+	public void setReceiveNotifyTime(String deviceId, String userId, Date receiveNotifyTime) {
+		Optional<Device> existDevice =  this.dao.getDevice(userId, deviceId);
+        if (existDevice.isPresent()) {
+        	Device d =  existDevice.get();
+        	d.setReceive_notify_time(receiveNotifyTime);
+        	this.dao.updateDevice(d);
+        }
+	}
 }
