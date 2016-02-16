@@ -6,6 +6,7 @@ import lombok.Data;
 public class PatchPayload implements Validable
 {
 	final public static String OP_REPLACE = "replace";
+	final public static String OP_ADD = "add";
 	
 	private String op;
 	private String path;

@@ -8,10 +8,12 @@ import static spark.Spark.put;
 
 import com.lap.zuzuweb.dao.CriteriaDao;
 import com.lap.zuzuweb.dao.DeviceDao;
+import com.lap.zuzuweb.dao.LogDao;
 import com.lap.zuzuweb.dao.NotifyItemDao;
 import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.dao.Sql2O.CriteriaDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.DeviceDaoBySql2O;
+import com.lap.zuzuweb.dao.Sql2O.LogDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.NotifyItemDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.UserDaoBySql2O;
 import com.lap.zuzuweb.handler.criteria.CriteriaCreateHandler;
@@ -24,6 +26,7 @@ import com.lap.zuzuweb.handler.device.DeviceDeleteHandler;
 import com.lap.zuzuweb.handler.device.DevicePatchHandler;
 import com.lap.zuzuweb.handler.device.DeviceQueryHandler;
 import com.lap.zuzuweb.handler.device.DeviceUpdateHandler;
+import com.lap.zuzuweb.handler.log.LogPatchHandler;
 import com.lap.zuzuweb.handler.notifyItem.GetUserNotifyItemHandler;
 import com.lap.zuzuweb.handler.notifyItem.GetUserUnreadNotifyItemCountHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemBatchCreateHandler;
@@ -34,6 +37,8 @@ import com.lap.zuzuweb.service.CriteriaService;
 import com.lap.zuzuweb.service.CriteriaServiceImpl;
 import com.lap.zuzuweb.service.DeviceService;
 import com.lap.zuzuweb.service.DeviceServiceImpl;
+import com.lap.zuzuweb.service.LogService;
+import com.lap.zuzuweb.service.LogServiceImpl;
 import com.lap.zuzuweb.service.NotifyItemService;
 import com.lap.zuzuweb.service.NotifyItemServiceImpl;
 import com.lap.zuzuweb.service.UserService;
@@ -58,6 +63,9 @@ public class App
     	
     	NotifyItemDao notifyItemDao = new NotifyItemDaoBySql2O();
     	NotifyItemService notifyItemSvc = new NotifyItemServiceImpl(notifyItemDao);
+
+    	LogDao logDao = new LogDaoBySql2O();
+    	LogService logSvc = new LogServiceImpl(logDao);
     	
     	// user
     	post("/user", new UserCreateHandler(userSvc)); // create a user
@@ -88,6 +96,8 @@ public class App
         get("/notifyitem/unread/count/:userid", new GetUserUnreadNotifyItemCountHandler(notifyItemSvc));
         patch("/notifyitem/:itemid/:userid", new NotifyItemPatchHandler(notifyItemSvc)); 
         
+        // log
+        patch("/log/:deviceid/:userid", new LogPatchHandler(logSvc));
         
         get("/alive", new Route() {
             @Override
