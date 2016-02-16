@@ -1,17 +1,18 @@
 package com.lap.zuzuweb.handler;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.lap.zuzuweb.Secrets;
+import com.lap.zuzuweb.handler.payload.EmptyPayload;
+import com.lap.zuzuweb.handler.payload.Validable;
 
 import spark.Request;
 import spark.Response;
 import spark.Route;
-
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.lap.zuzuweb.handler.payload.EmptyPayload;
-import com.lap.zuzuweb.handler.payload.Validable;
 
 public abstract class AbstractRequestHandler<V extends Validable> implements RequestHandler<V>, Route {
 
@@ -61,8 +62,15 @@ public abstract class AbstractRequestHandler<V extends Validable> implements Req
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
+    	
+    	if (!this.auth(request.headers("Authorization"))) {
+    		response.status(403);
+            response.body("Forbidden");
+            return new Answer(403, "Forbidden");
+    	}
+    	
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+           	ObjectMapper objectMapper = new ObjectMapper();
             V value = null;
             if (valueClass != EmptyPayload.class) {
                 value = objectMapper.readValue(request.body(), valueClass);
@@ -80,11 +88,23 @@ public abstract class AbstractRequestHandler<V extends Validable> implements Req
             response.type("application/json");
             response.body(answer.getBody());
             return answer.getBody();
-        } catch (JsonMappingException e) {
+        } catch (Exception e) {
+        	e.printStackTrace();
             response.status(400);
             response.body(e.getMessage());
             return e.getMessage();
         }
     }
-
+    
+    private boolean auth(String auth_string) {
+    	boolean auth = false;
+    	
+    	final Base64.Encoder encoder = Base64.getEncoder();
+    	String encodedAuthToken = encoder.encodeToString(Secrets.AUTH_TOKEN.getBytes());
+    	
+    	if (("Basic " + encodedAuthToken).equals(auth_string)) {
+    		auth = true; 
+    	}
+    	return auth;
+    }
 }
