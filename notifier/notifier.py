@@ -95,7 +95,7 @@ class Notifier(object):
         criteria_id = criteria.criteria_id
         user_id = criteria.user_id
         last_notify_time = criteria.last_notify_time
-        self.notifierWeb.updateCriteriaLastNotifyTime(criteria_id, user_id, last_notify_time)
+        self.notifierWeb.updateCriteriaLastNotifyTime(criteria_id, user_id, last_notify_time.strftime(TimeUtils.UTC_FORMT))
 
     def getNextQueryPostTime(self, last_post_time):
         if last_post_time is None:
@@ -193,6 +193,8 @@ class Notifier(object):
             query["query"] = "city:"+query["city"]
         elif query.get("region") is not None:
             query["query"] = "region:"+query["region"]
+        else:
+            query["query"] = "*:*"
 
         return query
 
