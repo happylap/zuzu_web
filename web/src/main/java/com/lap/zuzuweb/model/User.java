@@ -19,5 +19,6 @@ public class User
     private String facebook_first_name;
     private String facebook_last_name;
     private String facebook_gender;
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
     private Date facebook_birthday;
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +13,7 @@ import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.PatchPayload;
 import com.lap.zuzuweb.handler.payload.Validable;
 import com.lap.zuzuweb.service.LogService;
+import com.lap.zuzuweb.util.CommonUtils;
 
 import spark.utils.StringUtils;
 
@@ -43,14 +45,12 @@ public class LogPatchHandler extends AbstractRequestArrayHandler {
 
 		String deviceId = urlParams.get(":deviceid");
 		String userId = urlParams.get(":userid");
-
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
+		
 		if (path.equalsIgnoreCase("/receiveNotifyTime")) {
 			try {
 				Date receiveNotifyTime = null;
 				if (StringUtils.isNotEmpty(value)) {
-					receiveNotifyTime = sdf.parse(value);
+					receiveNotifyTime = CommonUtils.getUTCDateFromString(value);
 				}
 				this.service.setReceiveNotifyTime(deviceId, userId, receiveNotifyTime);
 			} catch (Exception e) {
@@ -60,7 +60,7 @@ public class LogPatchHandler extends AbstractRequestArrayHandler {
 			try {
 				Date registerTime = null;
 				if (StringUtils.isNotEmpty(value)) {
-					registerTime = sdf.parse(value);
+					registerTime = CommonUtils.getUTCDateFromString(value);
 				}
 				this.service.setRegisterTime(deviceId, userId, registerTime);
 			} catch (Exception e) {

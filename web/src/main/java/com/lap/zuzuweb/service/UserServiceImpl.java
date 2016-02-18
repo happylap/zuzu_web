@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.model.User;
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class UserServiceImpl implements UserService
 {
@@ -28,7 +29,7 @@ public class UserServiceImpl implements UserService
         if (existUser.isPresent()) {
             return existUser.get().getUser_id();
         }
-        user.setRegister_time(new Date());
+        user.setRegister_time(CommonUtils.getUTCNow());
 		return this.dao.createUser(user);
 	}
 	
