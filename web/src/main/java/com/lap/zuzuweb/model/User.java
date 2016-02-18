@@ -10,7 +10,7 @@ import lombok.Data;
 public class User
 {
     private String user_id;
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="Asia/Taipei")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
     private Date register_time;
     private String facebook_id;
     private String facebook_name;
