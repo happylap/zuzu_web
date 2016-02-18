@@ -5,7 +5,7 @@ import datetime
 UTC_FORMT = "%Y-%m-%dT%H:%M:%SZ"
 
 def get_Now():
-    return datetime.datetime.utcnow() + datetime.timedelta(hours=8)
+    return datetime.datetime.utcnow()
 
 def convertTime(time_string, format):
     try:
