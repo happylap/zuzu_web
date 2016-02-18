@@ -8,8 +8,7 @@ from notifier_model import Device, Criteria
 class NotifierWeb(object):
     def __init__(self):
         self.logger = CommonUtils.getLogger()
-        #self.web_url = "http://ec2-52-76-69-228.ap-southeast-1.compute.amazonaws.com:4567"
-        self.web_url = "http://localhost:4567"
+        self.web_url = "http://ec2-52-77-238-225.ap-southeast-1.compute.amazonaws.com:4567"
 
     def get(self, resource):
         try:
