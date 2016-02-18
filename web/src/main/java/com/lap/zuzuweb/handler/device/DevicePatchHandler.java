@@ -1,7 +1,6 @@
 package com.lap.zuzuweb.handler.device;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -12,6 +11,7 @@ import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.PatchPayload;
 import com.lap.zuzuweb.handler.payload.Validable;
 import com.lap.zuzuweb.service.DeviceService;
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class DevicePatchHandler extends AbstractRequestArrayHandler{
 	private DeviceService service = null;
@@ -43,10 +43,9 @@ public class DevicePatchHandler extends AbstractRequestArrayHandler{
     	String userId = urlParams.get(":userid");
     	
     	if (path.equalsIgnoreCase("/receiveNotifyTime")){
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 			try
 			{
-				Date receiveNotifyTime = sdf.parse(value);
+				Date receiveNotifyTime = CommonUtils.getUTCDateFromString(value);
 				this.service.setReceiveNotifyTime(deviceId, userId, receiveNotifyTime);
 			}
 			catch(Exception e)
