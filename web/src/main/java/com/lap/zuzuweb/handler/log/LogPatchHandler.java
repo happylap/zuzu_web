@@ -1,10 +1,7 @@
 package com.lap.zuzuweb.handler.log;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
-import java.util.TimeZone;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,8 +11,6 @@ import com.lap.zuzuweb.handler.payload.PatchPayload;
 import com.lap.zuzuweb.handler.payload.Validable;
 import com.lap.zuzuweb.service.LogService;
 import com.lap.zuzuweb.util.CommonUtils;
-
-import spark.utils.StringUtils;
 
 public class LogPatchHandler extends AbstractRequestArrayHandler {
 	private LogService service = null;

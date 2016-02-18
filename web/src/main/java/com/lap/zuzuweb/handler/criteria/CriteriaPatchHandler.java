@@ -1,7 +1,6 @@
 package com.lap.zuzuweb.handler.criteria;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -14,6 +13,7 @@ import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.PatchPayload;
 import com.lap.zuzuweb.handler.payload.Validable;
 import com.lap.zuzuweb.service.CriteriaService;
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class CriteriaPatchHandler extends AbstractRequestArrayHandler{
 	private CriteriaService service = null;
@@ -59,10 +59,9 @@ public class CriteriaPatchHandler extends AbstractRequestArrayHandler{
 			boolean enabled = Boolean.valueOf(value).booleanValue();
 			this.service.setEnable(criteriaId, userId, enabled);
 		} else if (path.equalsIgnoreCase("/lastNotifyTime")){
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 			try
 			{
-				Date lastNotifyTime = sdf.parse(value);
+				Date lastNotifyTime = CommonUtils.getUTCDateFromString(value);
 				this.service.setLastNotifyTime(criteriaId, userId, lastNotifyTime);
 			}
 			catch(Exception e)
