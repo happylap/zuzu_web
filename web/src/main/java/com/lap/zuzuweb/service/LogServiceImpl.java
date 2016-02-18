@@ -15,14 +15,14 @@ public class LogServiceImpl implements LogService {
 
 	@Override
 	public void setReceiveNotifyTime(String deviceID, String userID, Date time) {
+		if (time == null) {
+			return;
+		}
 		Log log = new Log();
 		log.setDevice_id(deviceID);
 		log.setUser_id(userID);
 		log.setLog_type(Log.Type.RECEIVE_NOTIFY_TIME);
 		log.setLog_comment("");
-		if (time == null) {
-			time = new Date();
-		}
 		log.setLog_time(time);
 		this.dao.createLog(log);
 	}

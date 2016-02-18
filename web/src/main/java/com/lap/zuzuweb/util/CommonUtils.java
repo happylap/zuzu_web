@@ -1,15 +1,13 @@
 package com.lap.zuzuweb.util;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
 public class CommonUtils {
 
 	public static Date getUTCNow() {
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-		return cal.getTime();
+		return new Date();
 	}
 	
 	//
@@ -25,3 +23,5 @@ public class CommonUtils {
 		return sdf.format(date);
 	}
 }
+
+
