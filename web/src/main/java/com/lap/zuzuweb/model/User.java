@@ -1,5 +1,6 @@
 package com.lap.zuzuweb.model;
 
+import java.io.InputStream;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,4 +22,5 @@ public class User
     private String facebook_gender;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
     private Date facebook_birthday;
+    private InputStream purchase_receipt;
 }

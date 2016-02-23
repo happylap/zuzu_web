@@ -63,12 +63,6 @@ public abstract class AbstractRequestHandler<V extends Validable> implements Req
     @Override
     public Object handle(Request request, Response response) throws Exception {
     	
-    	if (!this.auth(request.headers("Authorization"))) {
-    		response.status(403);
-            response.body("Forbidden");
-            return new Answer(403, "Forbidden");
-    	}
-    	
         try {
            	ObjectMapper objectMapper = new ObjectMapper();
             V value = null;
@@ -96,15 +90,4 @@ public abstract class AbstractRequestHandler<V extends Validable> implements Req
         }
     }
     
-    private boolean auth(String auth_string) {
-    	boolean auth = false;
-    	
-    	final Base64.Encoder encoder = Base64.getEncoder();
-    	String encodedAuthToken = encoder.encodeToString(Secrets.AUTH_TOKEN.getBytes());
-    	
-    	if (("Basic " + encodedAuthToken).equals(auth_string)) {
-    		auth = true; 
-    	}
-    	return auth;
-    }
 }

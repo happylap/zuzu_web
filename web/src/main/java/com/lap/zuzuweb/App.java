@@ -1,20 +1,34 @@
 package com.lap.zuzuweb;
 
+import static spark.Spark.before;
 import static spark.Spark.delete;
 import static spark.Spark.get;
+import static spark.Spark.halt;
 import static spark.Spark.patch;
 import static spark.Spark.post;
 import static spark.Spark.put;
+
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
+import java.util.Collection;
+
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.Part;
 
 import com.lap.zuzuweb.dao.CriteriaDao;
 import com.lap.zuzuweb.dao.DeviceDao;
 import com.lap.zuzuweb.dao.LogDao;
 import com.lap.zuzuweb.dao.NotifyItemDao;
+import com.lap.zuzuweb.dao.PurchaseDao;
 import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.dao.Sql2O.CriteriaDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.DeviceDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.LogDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.NotifyItemDaoBySql2O;
+import com.lap.zuzuweb.dao.Sql2O.PurchaseDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.UserDaoBySql2O;
 import com.lap.zuzuweb.handler.criteria.CriteriaCreateHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaModifyHandler;
@@ -31,6 +45,8 @@ import com.lap.zuzuweb.handler.notifyItem.GetUserNotifyItemHandler;
 import com.lap.zuzuweb.handler.notifyItem.GetUserUnreadNotifyItemCountHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemBatchCreateHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemPatchHandler;
+import com.lap.zuzuweb.handler.purchase.PurchaseCreateHandler;
+import com.lap.zuzuweb.handler.purchase.PurchaseQueryHandler;
 import com.lap.zuzuweb.handler.user.UserCreateHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
 import com.lap.zuzuweb.service.CriteriaService;
@@ -41,8 +57,11 @@ import com.lap.zuzuweb.service.LogService;
 import com.lap.zuzuweb.service.LogServiceImpl;
 import com.lap.zuzuweb.service.NotifyItemService;
 import com.lap.zuzuweb.service.NotifyItemServiceImpl;
+import com.lap.zuzuweb.service.PurchaseService;
+import com.lap.zuzuweb.service.PurchaseServiceImpl;
 import com.lap.zuzuweb.service.UserService;
 import com.lap.zuzuweb.service.UserServiceImpl;
+import com.lap.zuzuweb.util.CommonUtils;
 
 import spark.Request;
 import spark.Response;
@@ -50,8 +69,25 @@ import spark.Route;
 
 public class App 
 {
+	
     public static void main( String[] args )
-    {
+    {	
+    	before((request, response) -> {
+    		boolean auth = false;
+        	
+        	final Base64.Encoder encoder = Base64.getEncoder();
+        	String encodedAuthToken = encoder.encodeToString(Secrets.AUTH_TOKEN.getBytes());
+        	
+        	System.out.println("Authorization" + request.headers("Authorization"));
+        	if (("Basic " + encodedAuthToken).equals(request.headers("Authorization"))) {
+        		auth = true; 
+        	}
+        	
+            if (!auth) {
+            	halt(403, "Forbidden!!!");
+            }
+        });
+    	
     	UserDao userDao = new UserDaoBySql2O();
     	UserService userSvc = new UserServiceImpl(userDao);
  
@@ -66,6 +102,9 @@ public class App
 
     	LogDao logDao = new LogDaoBySql2O();
     	LogService logSvc = new LogServiceImpl(logDao);
+    	
+    	PurchaseDao purchaseDao = new PurchaseDaoBySql2O();
+    	PurchaseService purchaseSvc = new PurchaseServiceImpl(purchaseDao, userDao, criteriaDao);
     	
     	// user
     	post("/user", new UserCreateHandler(userSvc)); // create a user
@@ -99,11 +138,17 @@ public class App
         // log
         patch("/log/:deviceid/:userid", new LogPatchHandler(logSvc));
         
+        // purchase
+        post("/purchase", new PurchaseCreateHandler(purchaseSvc)); // add a purchase
+        get("/purchase/:userid", new PurchaseQueryHandler(purchaseSvc)); // get a list of purchases belonging to some user 
+        
+        
         get("/alive", new Route() {
             @Override
             public Object handle(Request request, Response response) throws Exception {
                 return "ok";
             }
         });
+        
     }
 }
