@@ -18,6 +18,7 @@ import java.util.Collection;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 
+import com.google.gson.Gson;
 import com.lap.zuzuweb.dao.CriteriaDao;
 import com.lap.zuzuweb.dao.DeviceDao;
 import com.lap.zuzuweb.dao.LogDao;
@@ -84,7 +85,11 @@ public class App
         	}
         	
             if (!auth) {
-            	halt(403, "Forbidden!!!");
+            	response.status(200);
+                response.type("application/json");
+                ApiResponse apiResponse = new ApiResponse(-1, "Authentication error. server 403 forbidden");
+                Gson gson = new Gson();
+            	halt(403, gson.toJson(apiResponse));
             }
         });
     	

@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.postgresql.util.PGobject;
 
 import com.lap.zuzuweb.dao.CriteriaDao;
@@ -33,16 +34,36 @@ public class PurchaseServiceImpl implements PurchaseService{
 	}
 
 	@Override
-	public String createPurchase(Purchase purchase, InputStream purchase_receipt, String criteriaFilters) {
+	public String purchaseCriteria(Purchase purchase, InputStream purchase_receipt, String criteriaFilters) {
 		System.out.println(purchase);
+		
+		if (StringUtils.isBlank(purchase.getUser_id())) {
+			throw new RuntimeException("Purchase user_id is required.");
+		}
+
+		if (StringUtils.isBlank(purchase.getStore())) {
+			throw new RuntimeException("Purchase store is required.");
+		}
+		
+		if (StringUtils.isBlank(purchase.getProduct_id())) {
+			throw new RuntimeException("Purchase product_id is required.");
+		}
+		
+		if (purchase_receipt == null) {
+			throw new RuntimeException("Purchase receipt file is required.");
+		}
+		
 		// TODO: 驗證 Purchase Receipt
+//		if (false) {
+//			throw new RuntimeException("Purchase receipt is invalid.");
+//		}
 		
 		purchase.setPurchase_time(CommonUtils.getUTCNow());
 		
 		Optional<User> existUser = userDao.getUser(purchase.getUser_id());
 		
 		if (!existUser.isPresent()) {
-			throw new RuntimeException("User is not found");
+			throw new RuntimeException("User does not exist. [" + purchase.getUser_id() + "]");
 		}
 		
 		User user = existUser.get();
@@ -67,7 +88,9 @@ public class PurchaseServiceImpl implements PurchaseService{
 		criteria.getFilters().setType("json");
 		criteria.setFiltersValue(criteriaFilters);
 		
-		return this.purchaseDao.createPurchase(purchase, user, criteria);
+		this.purchaseDao.createPurchase(purchase, user, criteria);
+		
+		return criteria.getCriteria_id();
 	}
 	
 }

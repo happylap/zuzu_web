@@ -6,6 +6,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.gson.Gson;
+import com.lap.zuzuweb.ApiResponse;
 import com.lap.zuzuweb.Secrets;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.handler.payload.Validable;
@@ -69,24 +71,24 @@ public abstract class AbstractRequestHandler<V extends Validable> implements Req
             if (valueClass != EmptyPayload.class) {
                 value = objectMapper.readValue(request.body(), valueClass);
             }
-            
             Map<String, String> urlParams = request.params();
-            //Answer answer = process(value, urlParams, shouldReturnHtml(request));
-            /*if (shouldReturnHtml(request)) {
-                response.type("text/html");
-            } else {
-                response.type("application/json");
-            }*/
+            
             Answer answer = process(value, urlParams);
-            response.status(answer.getCode());
+            
+            response.status(200);
             response.type("application/json");
-            response.body(answer.getBody());
-            return answer.getBody();
+            ApiResponse apiResponse = new ApiResponse(answer.getBody());
+            Gson gson = new Gson();
+            return gson.toJson(apiResponse);
+            
         } catch (Exception e) {
         	e.printStackTrace();
-            response.status(400);
-            response.body(e.getMessage());
-            return e.getMessage();
+        	
+        	response.status(200);
+            response.type("application/json");
+            ApiResponse apiResponse = new ApiResponse(-1, e.getMessage());
+            Gson gson = new Gson();
+            return gson.toJson(apiResponse);
         }
     }
     
