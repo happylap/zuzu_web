@@ -25,12 +25,12 @@ public class DeviceDeleteHandler extends AbstractRequestHandler<EmptyPayload>{
     	if (urlParams.containsKey(":deviceid")){
         	String deviceId = urlParams.get(":deviceid");
             service.deleteDevice(deviceId);
-            return new Answer(200, deviceId);   		
+            return Answer.ok(deviceId);   		
     	}
     	else{
         	String userid = urlParams.get(":userid");
             service.deleteDevicesByUser(userid);
-            return new Answer(200, Answer.SUCCESS);       		
+            return Answer.ok();       		
     	}
     	
 

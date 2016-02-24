@@ -18,7 +18,7 @@ public class DeviceCreateHandler extends AbstractRequestHandler<DeviceCreatePayl
 	@Override
 	protected Answer processImpl(DeviceCreatePayload value, Map<String, String> urlParams) {
         String deviceId = service.createDevice(value);
-        return new Answer(201, deviceId);
+        return Answer.ok(deviceId);
 	}
 
 }

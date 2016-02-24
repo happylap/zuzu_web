@@ -6,6 +6,7 @@ import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.service.DeviceService;
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class DeviceQueryHandler extends AbstractRequestHandler<EmptyPayload>{
 
@@ -19,12 +20,12 @@ public class DeviceQueryHandler extends AbstractRequestHandler<EmptyPayload>{
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
     	if (!urlParams.containsKey(":userid")) {
-    		String json = dataToJson(this.service.getAllDevices());
+    		String json = CommonUtils.toJson(this.service.getAllDevices());
     		return Answer.ok(json); 
         }
 
     	String userID = urlParams.get(":userid");
-        String json = dataToJson(this.service.getDevices(userID));
+        String json = CommonUtils.toJson(this.service.getDevices(userID));
         return Answer.ok(json); 
 	}
 

@@ -1,8 +1,8 @@
 package com.lap.zuzuweb.model;
 
-import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 
@@ -15,7 +15,8 @@ public class Purchase {
 	private String product_id;
 	private String product_title;
 	private String product_locale_id;
-	private BigDecimal product_price;
+	private Double product_price;
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
 	private Date purchase_time;
 	
 }

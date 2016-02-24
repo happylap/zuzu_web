@@ -12,8 +12,8 @@ import com.lap.zuzuweb.model.User;
 
 public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDao {
 
-	static private String SQL_GET_PURCHASE = "SELECT purchase_id, user_id, store, product_id, product_title, product_locale_id, product_price," 
-			+ " purchase_time, purchase_receipt FROM \"ZuzuPurchase\" " 
+	static private String SQL_GET_PURCHASE = "SELECT purchase_id, user_id, store, product_id, product_title, product_locale_id, product_price, purchase_time" 
+			+ " FROM \"ZuzuPurchase\" " 
 			+ " WHERE user_id = :user_id";
 	
 	static private String SQL_CREATE_PURCHASE = "INSERT INTO \"ZuzuPurchase\"(purchase_id, user_id, store, product_id, product_title, product_locale_id, product_price, purchase_time) "

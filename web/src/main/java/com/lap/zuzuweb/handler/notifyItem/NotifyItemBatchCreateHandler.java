@@ -19,6 +19,6 @@ public class NotifyItemBatchCreateHandler extends AbstractRequestHandler<NotifyI
 	@Override
 	protected Answer processImpl(NotifyItemBatchCreatePayload value, Map<String, String> urlParams) {
         service.addItems(value.getItems());
-        return new Answer(201, Answer.SUCCESS);
+        return Answer.ok();
 	}
 }

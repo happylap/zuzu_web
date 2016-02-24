@@ -20,36 +20,20 @@ public class CriteriaQueryHandler extends AbstractRequestHandler<EmptyPayload>{
 	
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
-    	if (!urlParams.containsKey(":criteriaid") && !urlParams.containsKey(":userid")) {
-            String json = dataToJson(this.service.getAllCriteria());
-            return Answer.ok(json);
-        }
-    	else if (urlParams.containsKey(":criteriaid") && urlParams.containsKey(":userid")){
-    		String criteriaId = urlParams.get(":criteriaid");
-    		String userID = urlParams.get(":userid");
-    		
-    		Optional<Criteria> existCriteria = this.service.getCriteria(criteriaId, userID);
-            if (existCriteria.isPresent()) {
-            	String json = dataToJson(existCriteria.get());
-        		return Answer.ok(json);
-            } else {
-            	throw new RuntimeException("Criteria is not found. (criteriaId: " + criteriaId + ", userId: " + userID + ")");
-            } 
-    	}
-    	else if(urlParams.containsKey(":userid")){
+    	if(urlParams.containsKey(":userid")){
         	String userID = urlParams.get(":userid");
             
             Optional<Criteria> existCriteria = this.service.getSingleCriteria(userID);
-            if (existCriteria.isPresent()) {
-            	String json = dataToJson(existCriteria.get());
-        		return Answer.ok(json);
-            } else {
-            	throw new RuntimeException("Criteria is not found. (userId: " + userID + ")");
+            
+            if (!existCriteria.isPresent()) {
+            	return Answer.no_data();
             }
-    	}else{
-    		throw new IllegalArgumentException();
-    	}
 
+    		return Answer.ok(existCriteria.get());
+            
+    	} else {
+    		return Answer.bad_request();
+    	}
 	}
 
 }

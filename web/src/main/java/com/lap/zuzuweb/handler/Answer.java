@@ -1,56 +1,71 @@
 package com.lap.zuzuweb.handler;
 
 public class Answer {
-
-	static public String SUCCESS = "Success";
 	
-    public Answer(int code) {
+	private static int OK = 200;
+	private static int NO_DATA = 204;
+	private static int BAD_REQUEST = 400;
+	private static int FORBIDDEN = 403;
+	private static int INTERNAL_SERVER_ERROR = 500;
+
+	public static Answer ok() {
+        return new Answer(OK);
+    }
+	
+	public static Answer ok(Object result) {
+        return new Answer(OK, result);
+    }
+	
+	public static Answer no_data() {
+        return new Answer(NO_DATA);
+    }
+
+    public static Answer error(String message) {
+        return new Answer(INTERNAL_SERVER_ERROR, null, message);
+    }
+    
+	public static Answer bad_request() {
+        return new Answer(BAD_REQUEST, null, "Server 400 bad request");
+    }
+	
+	public static Answer forbidden() {
+        return new Answer(FORBIDDEN, null, "Server 403 forbidden");
+    }
+	
+	private int code;
+    private Object data;
+    private String message;
+    
+    private Answer(int code) {
         this.code = code;
-        this.body = "";
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Answer answer = (Answer) o;
-
-        if (code != answer.code) return false;
-        if (body != null ? !body.equals(answer.body) : answer.body != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = code;
-        result = 31 * result + (body != null ? body.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Answer(code=" + code + ", body=" + body + ")";
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    private int code;
-    private String body;
-
-    public Answer(int code, String body){
+    
+    private Answer(int code, Object data){
         this.code = code;
-        this.body = body;
+        this.data = data;
     }
+    
+    private Answer(int code, Object data, String message){
+        this.code = code;
+        this.data = data;
+        this.message = message;
+    }
+    
+	public int getCode() {
+		return code;
+	}
 
-    public static Answer ok(String body) {
-        return new Answer(200, body);
-    }
+	public Object getData() {
+		return data;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	@Override
+	public String toString() {
+		return "Answer [code=" + code + ", data=" + data + ", message=" + message + "]";
+	}
+
 }

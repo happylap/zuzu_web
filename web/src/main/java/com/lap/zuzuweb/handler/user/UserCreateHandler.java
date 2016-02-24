@@ -20,7 +20,7 @@ public class UserCreateHandler extends AbstractRequestHandler<UserCreatePayload>
     @Override
     protected Answer processImpl(UserCreatePayload value, Map<String, String> urlParams) {
         String userId = service.createUser(value);
-        return new Answer(201, userId);
+        return Answer.ok(userId);
     }
 }
 

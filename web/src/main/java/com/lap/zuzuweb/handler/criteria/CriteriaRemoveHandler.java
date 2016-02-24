@@ -18,25 +18,20 @@ public class CriteriaRemoveHandler extends AbstractRequestHandler<EmptyPayload>{
     }
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
-    	if (!urlParams.containsKey(":criteriaid") && !urlParams.containsKey(":userid")) {
-            throw new IllegalArgumentException();
-        }
     	
     	if (urlParams.containsKey(":criteriaid") && urlParams.containsKey(":userid")){
         	String criteriaId = urlParams.get(":criteriaid");
         	String userId = urlParams.get(":userid");
             service.deleteCriteria(criteriaId, userId);
-            return new Answer(200, criteriaId);   		
+            return Answer.ok();   		
     	}
     	else if (urlParams.containsKey(":userid")){
         	String userId = urlParams.get(":userid");
             service.deleteCriteriaByUser(userId);
-            return new Answer(200, Answer.SUCCESS);       		
-    	}else{
-    		throw new IllegalArgumentException();
+            return Answer.ok();       		
     	}
     	
-
+    	return Answer.bad_request();
 	}
 
 }

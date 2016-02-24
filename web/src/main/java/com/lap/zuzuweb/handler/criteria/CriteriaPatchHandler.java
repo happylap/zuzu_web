@@ -15,57 +15,53 @@ import com.lap.zuzuweb.handler.payload.Validable;
 import com.lap.zuzuweb.service.CriteriaService;
 import com.lap.zuzuweb.util.CommonUtils;
 
-public class CriteriaPatchHandler extends AbstractRequestArrayHandler{
+public class CriteriaPatchHandler extends AbstractRequestArrayHandler {
 	private CriteriaService service = null;
-	
+
 	public CriteriaPatchHandler(CriteriaService service) {
-        this.service = service;
-    }
+		this.service = service;
+	}
 
 	@Override
 	protected Answer processImpl(Validable[] values, Map<String, String> urlParams) {
-		PatchPayload[] patches = (PatchPayload[])values;
-		for (PatchPayload patch: patches){
+		PatchPayload[] patches = (PatchPayload[]) values;
+		for (PatchPayload patch : patches) {
 			String op = patch.getOp();
 			String path = patch.getPath();
 			String value = patch.getValue();
-			if (op.equalsIgnoreCase(PatchPayload.OP_REPLACE)){
+			if (op.equalsIgnoreCase(PatchPayload.OP_REPLACE)) {
 				this.handleReplace(urlParams, path, value);
 			}
 		}
-		return new Answer(200, Answer.SUCCESS);
+		
+		return Answer.ok();
 	}
 
 	private void handleReplace(Map<String, String> urlParams, String path, String value) {
-    	if (!urlParams.containsKey(":criteriaid") || !urlParams.containsKey(":userid")) {
-            throw new IllegalArgumentException();
-        }
-    	
-    	String criteriaId = urlParams.get(":criteriaid");
-    	String userId = urlParams.get(":userid");
-    	
-    	if (path.equalsIgnoreCase("/filters"))
-		{
-    		PGobject filters = new PGobject();
-    		filters.setType("json");
-    		try {
-    			filters.setValue(value);
-    			this.service.setFilters(criteriaId, userId, filters);
-    		} catch (final Exception e) {
-    		    throw new IllegalArgumentException();
-    		}
-		} else if (path.equalsIgnoreCase("/enabled"))
-		{
+		if (!urlParams.containsKey(":criteriaid") || !urlParams.containsKey(":userid")) {
+			throw new IllegalArgumentException();
+		}
+
+		String criteriaId = urlParams.get(":criteriaid");
+		String userId = urlParams.get(":userid");
+
+		if (path.equalsIgnoreCase("/filters")) {
+			PGobject filters = new PGobject();
+			filters.setType("json");
+			try {
+				filters.setValue(value);
+				this.service.setFilters(criteriaId, userId, filters);
+			} catch (final Exception e) {
+				throw new IllegalArgumentException();
+			}
+		} else if (path.equalsIgnoreCase("/enabled")) {
 			boolean enabled = Boolean.valueOf(value).booleanValue();
 			this.service.setEnable(criteriaId, userId, enabled);
-		} else if (path.equalsIgnoreCase("/lastNotifyTime")){
-			try
-			{
+		} else if (path.equalsIgnoreCase("/lastNotifyTime")) {
+			try {
 				Date lastNotifyTime = CommonUtils.getUTCDateFromString(value);
 				this.service.setLastNotifyTime(criteriaId, userId, lastNotifyTime);
-			}
-			catch(Exception e)
-			{
+			} catch (Exception e) {
 				throw new IllegalArgumentException();
 			}
 		}
@@ -73,10 +69,9 @@ public class CriteriaPatchHandler extends AbstractRequestArrayHandler{
 
 	@Override
 	protected Validable[] parsePayloas(String reqBody) throws JsonParseException, IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        PatchPayload[] values = objectMapper.readValue(reqBody, PatchPayload[].class);
-        return values;
+		ObjectMapper objectMapper = new ObjectMapper();
+		PatchPayload[] values = objectMapper.readValue(reqBody, PatchPayload[].class);
+		return values;
 	}
-
 
 }

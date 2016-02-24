@@ -1,15 +1,13 @@
 package com.lap.zuzuweb.handler.purchase;
 
-import java.math.BigDecimal;
-
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 
-import com.google.gson.Gson;
 import com.lap.zuzuweb.ApiResponse;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.model.Purchase;
 import com.lap.zuzuweb.service.PurchaseService;
+import com.lap.zuzuweb.util.CommonUtils;
 
 import spark.Request;
 import spark.Response;
@@ -25,6 +23,7 @@ public class PurchaseCreateHandler implements Route {
 	
 	@Override
     public Object handle(Request request, Response response) throws Exception {
+		
 		try {
 			String location = "temp";          // the directory location where files will be stored
 	    	long maxFileSize = 100000000;       // the maximum size allowed for uploaded files
@@ -57,7 +56,11 @@ public class PurchaseCreateHandler implements Route {
 	    	purchase.setProduct_id(productId);
 	    	purchase.setProduct_title(productTitle);
 	    	purchase.setProduct_locale_id(productLocaleId);
-	    	purchase.setProduct_price(BigDecimal.valueOf(Double.valueOf(productPrice)));
+	    	purchase.setProduct_price(Double.valueOf(productPrice));
+	    	
+	    	if (purchaseReceiptFile == null) {
+	    		throw new RuntimeException("Purchase receipt file is required."); 
+	    	}
 	    	
 	    	String criteriaId = this.service.purchaseCriteria(purchase, purchaseReceiptFile.getInputStream(), criteriaFilters);
 	    	
@@ -65,20 +68,13 @@ public class PurchaseCreateHandler implements Route {
 	    	multipartConfigElement = null;
 	    	purchaseReceiptFile = null;
 	    	
-	    	response.status(200);
-            response.type("application/json");
-            ApiResponse apiResponse = new ApiResponse(criteriaId);
-            Gson gson = new Gson();
-            return gson.toJson(apiResponse);
+	    	Answer answer = Answer.ok(criteriaId);
+	    	return CommonUtils.toJson(answer);
             
 		} catch (Exception e) {
-			e.printStackTrace();
 			
-			response.status(200);
-            response.type("application/json");
-            ApiResponse apiResponse = new ApiResponse(-1, e.getMessage());
-            Gson gson = new Gson();
-            return gson.toJson(apiResponse);
+			e.printStackTrace();
+			return CommonUtils.toJson(Answer.error(e.getMessage()));
 		}
 	}
 

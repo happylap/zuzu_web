@@ -6,6 +6,7 @@ import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.service.NotifyItemService;
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class GetUserUnreadNotifyItemCountHandler extends AbstractRequestHandler<EmptyPayload>{
 
@@ -24,7 +25,7 @@ public class GetUserUnreadNotifyItemCountHandler extends AbstractRequestHandler<
 
     		
 		String userID = urlParams.get(":userid");
-        String json = dataToJson(this.service.getUnreadCount(userID));
+        String json = CommonUtils.toJson(this.service.getUnreadCount(userID));
         return Answer.ok(json);
 
     	 

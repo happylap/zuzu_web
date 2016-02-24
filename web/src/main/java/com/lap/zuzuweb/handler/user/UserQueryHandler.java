@@ -9,8 +9,6 @@ import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.model.User;
 import com.lap.zuzuweb.service.UserService;
 
-import spark.Request;
-
 public class UserQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 
 	private UserService service = null;
@@ -29,10 +27,12 @@ public class UserQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 
     	String userID = urlParams.get(":userid");
         Optional<User> user = this.service.getUser(userID);
-        if (!user.isPresent()) {
-            return new Answer(404);
+        
+        if (user.isPresent()) {
+            return Answer.ok(user.get());
         }
-        return Answer.ok(dataToJson(user.get()));
+        
+        return Answer.ok();
     }
 
 }

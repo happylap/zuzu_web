@@ -42,7 +42,7 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 	@Override
 	public void setRead(String itemid, String userID, boolean is_read) {
 		Optional<NotifyItem> existItem = this.getItem(itemid, userID);
-		if (existItem != null) {
+		if (existItem.isPresent()) {
 			NotifyItem item = existItem.get();
 
 			if (item.is_read() != is_read) {

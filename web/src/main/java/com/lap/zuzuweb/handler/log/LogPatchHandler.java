@@ -30,7 +30,7 @@ public class LogPatchHandler extends AbstractRequestArrayHandler {
 				this.handleAdd(urlParams, path, value);
 			}
 		}
-		return new Answer(200, Answer.SUCCESS);
+		return Answer.ok();
 	}
 
 	private void handleAdd(Map<String, String> urlParams, String path, String value) {

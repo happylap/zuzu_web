@@ -19,12 +19,11 @@ public class GetUserNotifyItemHandler extends AbstractRequestHandler<EmptyPayloa
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
     	if (!urlParams.containsKey(":userid")) {
-            throw new IllegalArgumentException();
+            return Answer.bad_request();
         }
 
     	String userID = urlParams.get(":userid");
-        String json = dataToJson(this.service.getItems(userID));
-        return Answer.ok(json); 
+        return Answer.ok(this.service.getItems(userID)); 
 	}
 
 }

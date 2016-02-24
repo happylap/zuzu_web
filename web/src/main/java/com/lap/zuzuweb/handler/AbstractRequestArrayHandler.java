@@ -1,39 +1,22 @@
 package com.lap.zuzuweb.handler;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.gson.Gson;
-import com.lap.zuzuweb.ApiResponse;
-import com.lap.zuzuweb.Secrets;
 import com.lap.zuzuweb.handler.payload.Validable;
+import com.lap.zuzuweb.util.CommonUtils;
 
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
 public abstract class AbstractRequestArrayHandler implements RequestArrayHandler, Route {
-
-    private static final int HTTP_BAD_REQUEST = 400;
-
-    public static String dataToJson(Object data) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            return mapper.writeValueAsString(data);
-        } catch (IOException e){
-            throw new RuntimeException("IOException from a StringWriter?");
-        }
-    }
  
     public final Answer process(Validable[] values, Map<String, String> urlParams) {
     	for (Validable value: values){
     		if (value != null && !value.isValid()) {
-    			return new Answer(HTTP_BAD_REQUEST);
+    			return Answer.bad_request();
     		}
     	}
     	
@@ -55,18 +38,15 @@ public abstract class AbstractRequestArrayHandler implements RequestArrayHandler
 
             response.status(200);
             response.type("application/json");
-            ApiResponse apiResponse = new ApiResponse(answer.getBody());
-            Gson gson = new Gson();
-            return gson.toJson(apiResponse);
+			return CommonUtils.toJson(answer);
             
         } catch (Exception e) {
-        	e.printStackTrace();
         	
-        	response.status(200);
+        	e.printStackTrace();
+            response.status(200);
             response.type("application/json");
-            ApiResponse apiResponse = new ApiResponse(-1, e.getMessage());
-            Gson gson = new Gson();
-            return gson.toJson(apiResponse);
+        	return CommonUtils.toJson(Answer.error(e.getMessage()));
+        	
         }
     }
     

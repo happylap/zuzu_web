@@ -31,7 +31,7 @@ public class DevicePatchHandler extends AbstractRequestArrayHandler{
 				this.handleReplace(urlParams, path, value);
 			}
 		}
-		return new Answer(200, Answer.SUCCESS);
+		return Answer.ok();
 	}
 
 	private void handleReplace(Map<String, String> urlParams, String path, String value) {

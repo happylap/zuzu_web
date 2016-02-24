@@ -1,8 +1,12 @@
 package com.lap.zuzuweb.util;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class CommonUtils {
 
@@ -22,6 +26,16 @@ public class CommonUtils {
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return sdf.format(date);
 	}
+	
+	public static String toJson(Object data) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+            return mapper.writeValueAsString(data);
+        } catch (IOException e){
+            throw new RuntimeException("IOException from a StringWriter?");
+        }
+    }
 }
 
 

@@ -24,7 +24,7 @@ public class CriteriaModifyHandler extends AbstractRequestHandler<CriteriaUpdate
     	String criteriaId = urlParams.get(":criteriaid");
     	String userId = urlParams.get(":userid");
         String updateId = service.updateCriteria(value.toCriteria(criteriaId, userId));
-        return new Answer(201, updateId);
+        return Answer.ok(updateId);
 	}
 
 }

@@ -17,7 +17,7 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 	static private String SQL_CREATE_USER = "INSERT INTO \"ZuZuUser\"(user_id, register_time, facebook_id, facebook_name,"
 			+ " facebook_email, facebook_picture_url, facebook_first_name, facebook_last_name, facebook_gender, facebook_birthday) "
 			+ " VALUES (:user_id, :register_time, :facebook_id, :facebook_name, :facebook_email, :facebook_picture_url, "
-			+ " :facebook_first_name, :facebook_last_name, :facebook_gender, :facebook_birthday,)";
+			+ " :facebook_first_name, :facebook_last_name, :facebook_gender, :facebook_birthday)";
 	
 	@Override
 	public Optional<User> getUser(String userID)

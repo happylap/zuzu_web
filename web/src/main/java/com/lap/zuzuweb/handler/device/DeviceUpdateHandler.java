@@ -18,7 +18,7 @@ public class DeviceUpdateHandler extends AbstractRequestHandler<DeviceUpdatePayl
 	@Override
 	protected Answer processImpl(DeviceUpdatePayload value, Map<String, String> urlParams) {
         String deviceId = service.updateDevice(value);
-        return new Answer(201, deviceId);
+        return Answer.ok(deviceId);
 	}
 
 }
