@@ -54,50 +54,48 @@ import spark.Route;
 
 public class App 
 {
+	public static boolean enableAuth = false;
 	
     public static void main( String[] args )
     {	
     	
     	before((request, response) -> {
     		
+    		if (!enableAuth) {
+    			return;
+    		}
+    		
+    		if (AuthUtils.isSuperTokenValid(request.headers("Authorization"))) {
+    			return;
+    		}
+    		
     		System.out.println("Header Authorization: " + request.headers("Authorization"));
     		
-    		boolean isSuper = AuthUtils.isSuperTokenValid(request.headers("Authorization"));
-    		
-    		if (!isSuper) {
-        		
-        		if (!AuthUtils.isBasicTokenValid(request.headers("Authorization"))) {
-        			response.type("application/json");
-                    halt(403, CommonUtils.toJson(Answer.forbidden("Basic Auth Failure")));
-        		}
-        		
-        		boolean auth = false;
-        		System.out.println("Header LoginProvider: " + request.headers("LoginProvider"));
-    	        System.out.println("Header LoginToken: " + request.headers("LoginToken"));
-    	        System.out.println("Header LoginUserId: " + request.headers("LoginUserId"));
-    	            
-    	        String userProvider = request.headers("UserProvider");
-    	        String userToken = request.headers("UserToken");
-    	        String userId = request.headers("UserId");
-    	            
-    	        if (StringUtils.equalsIgnoreCase("graph.facebook.com", userProvider)) {
-    	            if (AuthUtils.isFacebookTokenValid(userToken, userId)) {
-    	            	auth = true;
-    	            }
-    	        } 
-    	            
-    	        if (StringUtils.equalsIgnoreCase("accounts.google.com", userProvider)) {
-    	            if (AuthUtils.isGoogleTokenValid(userToken, userId)) {
-    	            	auth = true;
-    	            }
-    	        } 
-        		
-                if (!auth) {
-                    response.type("application/json");
-                    halt(403, CommonUtils.toJson(Answer.forbidden("User Auth Failure")));
-                }
+    		if (AuthUtils.isBasicTokenValid(request.headers("Authorization"))) {
+    			
+	    		System.out.println("Header UserProvider: " + request.headers("UserProvider"));
+	    		System.out.println("Header UserToken: " + request.headers("UserToken"));
+	    		System.out.println("Header UserId: " + request.headers("UserId"));
+	
+	    		String userProvider = request.headers("UserProvider");
+	    		String userToken = request.headers("UserToken");
+	    		String userId = request.headers("UserId");
+	
+	    		if (StringUtils.equalsIgnoreCase("graph.facebook.com", userProvider)) {
+	    			if (AuthUtils.isFacebookTokenValid(userToken, userId)) {
+	    				return;
+	    			}
+	    		}
+	
+	    		if (StringUtils.equalsIgnoreCase("accounts.google.com", userProvider)) {
+	    			if (AuthUtils.isGoogleTokenValid(userToken, userId)) {
+	    				return;
+	    			}
+	    		}
     		}
-
+    		
+    		response.type("application/json");
+			halt(403, CommonUtils.toJson(Answer.forbidden()));
         });
         
     	
