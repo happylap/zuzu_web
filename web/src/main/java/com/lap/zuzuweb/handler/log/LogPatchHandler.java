@@ -42,17 +42,9 @@ public class LogPatchHandler extends AbstractRequestArrayHandler {
 		String userId = urlParams.get(":userid");
 		
 		if (path.equalsIgnoreCase("/receiveNotifyTime")) {
-			try {
-				this.service.setReceiveNotifyTime(deviceId, userId, CommonUtils.getUTCNow());
-			} catch (Exception e) {
-				throw new IllegalArgumentException();
-			}
+			this.service.setReceiveNotifyTime(deviceId, userId, CommonUtils.getUTCNow());
 		} else if (path.equalsIgnoreCase("/registerTime")) {
-			try {
-				this.service.setRegisterTime(deviceId, userId, CommonUtils.getUTCNow());
-			} catch (Exception e) {
-				throw new IllegalArgumentException();
-			}
+			this.service.setRegisterTime(deviceId, userId, CommonUtils.getUTCNow());
 		} else {
 			throw new IllegalArgumentException();
 		}
