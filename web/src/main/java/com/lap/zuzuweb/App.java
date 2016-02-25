@@ -8,7 +8,7 @@ import static spark.Spark.patch;
 import static spark.Spark.post;
 import static spark.Spark.put;
 
-import java.util.Base64;
+import org.apache.commons.lang3.StringUtils;
 
 import com.lap.zuzuweb.dao.CriteriaDao;
 import com.lap.zuzuweb.dao.LogDao;
@@ -45,6 +45,7 @@ import com.lap.zuzuweb.service.PurchaseService;
 import com.lap.zuzuweb.service.PurchaseServiceImpl;
 import com.lap.zuzuweb.service.UserService;
 import com.lap.zuzuweb.service.UserServiceImpl;
+import com.lap.zuzuweb.util.AuthUtils;
 import com.lap.zuzuweb.util.CommonUtils;
 
 import spark.Request;
@@ -58,20 +59,45 @@ public class App
     {	
     	
     	before((request, response) -> {
-    		boolean auth = false;
-        	
-        	final Base64.Encoder encoder = Base64.getEncoder();
-        	String encodedAuthToken = encoder.encodeToString(Secrets.AUTH_TOKEN.getBytes());
-        	
-        	System.out.println("Authorization" + request.headers("Authorization"));
-        	if (("Basic " + encodedAuthToken).equals(request.headers("Authorization"))) {
-        		auth = true; 
-        	}
-        	
-            if (!auth) {
-                response.type("application/json");
-                halt(403, CommonUtils.toJson(Answer.forbidden()));
-            }
+    		
+    		System.out.println("Header Authorization: " + request.headers("Authorization"));
+    		
+    		boolean isSuper = AuthUtils.isSuperTokenValid(request.headers("Authorization"));
+    		
+    		if (!isSuper) {
+        		
+        		if (!AuthUtils.isBasicTokenValid(request.headers("Authorization"))) {
+        			response.type("application/json");
+                    halt(403, CommonUtils.toJson(Answer.forbidden("Basic Auth Failure")));
+        		}
+        		
+        		boolean auth = false;
+        		System.out.println("Header LoginProvider: " + request.headers("LoginProvider"));
+    	        System.out.println("Header LoginToken: " + request.headers("LoginToken"));
+    	        System.out.println("Header LoginUserId: " + request.headers("LoginUserId"));
+    	            
+    	        String userProvider = request.headers("UserProvider");
+    	        String userToken = request.headers("UserToken");
+    	        String userId = request.headers("UserId");
+    	            
+    	        if (StringUtils.equalsIgnoreCase("graph.facebook.com", userProvider)) {
+    	            if (AuthUtils.isFacebookTokenValid(userToken, userId)) {
+    	            	auth = true;
+    	            }
+    	        } 
+    	            
+    	        if (StringUtils.equalsIgnoreCase("accounts.google.com", userProvider)) {
+    	            if (AuthUtils.isGoogleTokenValid(userToken, userId)) {
+    	            	auth = true;
+    	            }
+    	        } 
+        		
+                if (!auth) {
+                    response.type("application/json");
+                    halt(403, CommonUtils.toJson(Answer.forbidden("User Auth Failure")));
+                }
+    		}
+
         });
         
     	

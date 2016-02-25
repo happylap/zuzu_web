@@ -32,6 +32,10 @@ public class Answer {
         return new Answer(FORBIDDEN, null, "Server 403 forbidden");
     }
 	
+	public static Answer forbidden(String message) {
+        return new Answer(FORBIDDEN, null, "Server 403 forbidden: " + message);
+    }
+	
 	private int code;
     private Object data;
     private String message;
