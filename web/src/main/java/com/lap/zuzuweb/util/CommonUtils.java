@@ -2,6 +2,7 @@ package com.lap.zuzuweb.util;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -36,6 +37,19 @@ public class CommonUtils {
             throw new RuntimeException("IOException from a StringWriter?");
         }
     }
+	
+	public static String decodeFromBase64String(String base64encodedString) {
+		// Decode
+		String decodeString = null;
+		try {
+			byte[] base64decodedBytes = Base64.getDecoder().decode(base64encodedString);
+			decodeString = new String(base64decodedBytes, "utf-8");
+		} catch (Exception e) {
+			
+		}
+		return decodeString;
+	}
+	
 }
 
 

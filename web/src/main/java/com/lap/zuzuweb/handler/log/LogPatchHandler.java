@@ -38,7 +38,7 @@ public class LogPatchHandler extends AbstractRequestArrayHandler {
 			throw new IllegalArgumentException();
 		}
 
-		String deviceId = urlParams.get(":deviceid");
+		String deviceId = CommonUtils.decodeFromBase64String(urlParams.get(":deviceid"));
 		String userId = urlParams.get(":userid");
 		
 		if (path.equalsIgnoreCase("/receiveNotifyTime")) {
