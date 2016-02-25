@@ -10,6 +10,7 @@ import static spark.Spark.put;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.lap.zuzuweb.common.Provider;
 import com.lap.zuzuweb.dao.CriteriaDao;
 import com.lap.zuzuweb.dao.LogDao;
 import com.lap.zuzuweb.dao.NotifyItemDao;
@@ -60,6 +61,8 @@ public class App
     {	
     	
     	before((request, response) -> {
+
+    		System.out.println("url: " + request.uri().toString());
     		
     		if (!enableAuth) {
     			return;
@@ -80,17 +83,16 @@ public class App
 	    		String userProvider = request.headers("UserProvider");
 	    		String userToken = request.headers("UserToken");
 	    		String userId = request.headers("UserId");
-	
-	    		if (StringUtils.equalsIgnoreCase("graph.facebook.com", userProvider)) {
+	    		
+	    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.FB.toString())) {
 	    			if (AuthUtils.isFacebookTokenValid(userToken, userId)) {
 	    				return;
 	    			}
 	    		}
-	
-	    		if (StringUtils.equalsIgnoreCase("accounts.google.com", userProvider)) {
-	    			if (AuthUtils.isGoogleTokenValid(userToken, userId)) {
-	    				return;
-	    			}
+	    		
+	    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.GOOGLE.toString())) {
+	    			// TODO
+	    			return;
 	    		}
     		}
     		
