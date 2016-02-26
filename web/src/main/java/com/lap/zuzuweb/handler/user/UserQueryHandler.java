@@ -22,7 +22,7 @@ public class UserQueryHandler extends AbstractRequestHandler<EmptyPayload> {
     protected Answer processImpl(EmptyPayload value, Map<String,String> urlParams)
     {
     	if (!urlParams.containsKey(":userid")) {
-            throw new IllegalArgumentException();
+            return Answer.bad_request();
         }
 
     	String userID = urlParams.get(":userid");
@@ -32,7 +32,7 @@ public class UserQueryHandler extends AbstractRequestHandler<EmptyPayload> {
             return Answer.ok(user.get());
         }
         
-        return Answer.ok();
+        return Answer.no_data();
     }
 
 }

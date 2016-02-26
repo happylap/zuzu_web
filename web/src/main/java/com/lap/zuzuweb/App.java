@@ -27,6 +27,7 @@ import com.lap.zuzuweb.handler.criteria.CriteriaModifyHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaPatchHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaQueryHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaRemoveHandler;
+import com.lap.zuzuweb.handler.criteria.CriteriaValidQueryHandler;
 import com.lap.zuzuweb.handler.log.LogPatchHandler;
 import com.lap.zuzuweb.handler.notifyItem.GetUserNotifyItemHandler;
 import com.lap.zuzuweb.handler.notifyItem.GetUserUnreadNotifyItemCountHandler;
@@ -143,8 +144,9 @@ public class App
         delete("/criteria/:criteriaid/:userid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria
         delete("/criteria/:userid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria belonging to some user
         get("/criteria", new CriteriaQueryHandler(criteriaSvc)); // get all criteria
-        get("/criteria/:criteriaid/:userid", new CriteriaQueryHandler(criteriaSvc)); // get criteria belonging to some user
         get("/criteria/:userid", new CriteriaQueryHandler(criteriaSvc)); // get criteria belonging to some user
+        get("/criteria/valid/:userid", new CriteriaValidQueryHandler(criteriaSvc)); // get criteria belonging to some user
+        
         
         // notify
         post("/notifyitem/batch", new NotifyItemBatchCreateHandler(notifyItemSvc)); // add a list of notify items
