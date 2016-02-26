@@ -8,18 +8,18 @@ import com.lap.zuzuweb.handler.payload.UserCreatePayload;
 import com.lap.zuzuweb.service.UserService;
 
 
-public class UserCreateHandler extends AbstractRequestHandler<UserCreatePayload> {
+public class UserCreateOrUpdateHandler extends AbstractRequestHandler<UserCreatePayload> {
 	
 	private UserService service = null;
 	
-	public UserCreateHandler(UserService service) {
+	public UserCreateOrUpdateHandler(UserService service) {
         super(UserCreatePayload.class);
         this.service = service;
     }
 	
     @Override
     protected Answer processImpl(UserCreatePayload value, Map<String, String> urlParams) {
-        String userId = service.createUser(value);
+        String userId = service.createOrUpdateUser(value);
         return Answer.ok(userId);
     }
 }

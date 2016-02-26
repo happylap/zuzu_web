@@ -23,13 +23,14 @@ public class UserServiceImpl implements UserService
 	}
 
 	@Override
-	public String createUser(User user) {
+	public String createOrUpdateUser(User user) {
         Optional<User> existUser = this.dao.getUser(user.getUser_id());
-        if (existUser.isPresent()) {
-            return existUser.get().getUser_id();
+        if (!existUser.isPresent()) {
+        	user.setRegister_time(CommonUtils.getUTCNow());
+    		return this.dao.createUser(user);    
+        } else {
+        	return this.dao.updateUser(user);
         }
-        user.setRegister_time(CommonUtils.getUTCNow());
-		return this.dao.createUser(user);
 	}
 	
 }

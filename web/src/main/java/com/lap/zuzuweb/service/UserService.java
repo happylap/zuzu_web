@@ -8,5 +8,5 @@ public interface UserService
 {
 	public Optional<User> getUser(String userID);
 	
-	public String createUser(User user);
+	public String createOrUpdateUser(User user);
 }

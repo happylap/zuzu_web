@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.sql2o.Connection;
 
 import com.lap.zuzuweb.dao.UserDao;
+import com.lap.zuzuweb.model.Criteria;
 import com.lap.zuzuweb.model.User;
 
 public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
@@ -18,6 +19,11 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 			+ " facebook_email, facebook_picture_url, facebook_first_name, facebook_last_name, facebook_gender, facebook_birthday) "
 			+ " VALUES (:user_id, :register_time, :facebook_id, :facebook_name, :facebook_email, :facebook_picture_url, "
 			+ " :facebook_first_name, :facebook_last_name, :facebook_gender, :facebook_birthday)";
+	
+	static private String SQL_UPDATE_USER = "UPDATE \"ZuZuUser\" SET facebook_id=:facebook_id, facebook_name=:facebook_name,"
+			+ " facebook_email=:facebook_email, facebook_picture_url=:facebook_picture_url, facebook_first_name=:facebook_first_name,"
+			+ " facebook_last_name=:facebook_last_name, facebook_gender=:facebook_gender, facebook_birthday=:facebook_birthday"
+			+ " WHERE user_id=:user_id";
 	
 	@Override
 	public Optional<User> getUser(String userID)
@@ -50,6 +56,25 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
                     .addParameter("facebook_last_name", user.getFacebook_last_name())
                     .addParameter("facebook_birthday", user.getFacebook_birthday())
                     .addParameter("facebook_gender", user.getFacebook_gender())
+                    .executeUpdate();
+            conn.commit();
+            return user.getUser_id();
+        }
+	}
+	
+	@Override
+	public String updateUser(User user) {
+        try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(SQL_UPDATE_USER)
+		            .addParameter("facebook_id", user.getFacebook_id())
+		            .addParameter("facebook_name", user.getFacebook_name())
+		            .addParameter("facebook_email", user.getFacebook_email())
+		            .addParameter("facebook_picture_url", user.getFacebook_picture_url())
+		            .addParameter("facebook_first_name", user.getFacebook_first_name())
+		            .addParameter("facebook_last_name", user.getFacebook_last_name())
+		            .addParameter("facebook_birthday", user.getFacebook_birthday())
+		            .addParameter("facebook_gender", user.getFacebook_gender())
+		            .addParameter("user_id", user.getUser_id())
                     .executeUpdate();
             conn.commit();
             return user.getUser_id();

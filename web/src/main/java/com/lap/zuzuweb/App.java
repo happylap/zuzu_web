@@ -35,7 +35,7 @@ import com.lap.zuzuweb.handler.notifyItem.NotifyItemBatchCreateHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemPatchHandler;
 import com.lap.zuzuweb.handler.purchase.PurchaseCreateHandler;
 import com.lap.zuzuweb.handler.purchase.PurchaseQueryHandler;
-import com.lap.zuzuweb.handler.user.UserCreateHandler;
+import com.lap.zuzuweb.handler.user.UserCreateOrUpdateHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
 import com.lap.zuzuweb.service.CriteriaService;
 import com.lap.zuzuweb.service.CriteriaServiceImpl;
@@ -123,7 +123,7 @@ public class App
     	PurchaseService purchaseSvc = new PurchaseServiceImpl(purchaseDao, userDao, criteriaDao);
     	
     	// user
-    	post("/user", new UserCreateHandler(userSvc)); // create a user
+    	post("/user", new UserCreateOrUpdateHandler(userSvc)); // create a user
         get("/user/:userid", new UserQueryHandler(userSvc)); //get user by user id
         
         // device
