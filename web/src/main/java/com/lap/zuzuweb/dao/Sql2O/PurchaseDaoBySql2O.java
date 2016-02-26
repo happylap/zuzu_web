@@ -4,11 +4,14 @@ import java.util.List;
 import java.util.UUID;
 
 import org.sql2o.Connection;
+import org.sql2o.Query;
 
 import com.lap.zuzuweb.dao.PurchaseDao;
 import com.lap.zuzuweb.model.Criteria;
+import com.lap.zuzuweb.model.Log;
 import com.lap.zuzuweb.model.Purchase;
 import com.lap.zuzuweb.model.User;
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDao {
 
@@ -22,9 +25,17 @@ public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDa
 	static private String SQL_UPDATE_USER_PURCHASE_RECEIPT = "UPDATE \"ZuZuUser\" SET purchase_receipt=:purchase_receipt"
 			+ " WHERE user_id = :user_id";
 	
+	static private String SQL_CREATE_CRITERIA = "INSERT INTO \"Criteria\"(criteria_id, user_id, enabled, expire_time, "
+			+ " apple_product_id, last_notify_time, filters) "
+			+ " VALUES (:criteria_id, :user_id, :enabled, :expire_time, :apple_product_id, :last_notify_time, :filters)";
+	
+	
 	static private String SQL_UPDATE_CRITERIA = "UPDATE \"Criteria\" SET enabled=:enabled, expire_time=:expire_time,"
 			+ " apple_product_id=:apple_product_id, last_notify_time=:last_notify_time, filters=:filters"
 			+ " WHERE criteria_id=:criteria_id AND user_id=:user_id";
+	
+	static private String SQL_CREATE_LOG = "INSERT INTO \"ZuzuLog\"(device_id, user_id, log_type, log_comment, log_time) "
+			+ " VALUES (:device_id, :user_id, :log_type, :log_comment, :log_time)";
 	
 	@Override
 	public List<Purchase> getPurchase(String userID) {
@@ -50,8 +61,17 @@ public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDa
 					.executeUpdate();
 			
 			if (criteria != null) {
-				conn.createQuery(SQL_UPDATE_CRITERIA)
-			    		.addParameter("enabled", criteria.isEnabled())
+				
+				Query query = null;
+				
+				if (criteria.getCriteria_id() == null) {
+					criteria.setCriteria_id(System.currentTimeMillis()+"");
+					query = conn.createQuery(SQL_CREATE_CRITERIA);
+				} else {
+					query = conn.createQuery(SQL_UPDATE_CRITERIA);
+				}
+				
+				query.addParameter("enabled", criteria.isEnabled())
 			            .addParameter("expire_time", criteria.getExpire_time())
 			            .addParameter("apple_product_id", criteria.getApple_product_id())
 			            .addParameter("last_notify_time", criteria.getLast_notify_time())
@@ -59,12 +79,26 @@ public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDa
 			            .addParameter("criteria_id", criteria.getCriteria_id())
 			            .addParameter("user_id", criteria.getUser_id())
 			            .executeUpdate();
+				
+				if (criteria.getCriteria_id() != null && criteria.getExpire_time() != null) {
+					String comment = String.format("%s (%s)", CommonUtils.getUTCStringFromDate(criteria.getExpire_time()), criteria.getApple_product_id());
+					
+					conn.createQuery(SQL_CREATE_LOG)
+						.addParameter("device_id", "")
+			            .addParameter("user_id", criteria.getUser_id())
+			            .addParameter("log_type", Log.Type.EXPIRE_TIME)
+			            .addParameter("log_comment", comment)
+			            .addParameter("log_time", CommonUtils.getUTCNow())
+			            .executeUpdate();
+				}
 			}
 			
 			conn.createQuery(SQL_UPDATE_USER_PURCHASE_RECEIPT)
 		    		.addParameter("purchase_receipt", user.getPurchase_receipt())
 		            .addParameter("user_id", user.getUser_id())
 		            .executeUpdate();
+			
+			
 			
 			conn.commit();
 			return purchase.getPurchase_id();

@@ -77,16 +77,15 @@ public class PurchaseServiceImpl implements PurchaseService{
 			criteria = existCriteria.get();
 		} else {
 			criteria = new Criteria();
-			criteria.setCriteria_id(System.currentTimeMillis()+"");
 			criteria.setUser_id(user.getUser_id());
 		}
-		
 		criteria.setEnabled(true);
-		criteria.setApple_product_id(purchase.getProduct_id());
-		// TODO: Calculate expire_time and set to criteria
 		criteria.setFilters(new PGobject());
 		criteria.getFilters().setType("json");
 		criteria.setFiltersValue(criteriaFilters);
+
+		// Calculate expire time
+		criteria.setProductAndCalExpireTime(purchase.getProduct_id());
 		
 		this.purchaseDao.createPurchase(purchase, user, criteria);
 		

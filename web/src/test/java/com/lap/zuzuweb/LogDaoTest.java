@@ -43,12 +43,6 @@ public class LogDaoTest extends TestCase {
 			insertLog.setLog_time(new Date());
 			logDao.createLog(insertLog);
 
-			Optional<Log> existLog = logDao.getLog("", "");
-			if (existLog.isPresent()) {
-				Log log = existLog.get();
-				System.out.println(log);
-			}
-
 			assertTrue(true);
 		} catch (Exception e) {
 			e.printStackTrace();

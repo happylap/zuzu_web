@@ -11,7 +11,8 @@ public class Log {
 	
 	public enum Type {
 		REGISTER_TIME("RegisterTime"),
-		RECEIVE_NOTIFY_TIME("ReceiveNotifyTime");
+		RECEIVE_NOTIFY_TIME("ReceiveNotifyTime"),
+		EXPIRE_TIME("ExpireTime");
 	 
 	    private String value;
 	 
