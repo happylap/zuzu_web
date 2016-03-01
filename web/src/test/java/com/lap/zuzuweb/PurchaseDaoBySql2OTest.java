@@ -2,12 +2,10 @@ package com.lap.zuzuweb;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.Date;
 import java.util.Optional;
 
-import com.lap.zuzuweb.dao.PurchaseDao;
 import com.lap.zuzuweb.dao.Sql2O.CriteriaDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.PurchaseDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.UserDaoBySql2O;
@@ -64,7 +62,7 @@ public class PurchaseDaoBySql2OTest extends TestCase {
 		
 		User user = existUser.get();
 		user.setPurchase_receipt(fis2);
-		user.setFacebook_birthday(CommonUtils.getUTCNow());
+		user.setBirthday(CommonUtils.getUTCNow());
 		
 		new PurchaseDaoBySql2O().createPurchase(purchase, user, criteria);
 

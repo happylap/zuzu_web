@@ -10,17 +10,21 @@ import lombok.Data;
 @Data
 public class User
 {
+	public enum UserProvider {
+		FB, GOOGLE
+	}
+
     private String user_id;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
     private Date register_time;
-    private String facebook_id;
-    private String facebook_name;
-    private String facebook_email;
-    private String facebook_picture_url;
-    private String facebook_first_name;
-    private String facebook_last_name;
-    private String facebook_gender;
+    
+    private UserProvider provider;
+    private String email;
+    private String name;
+    private String gender;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
-    private Date facebook_birthday;
+    private Date birthday;
+    private String picture_url;
     private InputStream purchase_receipt;
+    
 }
