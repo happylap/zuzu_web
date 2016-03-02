@@ -33,6 +33,6 @@ public enum ProductEnum {
 				return v;
 			}
 		}
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException("The productId is invalid. [" + productId + "]");
 	}
 }

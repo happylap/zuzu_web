@@ -30,6 +30,10 @@ public class Criteria {
 		
 		ProductEnum product = ProductEnum.getEnum(productId);
 
+		if (product == null) {
+			throw new NullPointerException("Calculate expire time error: product is require.");
+		}
+		
 		Date baseTime = null;
 		if (this.expire_time != null && this.expire_time.after(CommonUtils.getUTCNow())) {
 			baseTime = this.expire_time;
