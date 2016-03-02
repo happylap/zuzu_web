@@ -3,7 +3,10 @@ package com.lap.zuzuweb.model;
 import org.apache.commons.lang3.StringUtils;
 
 public enum ProductEnum {
-	RADAR30("radar30", 30, 0), RADAR60("radar60", 60, 15), RADAR90("radar90", 90, 30);
+	RADAR30("com.lap.zuzurentals.radar1", 30, 0), 
+	RADAR60("com.lap.zuzurentals.radar2", 60, 0), 
+	RADAR90("com.lap.zuzurentals.radar3", 90, 0),
+	RADARFREE("com.lap.zuzurentals.radar4", 30, 0);
 
 	private String productId;
 	private int standardDays;
