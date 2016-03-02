@@ -85,15 +85,21 @@ public class App
 	    		String userToken = request.headers("UserToken");
 	    		String userId = request.headers("UserId");
 	    		
-	    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.FB.toString())) {
-	    			if (AuthUtils.isFacebookTokenValid(userToken, userId)) {
-	    				return;
-	    			}
-	    		}
-	    		
-	    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.GOOGLE.toString())) {
-	    			// TODO
-	    			return;
+	    		try {
+		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.FB.toString())) {
+		    			if (AuthUtils.isFacebookTokenValid(userToken, userId)) {
+		    				return;
+		    			}
+		    		}
+		    		
+		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.GOOGLE.toString())) {
+		    			if (AuthUtils.isGoogleTokenValid(userToken, userId)) {
+		    				return;
+		    			}
+		    		}
+	    		} catch (Exception e) {
+	    			response.type("application/json");
+	    			halt(403, CommonUtils.toJson(Answer.forbidden(e.getMessage())));
 	    		}
     		}
     		
