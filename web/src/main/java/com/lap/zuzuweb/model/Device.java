@@ -10,9 +10,6 @@ import lombok.Data;
 public class Device {
     private String device_id;
     private String user_id;
-    private boolean enabled;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
     private Date register_time;
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
-    private Date receive_notify_time;
 }

@@ -2,6 +2,8 @@ package com.lap.zuzuweb.handler.device;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
@@ -18,22 +20,21 @@ public class DeviceDeleteHandler extends AbstractRequestHandler<EmptyPayload>{
     }
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
-    	if (!urlParams.containsKey(":deviceid") && !urlParams.containsKey(":userid")) {
-            throw new IllegalArgumentException();
-        }
+		
+		if (!urlParams.containsKey(":userid") && !urlParams.containsKey(":deviceid")) {
+        	return Answer.bad_request();
+		}
+		
+		String userId = urlParams.get(":userid");
+    	String deviceId = urlParams.get(":deviceid");
     	
-    	if (urlParams.containsKey(":deviceid")){
-        	String deviceId = urlParams.get(":deviceid");
-            service.deleteDevice(deviceId);
-            return Answer.ok(deviceId);   		
-    	}
-    	else{
-        	String userid = urlParams.get(":userid");
-            service.deleteDevicesByUser(userid);
-            return Answer.ok();       		
+    	if (StringUtils.isNotEmpty(userId) && StringUtils.isNotEmpty(deviceId)) {
+    		service.deleteDevice(userId, deviceId);
+    	} 
+    	else if (StringUtils.isNotEmpty(userId)) {
+    		service.deleteDevicesByUser(userId);
     	}
     	
-
+    	return Answer.ok();
 	}
-
 }

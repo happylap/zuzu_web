@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.lap.zuzuweb.dao.DeviceDao;
-import com.lap.zuzuweb.model.Criteria;
 import com.lap.zuzuweb.model.Device;
-import com.lap.zuzuweb.model.User;
 
 public class DeviceServiceImpl implements DeviceService
 {
@@ -19,8 +17,8 @@ public class DeviceServiceImpl implements DeviceService
 	}
 
 	@Override
-	public List<Device> getAllDevices() {
-		return this.dao.getAllDevices();
+	public Optional<Device> getDevice(String userId, String deviceId) {
+		return this.dao.getDevice(userId, deviceId);
 	}
 	
 	@Override
@@ -37,15 +35,10 @@ public class DeviceServiceImpl implements DeviceService
 		device.setRegister_time(new Date());
 		return this.dao.createDevice(device);
 	}
-
-	@Override
-	public String updateDevice(Device device) {
-		return this.dao.updateDevice(device);
-	}
 	
 	@Override
-	public String deleteDevice(String deviceId) {
-		return this.dao.deleteDevice(deviceId);
+	public String deleteDevice(String userId, String deviceId) {
+		return this.dao.deleteDevice(userId, deviceId);
 	}
 
 	@Override
@@ -53,13 +46,4 @@ public class DeviceServiceImpl implements DeviceService
 		return this.dao.deleteDevicesByUser(userId);
 	}
 
-	@Override
-	public void setReceiveNotifyTime(String deviceId, String userId, Date receiveNotifyTime) {
-		Optional<Device> existDevice =  this.dao.getDevice(userId, deviceId);
-        if (existDevice.isPresent()) {
-        	Device d =  existDevice.get();
-        	d.setReceive_notify_time(receiveNotifyTime);
-        	this.dao.updateDevice(d);
-        }
-	}
 }

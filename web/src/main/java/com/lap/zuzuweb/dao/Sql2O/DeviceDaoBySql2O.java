@@ -10,33 +10,18 @@ import com.lap.zuzuweb.model.Device;
 
 public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 {
-	static private String SQL_GET_ALL_DEVICES = "SELECT device_id, user_id, register_time, enabled, register_time, receive_notify_time"
-			+ " FROM \"Device\" ";
-		
-	static private String SQL_GET_DEVICES_BY_USER = "SELECT device_id, user_id, register_time, enabled, register_time, receive_notify_time"
+	static private String SQL_GET_DEVICES_BY_USER = "SELECT device_id, user_id, register_time"
 			+ " FROM \"Device\" WHERE user_id=:user_id";
 	
-	static private String SQL_GET_DEVICE = "SELECT device_id, user_id, register_time, enabled, register_time, receive_notify_time"
+	static private String SQL_GET_DEVICE = "SELECT device_id, user_id, register_time"
 			+ " FROM \"Device\" WHERE user_id=:user_id AND device_id=:device_id";
 	
-	static private String SQL_CREATE_DEVICE = "INSERT INTO \"Device\"(device_id, user_id, register_time, enabled)"
-			+ " VALUES (:device_id, :user_id, :register_time, :enabled)";
+	static private String SQL_CREATE_DEVICE = "INSERT INTO \"Device\"(device_id, user_id, register_time)"
+			+ " VALUES (:device_id, :user_id, :register_time)";
 	
-	static private String SQL_UPDATE_DEVICE = "UPDATE \"Device\" SET enabled=:enabled, receive_notify_time=:receive_notify_time"
-			+ " WHERE device_id=:device_id AND user_id=:user_id";
-	
-	static private String SQL_REMOVE_DEVICE = "DELETE FROM \"Device\" WHERE device_id=:device_id";
+	static private String SQL_REMOVE_DEVICE = "DELETE FROM \"Device\" WHERE user_id=:user_id AND device_id=:device_id";
 	
 	static private String SQL_REMOVE_DEVICE_BY_USER = "DELETE FROM \"Device\" WHERE user_id=:user_id";
-
-	@Override
-	public List<Device> getAllDevices() {
-        try (Connection conn = sql2o.open()) {
-            List<Device> devices = conn.createQuery(SQL_GET_ALL_DEVICES)
-                    .executeAndFetch(Device.class);
-            return devices;
-        }
-	}
 	
 	@Override
 	public List<Device> getDevices(String userID)
@@ -76,40 +61,24 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
             conn.createQuery(SQL_CREATE_DEVICE)
             		.addParameter("device_id", device.getDevice_id())
             		.addParameter("user_id", device.getUser_id())
-            		.addParameter("enabled", device.isEnabled())
                     .addParameter("register_time", device.getRegister_time())
                     .executeUpdate();
             conn.commit();
             return device.getDevice_id();
         }
 	}
-
-	@Override
-	public String updateDevice(Device device) {
-        try (Connection conn = sql2o.beginTransaction()) {
-            conn.createQuery(SQL_UPDATE_DEVICE)
-            		.addParameter("device_id", device.getDevice_id())
-            		.addParameter("user_id", device.getUser_id())
-            		.addParameter("enabled", device.isEnabled())
-                    .addParameter("receive_notify_time", device.getReceive_notify_time())
-                    .executeUpdate();
-            conn.commit();
-            return device.getDevice_id();
-        }
-	}
-	
 	
 	@Override
-	public String deleteDevice(String deviceId) {
+	public String deleteDevice(String userId, String deviceId) {
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_REMOVE_DEVICE)
+    				.addParameter("user_id", userId)
             		.addParameter("device_id", deviceId)
                     .executeUpdate();
             conn.commit();
             return deviceId;
         }
 	}
-
 
 	@Override
 	public boolean deleteDevicesByUser(String userId) {

@@ -12,11 +12,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.lap.zuzuweb.common.Provider;
 import com.lap.zuzuweb.dao.CriteriaDao;
+import com.lap.zuzuweb.dao.DeviceDao;
 import com.lap.zuzuweb.dao.LogDao;
 import com.lap.zuzuweb.dao.NotifyItemDao;
 import com.lap.zuzuweb.dao.PurchaseDao;
 import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.dao.Sql2O.CriteriaDaoBySql2O;
+import com.lap.zuzuweb.dao.Sql2O.DeviceDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.LogDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.NotifyItemDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.PurchaseDaoBySql2O;
@@ -28,6 +30,10 @@ import com.lap.zuzuweb.handler.criteria.CriteriaPatchHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaQueryHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaRemoveHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaValidQueryHandler;
+import com.lap.zuzuweb.handler.device.DeviceCreateHandler;
+import com.lap.zuzuweb.handler.device.DeviceDeleteHandler;
+import com.lap.zuzuweb.handler.device.DeviceGetHandler;
+import com.lap.zuzuweb.handler.device.DeviceQueryHandler;
 import com.lap.zuzuweb.handler.log.LogPatchHandler;
 import com.lap.zuzuweb.handler.notifyItem.GetUserNotifyItemHandler;
 import com.lap.zuzuweb.handler.notifyItem.GetUserUnreadNotifyItemCountHandler;
@@ -39,6 +45,8 @@ import com.lap.zuzuweb.handler.user.UserCreateOrUpdateHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
 import com.lap.zuzuweb.service.CriteriaService;
 import com.lap.zuzuweb.service.CriteriaServiceImpl;
+import com.lap.zuzuweb.service.DeviceService;
+import com.lap.zuzuweb.service.DeviceServiceImpl;
 import com.lap.zuzuweb.service.LogService;
 import com.lap.zuzuweb.service.LogServiceImpl;
 import com.lap.zuzuweb.service.NotifyItemService;
@@ -111,10 +119,8 @@ public class App
     	UserDao userDao = new UserDaoBySql2O();
     	UserService userSvc = new UserServiceImpl(userDao);
  
-    	/*
     	DeviceDao deviceDao = new DeviceDaoBySql2O();
     	DeviceService deviceSvc = new DeviceServiceImpl(deviceDao);
-		*/
     	
     	CriteriaDao criteriaDao = new CriteriaDaoBySql2O();
     	CriteriaService criteriaSvc = new CriteriaServiceImpl(criteriaDao);
@@ -133,16 +139,12 @@ public class App
         get("/user/:userid", new UserQueryHandler(userSvc)); //get user by user id
         
         // device
-        /*
-        post("/device", new DeviceCreateHandler(deviceSvc));
-        put("/device", new DeviceUpdateHandler(deviceSvc));
-        delete("/device/userid/:userid", new DeviceDeleteHandler(deviceSvc)); //remove devices belonging to some user
-        delete("/device/:deviceid", new DeviceDeleteHandler(deviceSvc)); // remove a device
-        get("/device", new DeviceQueryHandler(deviceSvc)); // get all devices
         get("/device/:userid", new DeviceQueryHandler(deviceSvc)); // get devices belonging to some user
-        patch("/device/:deviceid/:userid", new DevicePatchHandler(deviceSvc));
-        */
-        
+        get("/device/:userid/:deviceid", new DeviceGetHandler(deviceSvc)); // get devices belonging to some user
+        post("/device", new DeviceCreateHandler(deviceSvc));
+        delete("/device/userid/", new DeviceDeleteHandler(deviceSvc)); //remove devices belonging to some user
+        delete("/device/:userid/:deviceid", new DeviceDeleteHandler(deviceSvc)); // remove a device
+      
         // criteria
         post("/criteria", new CriteriaCreateHandler(criteriaSvc)); // add a criteria
         put("/criteria/update/:criteriaid/:userid", new CriteriaModifyHandler(criteriaSvc)); // modify criteria

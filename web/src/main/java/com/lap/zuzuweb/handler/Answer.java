@@ -1,5 +1,7 @@
 package com.lap.zuzuweb.handler;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class Answer {
 	
 	private static int OK = 200;
@@ -25,7 +27,11 @@ public class Answer {
     }
     
 	public static Answer bad_request() {
-        return new Answer(BAD_REQUEST, null, "Server 400 bad request");
+        return new Answer(BAD_REQUEST, null, "Bad request");
+    }
+	
+	public static Answer bad_request(String message) {
+        return new Answer(BAD_REQUEST, null, "Bad request: " + message);
     }
 	
 	public static Answer forbidden() {
