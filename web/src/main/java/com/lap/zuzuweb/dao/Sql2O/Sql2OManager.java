@@ -2,6 +2,8 @@ package com.lap.zuzuweb.dao.Sql2O;
 
 import org.sql2o.Sql2o;
 
+import com.lap.zuzuweb.Secrets;
+
 public class Sql2OManager {
 
 	static private Sql2o instance = null;
@@ -14,14 +16,9 @@ public class Sql2OManager {
 	}
 	
 	static private Sql2o createSql2O(){
-		String dbHost ="ec2-52-77-238-225.ap-southeast-1.compute.amazonaws.com";
-		String dbPort = "5432";
-		String database = "zuzu_rentals_db";
-		String dbUsername = "zuzu";
-		String dbPassword = "ji3g4xu3ej;jo3";
-				
-        Sql2o sql2o = new Sql2o("jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + database,
-                dbUsername, dbPassword);
+		
+		Sql2o sql2o = new Sql2o("jdbc:postgresql://" + Secrets.DB_HOST + ":" + Secrets.DB_PORT + "/" + Secrets.DB_NAME,
+        		Secrets.DB_USERNAME, Secrets.DB_PASSWORD);
         
         return sql2o;
 	}
