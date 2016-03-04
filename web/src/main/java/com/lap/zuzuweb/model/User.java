@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
@@ -25,6 +26,7 @@ public class User
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
     private Date birthday;
     private String picture_url;
+    @JsonIgnore
     private InputStream purchase_receipt;
     
 }
