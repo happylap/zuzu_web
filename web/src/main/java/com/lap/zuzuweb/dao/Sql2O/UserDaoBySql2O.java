@@ -10,7 +10,7 @@ import com.lap.zuzuweb.model.User;
 
 public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 {
-	static private String SQL_SINGLE_USER = "SELECT user_id, register_time, provider, email, name, gender, birthday, picture_url"
+	static private String SQL_SINGLE_USER = "SELECT user_id, register_time, provider, email, name, gender, birthday, picture_url, purchase_receipt"
 			+ " FROM \"ZuZuUser\" WHERE user_id=:user_id";
 	
 	static private String SQL_CREATE_USER = "INSERT INTO \"ZuZuUser\"(user_id, register_time, provider, email, name, gender, birthday, picture_url) "

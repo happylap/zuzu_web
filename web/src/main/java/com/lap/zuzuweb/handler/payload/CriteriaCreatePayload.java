@@ -29,7 +29,9 @@ public class CriteriaCreatePayload implements Validable {
 		c.setEnabled(this.enabled);
 		c.setExpire_time(this.expire_time);
 		c.setApple_product_id(this.apple_product_id);
-		c.setFiltersValue(this.filters.toString());
+		if (this.filters != null) {
+			c.setFiltersValue(this.filters.toString());
+		}
 		c.setLast_notify_time(this.last_notify_time);
 		return c;
 	}
