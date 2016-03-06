@@ -43,6 +43,8 @@ import com.lap.zuzuweb.handler.purchase.PurchaseCreateHandler;
 import com.lap.zuzuweb.handler.purchase.PurchaseQueryHandler;
 import com.lap.zuzuweb.handler.user.UserCreateOrUpdateHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
+import com.lap.zuzuweb.service.AuthService;
+import com.lap.zuzuweb.service.AuthServiceImpl;
 import com.lap.zuzuweb.service.CriteriaService;
 import com.lap.zuzuweb.service.CriteriaServiceImpl;
 import com.lap.zuzuweb.service.DeviceService;
@@ -55,7 +57,6 @@ import com.lap.zuzuweb.service.PurchaseService;
 import com.lap.zuzuweb.service.PurchaseServiceImpl;
 import com.lap.zuzuweb.service.UserService;
 import com.lap.zuzuweb.service.UserServiceImpl;
-import com.lap.zuzuweb.util.AuthUtils;
 import com.lap.zuzuweb.util.CommonUtils;
 
 import spark.Request;
@@ -68,6 +69,8 @@ public class App
 	
     public static void main( String[] args )
     {	
+
+    	AuthService authSvc = new AuthServiceImpl();
     	
     	before((request, response) -> {
 
@@ -77,13 +80,13 @@ public class App
     			return;
     		}
     		
-    		if (AuthUtils.isSuperTokenValid(request.headers("Authorization"))) {
+    		if (authSvc.isSuperTokenValid(request.headers("Authorization"))) {
     			return;
     		}
     		
     		System.out.println("Header Authorization: " + request.headers("Authorization"));
     		
-    		if (AuthUtils.isBasicTokenValid(request.headers("Authorization"))) {
+    		if (authSvc.isBasicTokenValid(request.headers("Authorization"))) {
     			
 	    		System.out.println("Header UserProvider: " + request.headers("UserProvider"));
 	    		System.out.println("Header UserToken: " + request.headers("UserToken"));
@@ -95,13 +98,13 @@ public class App
 	    		
 	    		try {
 		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.FB.toString())) {
-		    			if (AuthUtils.isFacebookTokenValid(userToken, userId)) {
+		    			if (authSvc.isFacebookTokenValid(userToken)) {
 		    				return;
 		    			}
 		    		}
 		    		
 		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.GOOGLE.toString())) {
-		    			if (AuthUtils.isGoogleTokenValid(userToken, userId)) {
+		    			if (authSvc.isGoogleTokenValid(userToken)) {
 		    				return;
 		    			}
 		    		}
