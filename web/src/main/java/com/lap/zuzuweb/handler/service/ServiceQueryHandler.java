@@ -31,15 +31,16 @@ public class ServiceQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 	
     @Override
     protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
-    	if (!urlParams.containsKey(":userid")) {
-    		return Answer.bad_request();
-    	}
     	
-    	String userID = urlParams.get(":userid");
+    	if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid")) {
+			return Answer.bad_request();
+		}
+		
+		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
         
-    	purchaseSvc.verify(userID);
+    	purchaseSvc.verify(userId);
     	
-        Optional<Service> existService = this.userSvc.getService(userID);
+        Optional<Service> existService = this.userSvc.getService(userId);
         
         String status = "invlid";
         Date expire_time = null;
@@ -68,7 +69,7 @@ public class ServiceQueryHandler extends AbstractRequestHandler<EmptyPayload> {
         int valid_purchase_count = 0;
         int invalid_purchase_count = 0;
         
-        List<Purchase> purchases = this.purchaseSvc.getPurchase(userID);
+        List<Purchase> purchases = this.purchaseSvc.getPurchase(userId);
         
         if (CollectionUtils.isNotEmpty(purchases)) {
         	valid_purchase_count = (int) purchases.stream().filter(p -> p.is_valid()).count();
@@ -76,7 +77,7 @@ public class ServiceQueryHandler extends AbstractRequestHandler<EmptyPayload> {
         }
         
         ServicePayload payload = new ServicePayload();
-        payload.setUser_id(userID);
+        payload.setUser_id(userId);
         payload.setStatus(status);
         payload.setRemaining_second(remaining_second);
         payload.setExpire_time(expire_time);

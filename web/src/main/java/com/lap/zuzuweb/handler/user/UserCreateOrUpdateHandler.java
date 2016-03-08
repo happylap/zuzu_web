@@ -6,6 +6,7 @@ import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.UserCreatePayload;
 import com.lap.zuzuweb.service.UserService;
+import com.lap.zuzuweb.util.CommonUtils;
 
 
 public class UserCreateOrUpdateHandler extends AbstractRequestHandler<UserCreatePayload> {
@@ -19,8 +20,15 @@ public class UserCreateOrUpdateHandler extends AbstractRequestHandler<UserCreate
 	
     @Override
     protected Answer processImpl(UserCreatePayload value, Map<String, String> urlParams) {
-        String userId = service.createOrUpdateUser(value);
-        return Answer.ok(userId);
+    	if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid")) {
+			return Answer.bad_request();
+		}
+    	
+		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		
+		value.setUser_id(userId);
+        
+        return Answer.ok(service.createOrUpdateUser(value));
     }
 }
 

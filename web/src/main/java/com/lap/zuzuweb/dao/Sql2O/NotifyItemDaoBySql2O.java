@@ -29,7 +29,7 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 			+ " purpose_type=:purpose_type, title=:title, addr=:addr"
 			+ " WHERE item_id=:item_id AND user_id=:user_id";
 	
-	static private String SQL_GET_UNREAD_COUNT_BY_USER = "SELECT COUNT(*) FROM \"Notify_item\" WHERE is_read = true and user_id=:user_id";
+	static private String SQL_GET_UNREAD_COUNT_BY_USER = "SELECT COUNT(*) FROM \"Notify_item\" WHERE is_read = false and user_id=:user_id";
 
 	
 	@Override

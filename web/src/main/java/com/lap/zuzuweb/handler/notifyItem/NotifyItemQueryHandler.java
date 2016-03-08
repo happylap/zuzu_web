@@ -1,4 +1,4 @@
-package com.lap.zuzuweb.handler.purchase;
+package com.lap.zuzuweb.handler.notifyItem;
 
 import java.util.List;
 import java.util.Map;
@@ -6,19 +6,19 @@ import java.util.Map;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
-import com.lap.zuzuweb.model.Purchase;
-import com.lap.zuzuweb.service.PurchaseService;
+import com.lap.zuzuweb.model.NotifyItem;
+import com.lap.zuzuweb.service.NotifyItemService;
 import com.lap.zuzuweb.util.CommonUtils;
 
-public class PurchaseQueryHandler extends AbstractRequestHandler<EmptyPayload> {
+public class NotifyItemQueryHandler extends AbstractRequestHandler<EmptyPayload>{
 
-	private PurchaseService service = null;
-
-	public PurchaseQueryHandler(PurchaseService service) {
-		super(EmptyPayload.class);
-		this.service = service;
-	}
-
+	private NotifyItemService service = null;
+	
+	public NotifyItemQueryHandler(NotifyItemService service) {
+        super(EmptyPayload.class);
+        this.service = service;
+    }
+	
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
 		
@@ -28,8 +28,9 @@ public class PurchaseQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 		
 		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
 		
-		List<Purchase> purchases = this.service.getPurchase(userId);
+		List<NotifyItem> notifyItems = this.service.getItems(userId);
 		
-		return Answer.ok(purchases);
+        return Answer.ok(notifyItems); 
 	}
+
 }

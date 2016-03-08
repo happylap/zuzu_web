@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.lap.zuzuweb.dao.DeviceDao;
 import com.lap.zuzuweb.model.Device;
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class DeviceServiceImpl implements DeviceService
 {
@@ -28,11 +29,11 @@ public class DeviceServiceImpl implements DeviceService
 	
 	@Override
 	public String createDevice(Device device) {
-        Optional<Device> exist = this.dao.getDevice(device.getUser_id(), device.getDevice_id());
-        if (exist.isPresent()) {
-            return exist.get().getDevice_id();
+        Optional<Device> existDevice = this.dao.getDevice(device.getUser_id(), device.getDevice_id());
+        if (existDevice.isPresent()) {
+            return existDevice.get().getDevice_id();
         }
-		device.setRegister_time(new Date());
+		device.setRegister_time(CommonUtils.getUTCNow());
 		return this.dao.createDevice(device);
 	}
 	

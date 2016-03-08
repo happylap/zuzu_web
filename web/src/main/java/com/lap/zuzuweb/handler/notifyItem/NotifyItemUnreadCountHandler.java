@@ -8,27 +8,27 @@ import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.service.NotifyItemService;
 import com.lap.zuzuweb.util.CommonUtils;
 
-public class GetUserUnreadNotifyItemCountHandler extends AbstractRequestHandler<EmptyPayload>{
+public class NotifyItemUnreadCountHandler extends AbstractRequestHandler<EmptyPayload>{
 
 	private NotifyItemService service = null;
 	
-	public GetUserUnreadNotifyItemCountHandler(NotifyItemService service) {
+	public NotifyItemUnreadCountHandler(NotifyItemService service) {
         super(EmptyPayload.class);
         this.service = service;
     }
 	
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
-    	if (!urlParams.containsKey(":userid")) {
-            throw new IllegalArgumentException();
-        }
-
-    		
-		String userID = urlParams.get(":userid");
-        String json = CommonUtils.toJson(this.service.getUnreadCount(userID));
-        return Answer.ok(json);
-
-    	 
+		
+		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid")) {
+			return Answer.bad_request();
+		}
+		
+		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		
+		long unreadCount = this.service.getUnreadCount(userId);
+		
+        return Answer.ok(unreadCount);    	 
 	}
 
 }

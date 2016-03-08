@@ -10,6 +10,7 @@ import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.PatchPayload;
 import com.lap.zuzuweb.handler.payload.Validable;
 import com.lap.zuzuweb.service.NotifyItemService;
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class NotifyItemPatchHandler extends AbstractRequestArrayHandler{
 	private NotifyItemService service = null;
@@ -33,17 +34,18 @@ public class NotifyItemPatchHandler extends AbstractRequestArrayHandler{
 	}
 
 	private void handleReplace(Map<String, String> urlParams, String path, String value) {
-    	if (!urlParams.containsKey(":itemid") || !urlParams.containsKey(":userid")) {
-            throw new IllegalArgumentException();
-        }
-
-    	String itemid = urlParams.get(":itemid");
-    	String userid = urlParams.get(":userid");
+		
+		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid") || !urlParams.containsKey(":itemid")) {
+			throw new IllegalArgumentException();
+		}
+		
+		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+    	String itemId = urlParams.get(":itemid");
     	
 		if (path.equalsIgnoreCase("/_read"))
 		{
 			boolean _read = Boolean.valueOf(value).booleanValue();
-			this.service.setRead(itemid, userid, _read);
+			this.service.setRead(itemId, userId, _read);
 		}
 	}
 

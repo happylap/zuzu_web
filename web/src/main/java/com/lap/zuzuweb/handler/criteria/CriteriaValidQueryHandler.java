@@ -25,23 +25,24 @@ public class CriteriaValidQueryHandler extends AbstractRequestHandler<EmptyPaylo
 	
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
-    	if (urlParams.containsKey(":userid")) {
-        	String userID = urlParams.get(":userid");
-            
-            Optional<Criteria> existCriteria = this.criteriaSvc.getSingleCriteria(userID);
-            Optional<Service> existService = this.userSvc.getService(userID);
-            
-            if (existCriteria.isPresent() && existService.isPresent()) {
-            	Service service = existService.get();
-            	if (service.getExpire_time() != null && service.getExpire_time().after(CommonUtils.getUTCNow())) {
-            		return Answer.ok(existCriteria.get());
-            	}
-            }
-            
-            return Answer.no_data();
-    	} else {
-    		return Answer.bad_request();
-    	}
+		
+		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid")) {
+			return Answer.bad_request();
+		}
+		
+		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		    
+        Optional<Criteria> existCriteria = this.criteriaSvc.getSingleCriteria(userId);
+        Optional<Service> existService = this.userSvc.getService(userId);
+        
+        if (existCriteria.isPresent() && existService.isPresent()) {
+        	Service service = existService.get();
+        	if (service.getExpire_time() != null && service.getExpire_time().after(CommonUtils.getUTCNow())) {
+        		return Answer.ok(existCriteria.get());
+        	}
+        }
+        
+        return Answer.no_data();
 	}
 
 }

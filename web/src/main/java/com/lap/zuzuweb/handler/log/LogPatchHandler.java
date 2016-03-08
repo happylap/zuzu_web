@@ -21,25 +21,31 @@ public class LogPatchHandler extends AbstractRequestArrayHandler {
 
 	@Override
 	protected Answer processImpl(Validable[] values, Map<String, String> urlParams) {
-		PatchPayload[] patches = (PatchPayload[]) values;
-		for (PatchPayload patch : patches) {
-			String op = patch.getOp();
-			String path = patch.getPath();
-			String value = patch.getValue();
-			if (op.equalsIgnoreCase(PatchPayload.OP_ADD)) {
-				this.handleAdd(urlParams, path, value);
+		try {
+			PatchPayload[] patches = (PatchPayload[]) values;
+			for (PatchPayload patch : patches) {
+				String op = patch.getOp();
+				String path = patch.getPath();
+				String value = patch.getValue();
+				if (op.equalsIgnoreCase(PatchPayload.OP_ADD)) {
+					this.handleAdd(urlParams, path, value);
+				}
 			}
+			return Answer.ok();
+		}catch(Exception e) {
+			return Answer.error(e.getMessage());
 		}
-		return Answer.ok();
 	}
 
 	private void handleAdd(Map<String, String> urlParams, String path, String value) {
-		if (!urlParams.containsKey(":deviceid") || !urlParams.containsKey(":userid")) {
+		
+		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid") || !urlParams.containsKey(":deviceid")) {
 			throw new IllegalArgumentException();
 		}
-
-		String deviceId = CommonUtils.decodeFromBase64String(urlParams.get(":deviceid"));
-		String userId = urlParams.get(":userid");
+		
+		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		//String deviceId = CommonUtils.decodeFromBase64String(urlParams.get(":deviceid"));
+		String deviceId = urlParams.get(":deviceid");
 		
 		if (path.equalsIgnoreCase("/receiveNotifyTime")) {
 			this.service.setReceiveNotifyTime(deviceId, userId, CommonUtils.getUTCNow());

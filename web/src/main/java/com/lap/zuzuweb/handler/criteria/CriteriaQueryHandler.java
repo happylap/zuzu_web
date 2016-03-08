@@ -8,32 +8,34 @@ import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.model.Criteria;
 import com.lap.zuzuweb.service.CriteriaService;
+import com.lap.zuzuweb.util.CommonUtils;
 
-public class CriteriaQueryHandler extends AbstractRequestHandler<EmptyPayload>{
+public class CriteriaQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 
 	private CriteriaService service = null;
-	
+
 	public CriteriaQueryHandler(CriteriaService service) {
-        super(EmptyPayload.class);
-        this.service = service;
-    }
-	
+		super(EmptyPayload.class);
+		this.service = service;
+	}
+
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
-    	if(urlParams.containsKey(":userid")){
-        	String userID = urlParams.get(":userid");
-            
-            Optional<Criteria> existCriteria = this.service.getSingleCriteria(userID);
-            
-            if (!existCriteria.isPresent()) {
-            	return Answer.no_data();
-            }
+		
+		if (urlParams.containsKey(":provider") && urlParams.containsKey(":userid")) {
+			String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
 
-    		return Answer.ok(existCriteria.get());
-            
-    	} else {
-    		return Answer.bad_request();
-    	}
+			Optional<Criteria> existCriteria = this.service.getSingleCriteria(userId);
+
+			if (existCriteria.isPresent()) {
+				return Answer.ok(existCriteria.get());
+			}
+
+			return Answer.no_data();
+		} else {
+			return Answer.ok(this.service.getAllCriteria());
+		}
+		
 	}
 
 }

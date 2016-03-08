@@ -8,6 +8,7 @@ import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.model.User;
 import com.lap.zuzuweb.service.UserService;
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class UserQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 
@@ -21,12 +22,13 @@ public class UserQueryHandler extends AbstractRequestHandler<EmptyPayload> {
     @Override
     protected Answer processImpl(EmptyPayload value, Map<String,String> urlParams)
     {
-    	if (!urlParams.containsKey(":userid")) {
-            return Answer.bad_request();
-        }
-
-    	String userID = urlParams.get(":userid");
-        Optional<User> user = this.service.getUser(userID);
+    	if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid")) {
+			return Answer.bad_request();
+		}
+		
+		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+    	
+        Optional<User> user = this.service.getUser(userId);
         
         if (user.isPresent()) {
             return Answer.ok(user.get());

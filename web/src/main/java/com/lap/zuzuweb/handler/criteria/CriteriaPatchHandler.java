@@ -24,26 +24,30 @@ public class CriteriaPatchHandler extends AbstractRequestArrayHandler {
 
 	@Override
 	protected Answer processImpl(Validable[] values, Map<String, String> urlParams) {
-		PatchPayload[] patches = (PatchPayload[]) values;
-		for (PatchPayload patch : patches) {
-			String op = patch.getOp();
-			String path = patch.getPath();
-			String value = patch.getValue();
-			if (op.equalsIgnoreCase(PatchPayload.OP_REPLACE)) {
-				this.handleReplace(urlParams, path, value);
+		try {
+			PatchPayload[] patches = (PatchPayload[]) values;
+			for (PatchPayload patch : patches) {
+				String op = patch.getOp();
+				String path = patch.getPath();
+				String value = patch.getValue();
+				if (op.equalsIgnoreCase(PatchPayload.OP_REPLACE)) {
+					this.handleReplace(urlParams, path, value);
+				}
 			}
+			return Answer.ok();
+		} catch (Exception e) {
+			return Answer.error(e.getMessage());
 		}
-		
-		return Answer.ok();
 	}
 
 	private void handleReplace(Map<String, String> urlParams, String path, String value) {
-		if (!urlParams.containsKey(":criteriaid") || !urlParams.containsKey(":userid")) {
+		
+		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid") || !urlParams.containsKey(":criteriaid")) {
 			throw new IllegalArgumentException();
 		}
-
+		
+		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
 		String criteriaId = urlParams.get(":criteriaid");
-		String userId = urlParams.get(":userid");
 
 		if (path.equalsIgnoreCase("/filters")) {
 			PGobject filters = new PGobject();
