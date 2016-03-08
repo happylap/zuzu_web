@@ -1,7 +1,5 @@
 package com.lap.zuzuweb.handler.payload;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.lap.zuzuweb.model.Criteria;
 
@@ -12,10 +10,10 @@ public class CriteriaCreatePayload implements Validable {
 
     private String user_id ;
     private boolean enabled ;
-    private Date expire_time;
-    private String apple_product_id;
+//    private Date expire_time;
+//    private String apple_product_id;
     private JsonNode filters;
-    private Date last_notify_time;
+    //private Date last_notify_time;
     
 	@Override
 	public boolean isValid() {
@@ -27,12 +25,12 @@ public class CriteriaCreatePayload implements Validable {
 		Criteria c = new Criteria();
 		c.setUser_id(this.user_id);
 		c.setEnabled(this.enabled);
-		c.setExpire_time(this.expire_time);
-		c.setApple_product_id(this.apple_product_id);
+//		c.setExpire_time(this.expire_time);
+//		c.setApple_product_id(this.apple_product_id);
 		if (this.filters != null) {
 			c.setFiltersValue(this.filters.toString());
 		}
-		c.setLast_notify_time(this.last_notify_time);
+		//c.setLast_notify_time(this.last_notify_time);
 		return c;
 	}
 }

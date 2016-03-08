@@ -7,28 +7,33 @@ import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.model.Criteria;
+import com.lap.zuzuweb.model.Service;
 import com.lap.zuzuweb.service.CriteriaService;
+import com.lap.zuzuweb.service.UserService;
 import com.lap.zuzuweb.util.CommonUtils;
 
 public class CriteriaValidQueryHandler extends AbstractRequestHandler<EmptyPayload>{
 
-	private CriteriaService service = null;
+	private CriteriaService criteriaSvc = null;
+	private UserService userSvc = null;
 	
-	public CriteriaValidQueryHandler(CriteriaService service) {
+	public CriteriaValidQueryHandler(CriteriaService criteriaSvc, UserService userSvc) {
         super(EmptyPayload.class);
-        this.service = service;
+        this.criteriaSvc = criteriaSvc;
+        this.userSvc = userSvc;
     }
 	
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
-    	if(urlParams.containsKey(":userid")){
+    	if (urlParams.containsKey(":userid")) {
         	String userID = urlParams.get(":userid");
             
-            Optional<Criteria> existCriteria = this.service.getSingleCriteria(userID);
+            Optional<Criteria> existCriteria = this.criteriaSvc.getSingleCriteria(userID);
+            Optional<Service> existService = this.userSvc.getService(userID);
             
-            if (existCriteria.isPresent()) {
-            	Criteria criteria = existCriteria.get();
-            	if (criteria.getExpire_time() != null && criteria.getExpire_time().after(CommonUtils.getUTCNow())) {
+            if (existCriteria.isPresent() && existService.isPresent()) {
+            	Service service = existService.get();
+            	if (service.getExpire_time() != null && service.getExpire_time().after(CommonUtils.getUTCNow())) {
             		return Answer.ok(existCriteria.get());
             	}
             }

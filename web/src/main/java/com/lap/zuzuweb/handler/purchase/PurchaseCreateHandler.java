@@ -3,7 +3,6 @@ package com.lap.zuzuweb.handler.purchase;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 
-import com.lap.zuzuweb.ApiResponse;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.model.Purchase;
 import com.lap.zuzuweb.service.PurchaseService;
@@ -39,7 +38,8 @@ public class PurchaseCreateHandler implements Route {
 	    	System.out.println("ProductTitle: " + request.raw().getParameter("product_title"));
 	    	System.out.println("ProductLocaleId: " + request.raw().getParameter("product_locale_id"));
 	    	System.out.println("ProductPrice: " + request.raw().getParameter("product_price"));
-	    	System.out.println("criteriaFilters: " + request.raw().getParameter("criteria_filters"));
+	    	//System.out.println("criteriaFilters: " + request.raw().getParameter("criteria_filters"));
+	    	System.out.println("TransactionId: " + request.raw().getParameter("transaction_id"));
 	    	
 	    	String userId = request.raw().getParameter("user_id");
 	    	String store = request.raw().getParameter("store");
@@ -47,7 +47,8 @@ public class PurchaseCreateHandler implements Route {
 	    	String productTitle = request.raw().getParameter("product_title");
 	    	String productLocaleId = request.raw().getParameter("product_locale_id");
 	    	String productPrice = request.raw().getParameter("product_price");
-	    	String criteriaFilters = request.raw().getParameter("criteria_filters");
+	    	String transactionId = request.raw().getParameter("transaction_id");
+	    	//String criteriaFilters = request.raw().getParameter("criteria_filters");
 	    	Part purchaseReceiptFile = request.raw().getPart("purchase_receipt");
 	    	
 	    	Purchase purchase = new Purchase();
@@ -57,18 +58,20 @@ public class PurchaseCreateHandler implements Route {
 	    	purchase.setProduct_title(productTitle);
 	    	purchase.setProduct_locale_id(productLocaleId);
 	    	purchase.setProduct_price(Double.valueOf(productPrice));
+	    	purchase.setTransaction_id(transactionId);
 	    	
 	    	if (purchaseReceiptFile == null) {
 	    		throw new RuntimeException("Purchase receipt file is required."); 
 	    	}
 	    	
-	    	String criteriaId = this.service.purchaseCriteria(purchase, purchaseReceiptFile.getInputStream(), criteriaFilters);
+	    	//String criteriaId = this.service.purchaseCriteria(purchase, purchaseReceiptFile.getInputStream(), criteriaFilters);
+	    	String purchase_id = this.service.purchase(purchase, purchaseReceiptFile.getInputStream());
 	    	
 	    	// cleanup
 	    	multipartConfigElement = null;
 	    	purchaseReceiptFile = null;
 	    	
-	    	Answer answer = Answer.ok(criteriaId);
+	    	Answer answer = Answer.ok(purchase_id);
 	    	return CommonUtils.toJson(answer);
             
 		} catch (Exception e) {

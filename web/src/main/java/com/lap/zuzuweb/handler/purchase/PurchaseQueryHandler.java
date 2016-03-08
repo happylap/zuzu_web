@@ -9,8 +9,6 @@ import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.model.Purchase;
 import com.lap.zuzuweb.service.PurchaseService;
 
-import spark.utils.CollectionUtils;
-
 public class PurchaseQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 
 	private PurchaseService service = null;

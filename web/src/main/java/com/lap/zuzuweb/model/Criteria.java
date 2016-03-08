@@ -1,12 +1,10 @@
 package com.lap.zuzuweb.model;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import org.postgresql.util.PGobject;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.lap.zuzuweb.util.CommonUtils;
 
 import lombok.Data;
 
@@ -26,6 +24,7 @@ public class Criteria {
 
 	}
 
+	/*
 	public void setProductAndCalExpireTime(String productId) {
 		
 		ProductEnum product = ProductEnum.getEnum(productId);
@@ -46,16 +45,17 @@ public class Criteria {
 		c.add(Calendar.DATE, product.getStandardDays());
 		c.add(Calendar.DATE, product.getExtraDays());
 		
-		this.expire_time = c.getTime();
-		this.apple_product_id = productId;
+//		this.expire_time = c.getTime();
+//		this.apple_product_id = productId;
 	}
+	*/
 
 	private String criteria_id;
 	private String user_id;
 	private boolean enabled;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-	private Date expire_time;
-	private String apple_product_id;
+//	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+//	private Date expire_time;
+//	private String apple_product_id;
 	private PGobject filters;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
 	private Date last_notify_time;

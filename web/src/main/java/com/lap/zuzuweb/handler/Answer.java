@@ -1,7 +1,5 @@
 package com.lap.zuzuweb.handler;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class Answer {
 	
 	private static int OK = 200;

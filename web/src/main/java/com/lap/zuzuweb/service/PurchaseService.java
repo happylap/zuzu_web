@@ -20,6 +20,10 @@ public interface PurchaseService {
 	 * @param criteriaFilters
 	 * @return criteria id
 	 */
-	public String purchaseCriteria(Purchase purchase, InputStream purchase_receipt, String criteriaFilters);
+	//@Deprecated
+	//public String purchaseCriteria(Purchase purchase, InputStream purchase_receipt, String criteriaFilters);
 
+	public String purchase(Purchase purchase, InputStream purchase_receipt);
+	
+	public void verify(String userID);
 }

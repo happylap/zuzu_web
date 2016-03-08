@@ -18,4 +18,6 @@ public class Purchase {
 	private Double product_price;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
 	private Date purchase_time;
+	private String transaction_id;
+	private boolean is_valid;
 }

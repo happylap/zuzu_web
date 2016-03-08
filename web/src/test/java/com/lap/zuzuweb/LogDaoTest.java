@@ -1,7 +1,6 @@
 package com.lap.zuzuweb;
 
 import java.util.Date;
-import java.util.Optional;
 
 import com.lap.zuzuweb.dao.LogDao;
 import com.lap.zuzuweb.dao.Sql2O.LogDaoBySql2O;
