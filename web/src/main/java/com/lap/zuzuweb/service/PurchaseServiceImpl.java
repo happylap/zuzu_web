@@ -134,7 +134,7 @@ public class PurchaseServiceImpl implements PurchaseService{
 		purchase.setPurchase_time(CommonUtils.getUTCNow());
 		purchase.set_valid(false);
 		
-		Optional<User> existUser = userDao.getUser(purchase.getUser_id());
+		Optional<User> existUser = userDao.getUserById(purchase.getUser_id());
 		
 		if (!existUser.isPresent()) {
 			throw new RuntimeException("User does not exist. [" + purchase.getUser_id() + "]");
@@ -158,7 +158,7 @@ public class PurchaseServiceImpl implements PurchaseService{
 				return;
 			}
 			
-			Optional<User> existUser = this.userDao.getUser(userID);
+			Optional<User> existUser = this.userDao.getUserById(userID);
 			if (!existUser.isPresent()) {
 				return;
 			}

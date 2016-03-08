@@ -7,9 +7,13 @@ import com.lap.zuzuweb.model.User;
 
 public interface UserService 
 {
-	public Optional<User> getUser(String userID);
+	public Optional<User> getUserByEmail(String email);
 	
-	public String createOrUpdateUser(User user);
+	public Optional<User> getUserById(String userID);
+	
+	public String createUser(User user);
+	
+	public void updateUser(User user);
 	
 	public Optional<Service> getService(String userID);
 	

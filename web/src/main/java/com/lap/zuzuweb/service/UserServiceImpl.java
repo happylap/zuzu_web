@@ -19,22 +19,52 @@ public class UserServiceImpl implements UserService
 		this.userDao = userDao;
 		this.serviceDao = serviceDao;
 	}
+
+	@Override
+	public Optional<User> getUserByEmail(String email) {
+		return this.userDao.getUserByEmail(email);
+	}
 	
 	@Override
-	public Optional<User> getUser(String userID) 
+	public Optional<User> getUserById(String userID) 
 	{
-		return this.userDao.getUser(userID);
+		return this.userDao.getUserById(userID);
 	}
 
 	@Override
-	public String createOrUpdateUser(User user) {
-        Optional<User> existUser = this.userDao.getUser(user.getUser_id());
+	public String createUser(User user) {
+		user.setUser_id(CommonUtils.getRandomUUID());
+		user.setRegister_time(CommonUtils.getUTCNow());
+		
+		if (user != null && !user.isValid()) {
+			throw new RuntimeException("[User] Missing required field");
+		}
+		
+		Optional<User> existUser = this.getUserByEmail(user.getEmail());
+		if (existUser.isPresent()) {
+			throw new RuntimeException("[User] Email already exists [" + user.getEmail() + "]");
+		}
+        
+        return this.userDao.createUser(user);
+	}
+	
+	@Override
+	public void updateUser(User user) {
+		if (user != null && !user.isValid()) {
+			throw new RuntimeException("[User] Missing required field");
+		}
+		
+		Optional<User> existUser = this.userDao.getUserById(user.getUser_id());
         if (!existUser.isPresent()) {
-        	user.setRegister_time(CommonUtils.getUTCNow());
-    		return this.userDao.createUser(user);    
-        } else {
-        	return this.userDao.updateUser(user);
+        	throw new RuntimeException("User does not exist");
         }
+        
+		existUser = this.getUserByEmail(user.getEmail());
+		if (existUser.isPresent()) {
+			throw new RuntimeException("[User] Email already exists [" + user.getEmail() + "]");
+		}
+		
+        this.userDao.updateUser(user);
 	}
 
 	@Override

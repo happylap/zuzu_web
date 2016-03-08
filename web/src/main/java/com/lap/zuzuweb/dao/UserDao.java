@@ -6,7 +6,9 @@ import com.lap.zuzuweb.model.User;
 
 public interface UserDao 
 {
-	public Optional<User> getUser(String userID);
+	public Optional<User> getUserByEmail(String email);
+	
+	public Optional<User> getUserById(String userID);
 	
 	public String createUser(User user);
 	

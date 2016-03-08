@@ -28,7 +28,7 @@ public class UserQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 		
 		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
     	
-        Optional<User> user = this.service.getUser(userId);
+        Optional<User> user = this.service.getUserById(userId);
         
         if (user.isPresent()) {
             return Answer.ok(user.get());

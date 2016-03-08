@@ -139,8 +139,9 @@ public class App
     	PurchaseService purchaseSvc = new PurchaseServiceImpl(purchaseDao, userDao, serviceDao);
     	
     	// user
-    	post("/user/:provider/:userid", new UserCreateOrUpdateHandler(userSvc)); // create a user
-        get("/user/:provider/:userid", new UserQueryHandler(userSvc)); //get user by user id
+        get("/user/:email", new UserQueryHandler(userSvc)); //get user by user id
+    	post("/user", new UserCreateOrUpdateHandler(userSvc)); // create a user
+    	put("/user", new UserCreateOrUpdateHandler(userSvc)); // create a user
         
         // device
         get("/device/:provider/:userid", new DeviceQueryHandler(deviceSvc)); // get devices belonging to some user

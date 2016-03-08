@@ -37,7 +37,7 @@ public class UserDaoBySql2OTest extends TestCase {
 	public void testApp() {
 		UserDao userDao = new UserDaoBySql2O();
 		
-		Optional<User> existUser = userDao.getUser("eechih@gmail.com");
+		Optional<User> existUser = userDao.getUserById("eechih@gmail.com");
         if (existUser.isPresent()) {
             User user = existUser.get();
             System.out.println(user);

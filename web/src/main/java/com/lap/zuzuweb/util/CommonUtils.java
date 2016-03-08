@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -52,6 +53,10 @@ public class CommonUtils {
 	
 	public static String combineUserID(String provider, String userid) {
 		return provider + userid;
+	}
+	
+	public static String getRandomUUID() {
+		return UUID.randomUUID().toString();
 	}
 }
 

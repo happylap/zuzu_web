@@ -48,7 +48,7 @@ public class PurchaseDaoBySql2OTest extends TestCase {
 		purchase.setPurchase_time(CommonUtils.getUTCNow());
 		
 		Optional<Criteria> existCriteria = new CriteriaDaoBySql2O().getSingleCriteria(purchase.getUser_id());
-		Optional<User> existUser = new UserDaoBySql2O().getUser(purchase.getUser_id());
+		Optional<User> existUser = null;// new UserDaoBySql2O().getUser(purchase.getUser_id());
 		
 		Criteria criteria = null;
 		if (existCriteria.isPresent()) {
