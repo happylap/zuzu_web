@@ -87,6 +87,11 @@ public class App
     			return;
     		}
     		
+    		// discharge
+    		if (StringUtils.startsWith(request.uri().toString(), "/user")) {
+    			return;
+    		}
+    		
     		if (!enableAuth) {
     			return;
     		}
@@ -168,12 +173,12 @@ public class App
         delete("/criteria/:userid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria belonging to some user
         get("/criteria", new CriteriaQueryHandler(criteriaSvc)); // get all criteria
         get("/criteria/:userid", new CriteriaQueryHandler(criteriaSvc)); // get criteria belonging to some user
-        get("/criteria/:userid/valid", new CriteriaValidQueryHandler(criteriaSvc, userSvc)); // get criteria belonging to some user
+        get("/criteria/valid/:userid", new CriteriaValidQueryHandler(criteriaSvc, userSvc)); // get criteria belonging to some user
         
         // notify
         post("/notifyitem/batch", new NotifyItemBatchCreateHandler(notifyItemSvc)); // add a list of notify items
         get("/notifyitem/:userid", new NotifyItemQueryHandler(notifyItemSvc)); // get notify belonging to some user
-        get("/notifyitem/:userid/unread/count", new NotifyItemUnreadCountHandler(notifyItemSvc));
+        get("/notifyitem/unreadcount/:userid", new NotifyItemUnreadCountHandler(notifyItemSvc));
         patch("/notifyitem/:userid/:itemid", new NotifyItemPatchHandler(notifyItemSvc)); 
         
         // log
