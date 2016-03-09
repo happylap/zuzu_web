@@ -22,11 +22,11 @@ public class NotifyItemQueryHandler extends AbstractRequestHandler<EmptyPayload>
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
 		
-		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid")) {
+		if (!urlParams.containsKey(":userid")) {
 			return Answer.bad_request();
 		}
 		
-		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		String userId = urlParams.get(":userid");
 		
 		List<NotifyItem> notifyItems = this.service.getItems(userId);
 		

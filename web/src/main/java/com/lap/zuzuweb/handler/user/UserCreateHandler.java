@@ -8,11 +8,11 @@ import com.lap.zuzuweb.handler.payload.UserCreatePayload;
 import com.lap.zuzuweb.service.UserService;
 
 
-public class UserCreateOrUpdateHandler extends AbstractRequestHandler<UserCreatePayload> {
+public class UserCreateHandler extends AbstractRequestHandler<UserCreatePayload> {
 	
 	private UserService service = null;
 	
-	public UserCreateOrUpdateHandler(UserService service) {
+	public UserCreateHandler(UserService service) {
         super(UserCreatePayload.class);
         this.service = service;
     }

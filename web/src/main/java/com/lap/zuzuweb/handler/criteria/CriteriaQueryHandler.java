@@ -8,7 +8,6 @@ import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.model.Criteria;
 import com.lap.zuzuweb.service.CriteriaService;
-import com.lap.zuzuweb.util.CommonUtils;
 
 public class CriteriaQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 
@@ -22,8 +21,8 @@ public class CriteriaQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
 		
-		if (urlParams.containsKey(":provider") && urlParams.containsKey(":userid")) {
-			String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		if (urlParams.containsKey(":userid")) {
+			String userId = urlParams.get(":userid");
 
 			Optional<Criteria> existCriteria = this.service.getSingleCriteria(userId);
 

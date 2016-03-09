@@ -8,7 +8,6 @@ import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.model.Device;
 import com.lap.zuzuweb.service.DeviceService;
-import com.lap.zuzuweb.util.CommonUtils;
 
 public class DeviceGetHandler extends AbstractRequestHandler<EmptyPayload>{
 
@@ -22,11 +21,11 @@ public class DeviceGetHandler extends AbstractRequestHandler<EmptyPayload>{
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
     	
-		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid") || !urlParams.containsKey(":deviceid")) {
+		if (!urlParams.containsKey(":userid") || !urlParams.containsKey(":deviceid")) {
 			return Answer.bad_request();
 		}
 		
-		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		String userId = urlParams.get(":userid");
     	String deviceId = urlParams.get(":deviceid");
     	
     	Optional<Device> existDevice = this.service.getDevice(userId, deviceId);

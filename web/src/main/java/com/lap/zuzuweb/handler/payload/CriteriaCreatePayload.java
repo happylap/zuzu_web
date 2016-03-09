@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class CriteriaCreatePayload implements Validable {
 	
+	private String user_id;
     private boolean enabled ;
     private JsonNode filters;
     
@@ -16,10 +17,10 @@ public class CriteriaCreatePayload implements Validable {
 		return true;
 	}
     
-	public Criteria toCriteria(String user_id)
+	public Criteria toCriteria()
 	{
 		Criteria c = new Criteria();
-		c.setUser_id(user_id);
+		c.setUser_id(this.user_id);
 		c.setEnabled(this.enabled);
 		if (this.filters != null) {
 			c.setFiltersValue(this.filters.toString());

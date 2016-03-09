@@ -37,15 +37,18 @@ import com.lap.zuzuweb.handler.device.DeviceDeleteHandler;
 import com.lap.zuzuweb.handler.device.DeviceGetHandler;
 import com.lap.zuzuweb.handler.device.DeviceQueryHandler;
 import com.lap.zuzuweb.handler.log.LogPatchHandler;
-import com.lap.zuzuweb.handler.notifyItem.NotifyItemQueryHandler;
-import com.lap.zuzuweb.handler.notifyItem.NotifyItemUnreadCountHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemBatchCreateHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemPatchHandler;
+import com.lap.zuzuweb.handler.notifyItem.NotifyItemQueryHandler;
+import com.lap.zuzuweb.handler.notifyItem.NotifyItemUnreadCountHandler;
 import com.lap.zuzuweb.handler.purchase.PurchaseCreateHandler;
 import com.lap.zuzuweb.handler.purchase.PurchaseQueryHandler;
+import com.lap.zuzuweb.handler.purchase.PurchaseValidHandler;
 import com.lap.zuzuweb.handler.service.ServiceQueryHandler;
-import com.lap.zuzuweb.handler.user.UserCreateOrUpdateHandler;
+import com.lap.zuzuweb.handler.user.UserCreateHandler;
+import com.lap.zuzuweb.handler.user.UserEmailExistHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
+import com.lap.zuzuweb.handler.user.UserUpdateHandler;
 import com.lap.zuzuweb.service.AuthService;
 import com.lap.zuzuweb.service.AuthServiceImpl;
 import com.lap.zuzuweb.service.CriteriaService;
@@ -79,6 +82,11 @@ public class App
 
     		System.out.println("url: " + request.uri().toString());
     		
+    		// discharge
+    		if (StringUtils.startsWith(request.uri().toString(), "/register")) {
+    			return;
+    		}
+    		
     		if (!enableAuth) {
     			return;
     		}
@@ -93,11 +101,9 @@ public class App
     			
 	    		System.out.println("Header UserProvider: " + request.headers("UserProvider"));
 	    		System.out.println("Header UserToken: " + request.headers("UserToken"));
-	    		System.out.println("Header UserId: " + request.headers("UserId"));
 	
 	    		String userProvider = request.headers("UserProvider");
 	    		String userToken = request.headers("UserToken");
-	    		//String userId = request.headers("UserId");
 	    		
 	    		try {
 		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.FB.toString())) {
@@ -138,43 +144,48 @@ public class App
     	LogService logSvc = new LogServiceImpl(logDao);
     	PurchaseService purchaseSvc = new PurchaseServiceImpl(purchaseDao, userDao, serviceDao);
     	
+    	// register
+    	get("/register/valid/:email", new UserEmailExistHandler(userSvc));
+    	post("/register", new UserCreateHandler(userSvc));
+    	
     	// user
-        get("/user/:email", new UserQueryHandler(userSvc)); //get user by user id
-    	post("/user", new UserCreateOrUpdateHandler(userSvc)); // create a user
-    	put("/user", new UserCreateOrUpdateHandler(userSvc)); // create a user
+        get("/user/:userid", new UserQueryHandler(userSvc)); //get user by user id
+        get("/user/email/:email", new UserQueryHandler(userSvc)); //get user by user id
+    	put("/user", new UserUpdateHandler(userSvc)); // create a user
         
         // device
-        get("/device/:provider/:userid", new DeviceQueryHandler(deviceSvc)); // get devices belonging to some user
-        get("/device/:provider/:userid/:deviceid", new DeviceGetHandler(deviceSvc)); // get devices belonging to some user
-        post("/device/:provider/:userid", new DeviceCreateHandler(deviceSvc));
-        delete("/device/:provider/:userid", new DeviceDeleteHandler(deviceSvc)); //remove devices belonging to some user
-        delete("/device/:provider/:userid/:deviceid", new DeviceDeleteHandler(deviceSvc)); // remove a device
+        get("/device/:userid", new DeviceQueryHandler(deviceSvc)); // get devices belonging to some user
+        get("/device/:userid/:deviceid", new DeviceGetHandler(deviceSvc)); // get devices belonging to some user
+        post("/device", new DeviceCreateHandler(deviceSvc));
+        delete("/device/:userid", new DeviceDeleteHandler(deviceSvc)); //remove devices belonging to some user
+        delete("/device/:userid/:deviceid", new DeviceDeleteHandler(deviceSvc)); // remove a device
         
         // criteria
-        post("/criteria/:provider/:userid", new CriteriaCreateHandler(criteriaSvc)); // add a criteria
-        put("/criteria/:provider/:userid/:criteriaid", new CriteriaModifyHandler(criteriaSvc)); // modify criteria
-        patch("/criteria/:provider/:userid/:criteriaid", new CriteriaPatchHandler(criteriaSvc));
-        delete("/criteria/:provider/:userid/:criteriaid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria
-        delete("/criteria/:provider/:userid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria belonging to some user
+        post("/criteria", new CriteriaCreateHandler(criteriaSvc)); // add a criteria
+        put("/criteria/:userid/:criteriaid", new CriteriaModifyHandler(criteriaSvc)); // modify criteria
+        patch("/criteria/:userid/:criteriaid", new CriteriaPatchHandler(criteriaSvc));
+        delete("/criteria/:userid/:criteriaid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria
+        delete("/criteria/:userid", new CriteriaRemoveHandler(criteriaSvc)); // delete a criteria belonging to some user
         get("/criteria", new CriteriaQueryHandler(criteriaSvc)); // get all criteria
-        get("/criteria/:provider/:userid", new CriteriaQueryHandler(criteriaSvc)); // get criteria belonging to some user
-        get("/criteria/:provider/:userid/valid", new CriteriaValidQueryHandler(criteriaSvc, userSvc)); // get criteria belonging to some user
+        get("/criteria/:userid", new CriteriaQueryHandler(criteriaSvc)); // get criteria belonging to some user
+        get("/criteria/:userid/valid", new CriteriaValidQueryHandler(criteriaSvc, userSvc)); // get criteria belonging to some user
         
         // notify
         post("/notifyitem/batch", new NotifyItemBatchCreateHandler(notifyItemSvc)); // add a list of notify items
-        get("/notifyitem/:provider/:userid", new NotifyItemQueryHandler(notifyItemSvc)); // get notify belonging to some user
-        get("/notifyitem/:provider/:userid/unread/count", new NotifyItemUnreadCountHandler(notifyItemSvc));
-        patch("/notifyitem/:provider/:userid/:itemid", new NotifyItemPatchHandler(notifyItemSvc)); 
+        get("/notifyitem/:userid", new NotifyItemQueryHandler(notifyItemSvc)); // get notify belonging to some user
+        get("/notifyitem/:userid/unread/count", new NotifyItemUnreadCountHandler(notifyItemSvc));
+        patch("/notifyitem/:userid/:itemid", new NotifyItemPatchHandler(notifyItemSvc)); 
         
         // log
-        patch("/log/:provider/:userid/:deviceid", new LogPatchHandler(logSvc));
+        patch("/log/:userid/:deviceid", new LogPatchHandler(logSvc));
         
         // purchase
-        post("/purchase/:provider/:userid", new PurchaseCreateHandler(purchaseSvc)); // add a purchase
-        get("/purchase/:provider/:userid", new PurchaseQueryHandler(purchaseSvc)); // get a list of purchases belonging to some user 
+        post("/purchase", new PurchaseCreateHandler(purchaseSvc)); // add a purchase
+        get("/purchase/:userid", new PurchaseQueryHandler(purchaseSvc)); // get a list of purchases belonging to some user
+        get("/purchase/valid/:userid", new PurchaseValidHandler(purchaseSvc)); // get a list of purchases belonging to some user
         
         // service
-        get("/service/:provider/:userid", new ServiceQueryHandler(userSvc, purchaseSvc)); // get a list of purchases belonging to some user
+        get("/service/:userid", new ServiceQueryHandler(userSvc, purchaseSvc)); // get a list of purchases belonging to some user
         
         get("/alive", new Route() {
             @Override

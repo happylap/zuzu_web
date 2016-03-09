@@ -42,11 +42,11 @@ public class CriteriaPatchHandler extends AbstractRequestArrayHandler {
 
 	private void handleReplace(Map<String, String> urlParams, String path, String value) {
 		
-		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid") || !urlParams.containsKey(":criteriaid")) {
+		if (!urlParams.containsKey(":userid") || !urlParams.containsKey(":criteriaid")) {
 			throw new IllegalArgumentException();
 		}
 		
-		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		String userId = urlParams.get(":userid");
 		String criteriaId = urlParams.get(":criteriaid");
 
 		if (path.equalsIgnoreCase("/filters")) {

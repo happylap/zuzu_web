@@ -6,7 +6,6 @@ import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.CriteriaUpdatePayload;
 import com.lap.zuzuweb.service.CriteriaService;
-import com.lap.zuzuweb.util.CommonUtils;
 
 public class CriteriaModifyHandler extends AbstractRequestHandler<CriteriaUpdatePayload>{
 
@@ -19,11 +18,11 @@ public class CriteriaModifyHandler extends AbstractRequestHandler<CriteriaUpdate
 	@Override
 	protected Answer processImpl(CriteriaUpdatePayload value, Map<String, String> urlParams) {
 		
-		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid") || !urlParams.containsKey(":criteriaid")) {
+		if (!urlParams.containsKey(":userid") || !urlParams.containsKey(":criteriaid")) {
 			return Answer.bad_request();
 		}
 		
-		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		String userId = urlParams.get(":userid");
     	String criteriaId = urlParams.get(":criteriaid");
     	
         String updateId = service.updateCriteria(value.toCriteria(criteriaId, userId));

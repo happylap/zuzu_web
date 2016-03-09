@@ -26,11 +26,11 @@ public class CriteriaValidQueryHandler extends AbstractRequestHandler<EmptyPaylo
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
 		
-		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid")) {
+		if (!urlParams.containsKey(":userid")) {
 			return Answer.bad_request();
 		}
 		
-		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		String userId = urlParams.get(":userid");
 		    
         Optional<Criteria> existCriteria = this.criteriaSvc.getSingleCriteria(userId);
         Optional<Service> existService = this.userSvc.getService(userId);

@@ -8,7 +8,6 @@ import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.service.CriteriaService;
-import com.lap.zuzuweb.util.CommonUtils;
 
 public class CriteriaRemoveHandler extends AbstractRequestHandler<EmptyPayload> {
 
@@ -22,11 +21,11 @@ public class CriteriaRemoveHandler extends AbstractRequestHandler<EmptyPayload> 
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
 
-		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid")) {
+		if (!urlParams.containsKey(":userid")) {
 			return Answer.bad_request();
 		}
 
-		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		String userId = urlParams.get(":userid");
 		String criteriaId = urlParams.get(":criteriaid");
 
 		if (StringUtils.isNotEmpty(userId) && StringUtils.isNotEmpty(criteriaId)) {

@@ -111,24 +111,29 @@ public class PurchaseServiceImpl implements PurchaseService{
 	public String purchase(Purchase purchase, InputStream purchase_receipt) {
 		System.out.println(purchase);
 		
-		if (StringUtils.isBlank(purchase.getUser_id())) {
-			throw new RuntimeException("Purchase user_id is required.");
+		if (StringUtils.isEmpty(purchase.getUser_id())) {
+			throw new RuntimeException("Missing required field: user_id");
 		}
 
-		if (StringUtils.isBlank(purchase.getStore())) {
-			throw new RuntimeException("Purchase store is required.");
+		if (StringUtils.isEmpty(purchase.getStore())) {
+			throw new RuntimeException("Missing required field: store");
 		}
 		
-		if (StringUtils.isBlank(purchase.getProduct_id())) {
-			throw new RuntimeException("Purchase product_id is required.");
+		if (StringUtils.isEmpty(purchase.getProduct_id())) {
+			throw new RuntimeException("Missing required field: product_id");
 		}
 		
 		if (purchase_receipt == null) {
-			throw new RuntimeException("Purchase receipt file is required.");
+			throw new RuntimeException("Missing required field: purchase_receipt");
 		}
 		
-		if (StringUtils.isBlank(purchase.getTransaction_id())) {
-			throw new RuntimeException("Purchase transaction_id is required.");
+		if (StringUtils.isEmpty(purchase.getTransaction_id())) {
+			throw new RuntimeException("Missing required field: transaction_id");
+		}
+		
+		Optional<Purchase> existPurchase = purchaseDao.getPurchaseByTransactionId(purchase.getTransaction_id(), purchase.getStore());
+		if (existPurchase.isPresent()) {
+			throw new RuntimeException("Purchase transaction_id already exists: " + purchase.getTransaction_id());
 		}
 		
 		purchase.setPurchase_time(CommonUtils.getUTCNow());
@@ -137,7 +142,7 @@ public class PurchaseServiceImpl implements PurchaseService{
 		Optional<User> existUser = userDao.getUserById(purchase.getUser_id());
 		
 		if (!existUser.isPresent()) {
-			throw new RuntimeException("User does not exist. [" + purchase.getUser_id() + "]");
+			throw new RuntimeException("User does not exist: " + purchase.getUser_id());
 		}
 		
 		User user = existUser.get();

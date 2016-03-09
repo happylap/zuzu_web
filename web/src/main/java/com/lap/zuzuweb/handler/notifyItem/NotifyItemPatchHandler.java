@@ -35,11 +35,11 @@ public class NotifyItemPatchHandler extends AbstractRequestArrayHandler{
 
 	private void handleReplace(Map<String, String> urlParams, String path, String value) {
 		
-		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid") || !urlParams.containsKey(":itemid")) {
+		if (!urlParams.containsKey(":userid") || !urlParams.containsKey(":itemid")) {
 			throw new IllegalArgumentException();
 		}
 		
-		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		String userId = urlParams.get(":userid");
     	String itemId = urlParams.get(":itemid");
     	
 		if (path.equalsIgnoreCase("/_read"))

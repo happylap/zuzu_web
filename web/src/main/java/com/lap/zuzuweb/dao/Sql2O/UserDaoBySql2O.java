@@ -20,7 +20,7 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 	static private String SQL_CREATE_USER = "INSERT INTO \"ZuZuUser\"(user_id, email, register_time, name, gender, birthday, picture_url, update_time) "
 			+ " VALUES (:user_id, :email, :register_time, :name, :gender, :birthday, :picture_url, :update_time)";
 	
-	static private String SQL_UPDATE_USER = "UPDATE \"ZuZuUser\" SET email=:email, name=:name, gender=:gender, birthday=:birthday, picture_url=:picture_url, update_time=:update_time"
+	static private String SQL_UPDATE_USER = "UPDATE \"ZuZuUser\" SET name=:name, gender=:gender, birthday=:birthday, picture_url=:picture_url, update_time=:update_time"
 			+ " WHERE user_id=:user_id";
 	
 
@@ -74,7 +74,7 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 	public String updateUser(User user) {
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_UPDATE_USER)
-            	.addParameter("email", user.getEmail())
+            	//.addParameter("email", user.getEmail())
 	            .addParameter("name", user.getName())
 	            .addParameter("gender", user.getGender())
 	            .addParameter("birthday", user.getBirthday())

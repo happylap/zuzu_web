@@ -39,11 +39,11 @@ public class LogPatchHandler extends AbstractRequestArrayHandler {
 
 	private void handleAdd(Map<String, String> urlParams, String path, String value) {
 		
-		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid") || !urlParams.containsKey(":deviceid")) {
+		if (!urlParams.containsKey(":userid") || !urlParams.containsKey(":deviceid")) {
 			throw new IllegalArgumentException();
 		}
 		
-		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		String userId = urlParams.get(":userid");
 		//String deviceId = CommonUtils.decodeFromBase64String(urlParams.get(":deviceid"));
 		String deviceId = urlParams.get(":deviceid");
 		

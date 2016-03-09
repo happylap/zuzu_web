@@ -20,11 +20,11 @@ public class NotifyItemUnreadCountHandler extends AbstractRequestHandler<EmptyPa
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
 		
-		if (!urlParams.containsKey(":provider") || !urlParams.containsKey(":userid")) {
+		if (!urlParams.containsKey(":userid")) {
 			return Answer.bad_request();
 		}
 		
-		String userId = CommonUtils.combineUserID(urlParams.get(":provider"), urlParams.get(":userid"));
+		String userId = urlParams.get(":userid");
 		
 		long unreadCount = this.service.getUnreadCount(userId);
 		
