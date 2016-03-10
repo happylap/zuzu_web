@@ -13,4 +13,6 @@ public interface UserDao
 	public String createUser(User user);
 	
 	public String updateUser(User user);
+	
+	public void deleteUserByIdAndEmail(String userID, String email);
 }

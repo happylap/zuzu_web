@@ -23,6 +23,7 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 	static private String SQL_UPDATE_USER = "UPDATE \"ZuZuUser\" SET name=:name, gender=:gender, birthday=:birthday, picture_url=:picture_url, update_time=:update_time"
 			+ " WHERE user_id=:user_id";
 	
+	static private String SQL_REMOVE_USER_BY_ID_AND_EMAIL = "DELETE FROM \"ZuZuUser\" Where user_id=:user_id AND email=:email";
 
 	@Override
 	public Optional<User> getUserByEmail(String email) {
@@ -84,6 +85,17 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
                 .executeUpdate();
             conn.commit();
             return user.getUser_id();
+        }
+	}
+	
+	@Override
+	public void deleteUserByIdAndEmail(String userID, String email) {
+		try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(SQL_REMOVE_USER_BY_ID_AND_EMAIL)
+	            .addParameter("user_id", userID)
+	            .addParameter("email", email)
+                .executeUpdate();
+            conn.commit();
         }
 	}
 

@@ -68,6 +68,14 @@ public class UserServiceImpl implements UserService
 	}
 
 	@Override
+	public void deleteUser(String userId, String email) {
+		if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(email)) {
+			throw new RuntimeException("Missing required field");
+		}
+		this.userDao.deleteUserByIdAndEmail(userId, email);
+	}
+
+	@Override
 	public Optional<Service> getService(String userID) {
 		return this.serviceDao.getService(userID);
 	}

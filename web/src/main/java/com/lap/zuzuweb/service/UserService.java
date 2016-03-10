@@ -15,6 +15,8 @@ public interface UserService
 	
 	public void updateUser(User user);
 	
+	public void deleteUser(String userId, String email);
+	
 	public Optional<Service> getService(String userID);
 	
 }

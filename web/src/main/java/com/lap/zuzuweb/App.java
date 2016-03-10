@@ -48,6 +48,7 @@ import com.lap.zuzuweb.handler.service.ServiceQueryHandler;
 import com.lap.zuzuweb.handler.user.UserCreateHandler;
 import com.lap.zuzuweb.handler.user.UserEmailExistHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
+import com.lap.zuzuweb.handler.user.UserRemoveHandler;
 import com.lap.zuzuweb.handler.user.UserUpdateHandler;
 import com.lap.zuzuweb.service.AuthService;
 import com.lap.zuzuweb.service.AuthServiceImpl;
@@ -157,6 +158,7 @@ public class App
         get("/user/:userid", new UserQueryHandler(userSvc)); //get user by user id
         get("/user/email/:email", new UserQueryHandler(userSvc)); //get user by user id
     	put("/user", new UserUpdateHandler(userSvc)); // create a user
+    	delete("/user/:userid/:email", new UserRemoveHandler(userSvc));
         
         // device
         get("/device/:userid", new DeviceQueryHandler(deviceSvc)); // get devices belonging to some user
