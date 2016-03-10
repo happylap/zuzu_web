@@ -12,6 +12,9 @@ import lombok.Data;
 @Data
 public class UserUpdatePayload implements Validable {
 	private String user_id;
+	private String email;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+	private Date register_time;
 	private String name;
 	private String gender;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
@@ -26,6 +29,8 @@ public class UserUpdatePayload implements Validable {
 	public User toUser() {
 		User user = new User();
 		user.setUser_id(user_id);
+		user.setEmail(email);
+		user.setRegister_time(register_time);
 		user.setName(name);
 		user.setGender(gender);
 		user.setBirthday(birthday);
