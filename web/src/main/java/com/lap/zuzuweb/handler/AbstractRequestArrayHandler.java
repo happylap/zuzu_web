@@ -3,6 +3,9 @@ package com.lap.zuzuweb.handler;
 import java.io.IOException;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.lap.zuzuweb.handler.payload.Validable;
 import com.lap.zuzuweb.util.CommonUtils;
@@ -13,6 +16,8 @@ import spark.Route;
 
 public abstract class AbstractRequestArrayHandler implements RequestArrayHandler, Route {
  
+	private static final Logger logger = LoggerFactory.getLogger(AbstractRequestArrayHandler.class);
+	
     public final Answer process(Validable[] values, Map<String, String> urlParams) {
     	for (Validable value: values){
     		if (value != null && !value.isValid()) {
@@ -29,25 +34,22 @@ public abstract class AbstractRequestArrayHandler implements RequestArrayHandler
     
     @Override
     public Object handle(Request request, Response response) throws Exception {
+    	Answer answer = null;
     	
         try {
         	Validable[] values = parsePayloas(request.body());
             Map<String, String> urlParams = request.params();
-            
-            Answer answer = process(values, urlParams);
-
-            response.status(200);
-            response.type("application/json");
-			return CommonUtils.toJson(answer);
-            
+            answer = process(values, urlParams);            
         } catch (Exception e) {
-        	
-        	e.printStackTrace();
-            response.status(200);
-            response.type("application/json");
-        	return CommonUtils.toJson(Answer.error(e.getMessage()));
-        	
+        	logger.error(e.getMessage(), e);
+            answer = Answer.error(e.getMessage());
         }
+        
+        response.status(200);
+        response.type("application/json");
+        String json = CommonUtils.toJson(answer);
+        logger.info(String.format("Route Path: %s, Answer: %s", request.uri().toString(), json));
+		return json;
     }
     
 }

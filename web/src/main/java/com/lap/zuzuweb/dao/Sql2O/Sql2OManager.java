@@ -19,20 +19,26 @@ public class Sql2OManager {
 	}
 
 	static private Sql2o createSql2O() {
-		String url = "jdbc:postgresql://" + Secrets.DB_HOST + ":" + Secrets.DB_PORT + "/" + Secrets.DB_NAME;
+		Sql2o sql2o = new Sql2o("jdbc:postgresql://" + Secrets.DB_HOST + ":" + Secrets.DB_PORT + "/" + Secrets.DB_NAME,
+        		Secrets.DB_USERNAME, Secrets.DB_PASSWORD);
+        
+        return sql2o;
 
-		ComboPooledDataSource cpds = new ComboPooledDataSource();
-		cpds.setJdbcUrl(url);
-		cpds.setUser(Secrets.DB_USERNAME);
-		cpds.setPassword(Secrets.DB_PASSWORD);
-		// the settings below are optional -- c3p0 can work with defaults
-		cpds.setMinPoolSize(5);
-		cpds.setAcquireIncrement(5);
-		cpds.setMaxPoolSize(20);
-
-		Quirks quirks = QuirksDetector.forURL(url);
-
-		return new Sql2o(cpds, quirks);
+        
+//		String url = "jdbc:postgresql://" + Secrets.DB_HOST + ":" + Secrets.DB_PORT + "/" + Secrets.DB_NAME;
+//
+//		ComboPooledDataSource cpds = new ComboPooledDataSource();
+//		cpds.setJdbcUrl(url);
+//		cpds.setUser(Secrets.DB_USERNAME);
+//		cpds.setPassword(Secrets.DB_PASSWORD);
+//		// the settings below are optional -- c3p0 can work with defaults
+//		cpds.setMinPoolSize(5);
+//		cpds.setAcquireIncrement(5);
+//		cpds.setMaxPoolSize(20);
+//
+//		Quirks quirks = QuirksDetector.forURL(url);
+//
+//		return new Sql2o(cpds, quirks);
 	}
 
 }

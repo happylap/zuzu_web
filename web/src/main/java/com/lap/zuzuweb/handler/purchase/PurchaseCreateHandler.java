@@ -1,5 +1,7 @@
 package com.lap.zuzuweb.handler.purchase;
 
+import java.io.InputStream;
+
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 
@@ -7,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.lap.zuzuweb.App;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.model.Purchase;
 import com.lap.zuzuweb.service.PurchaseService;
@@ -29,6 +30,9 @@ public class PurchaseCreateHandler implements Route {
 	
 	@Override
     public Object handle(Request request, Response response) throws Exception {
+		logger.debug("handle enter:");
+		
+		Answer answer = null;
 		
 		try {
 			String location = "temp";          // the directory location where files will be stored
@@ -48,7 +52,8 @@ public class PurchaseCreateHandler implements Route {
 	    	logger.info("TransactionId: " + request.raw().getParameter("transaction_id"));
 	    	
 	    	if (StringUtils.isBlank(request.raw().getParameter("user_id"))) {
-	    		throw new IllegalArgumentException("user_id is required."); 
+	    		logger.error("Missing required field: user_id");
+	    		throw new IllegalArgumentException("Missing required field: user_id");  
 	    	}
 	    	
 	    	String userId = request.raw().getParameter("user_id");
@@ -61,7 +66,8 @@ public class PurchaseCreateHandler implements Route {
 	    	Part purchaseReceiptFile = request.raw().getPart("purchase_receipt");
 	    	
 	    	if (purchaseReceiptFile == null) {
-	    		throw new IllegalArgumentException("Purchase receipt file is required."); 
+	    		logger.error("Missing required field: purchase_receipt");
+	    		throw new IllegalArgumentException("Missing required field: purchase_receipt");  
 	    	}
 	    	
 	    	Purchase purchase = new Purchase();
@@ -74,26 +80,28 @@ public class PurchaseCreateHandler implements Route {
 	    		purchase.setProduct_price(Double.valueOf(productPrice));
 	    	}
 	    	purchase.setTransaction_id(transactionId);
+
+	    	logger.info("service purchase: " + purchase.toString());
 	    	
-	    	String purchase_id = this.service.purchase(purchase, purchaseReceiptFile.getInputStream());
+	    	InputStream purchase_receipt = purchaseReceiptFile.getInputStream();
+	    	
+	    	String purchase_id = this.service.purchase(purchase, purchase_receipt);
 	    	
 	    	// cleanup
 	    	multipartConfigElement = null;
 	    	purchaseReceiptFile = null;
 	    	
-	    	Answer answer = Answer.ok(purchase_id);
-	    	
-	    	String json = CommonUtils.toJson(answer);
-            logger.info(String.format("Route Path: %s, Answer: %s", request.uri().toString(), json));
-			return json;
+	    	answer = Answer.ok(purchase_id);
 	    	
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			String json = CommonUtils.toJson(Answer.error(e.getMessage()));
-            logger.info(String.format("Route Path: %s, Answer: %s", request.uri().toString(), json));
-			return json;
+			answer = Answer.error(e.getMessage());
 		}
 		
+		String json = CommonUtils.toJson(answer);
+        logger.info(String.format("Route Path: %s, Answer: %s", request.uri().toString(), json));
+        logger.info("handle exit.");
+		return json;
 		
 	}
 

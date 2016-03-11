@@ -38,11 +38,11 @@ public class ServiceQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 		
 		String userId = urlParams.get(":userid");
         
-    	purchaseSvc.verify(userId);
+    	purchaseSvc.processService(userId);
     	
         Optional<Service> existService = this.userSvc.getService(userId);
         
-        String status = "invlid";
+        String status = "invalid";
         Date expire_time = null;
         Long remaining_second = null;
         

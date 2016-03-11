@@ -49,30 +49,39 @@ public class PurchaseServiceImpl implements PurchaseService{
 	public List<Purchase> getPurchase(String userID) {
 		return this.purchaseDao.getPurchase(userID);
 	}
-	
+
+	@Override
 	public String purchase(Purchase purchase, InputStream purchase_receipt) {
+		logger.debug("purchase enter:");
+		
 		if (StringUtils.isEmpty(purchase.getUser_id())) {
+			logger.debug("purchase exit.");
 			throw new RuntimeException("Missing required field: user_id");
 		}
 
 		if (StringUtils.isEmpty(purchase.getStore())) {
+			logger.debug("purchase exit.");
 			throw new RuntimeException("Missing required field: store");
 		}
 		
 		if (StringUtils.isEmpty(purchase.getProduct_id())) {
+			logger.debug("purchase exit.");
 			throw new RuntimeException("Missing required field: product_id");
 		}
 		
 		if (purchase_receipt == null) {
+			logger.debug("purchase exit.");
 			throw new RuntimeException("Missing required field: purchase_receipt");
 		}
 		
 		if (StringUtils.isEmpty(purchase.getTransaction_id())) {
+			logger.debug("purchase exit.");
 			throw new RuntimeException("Missing required field: transaction_id");
 		}
 		
 		Optional<Purchase> existPurchase = purchaseDao.getPurchaseByTransactionId(purchase.getTransaction_id(), purchase.getStore());
 		if (existPurchase.isPresent()) {
+			logger.debug("purchase exit.");
 			throw new RuntimeException("Purchase transaction_id already exists: " + purchase.getTransaction_id());
 		}
 		
@@ -82,14 +91,18 @@ public class PurchaseServiceImpl implements PurchaseService{
 		Optional<User> existUser = userDao.getUserById(purchase.getUser_id());
 		
 		if (!existUser.isPresent()) {
+			logger.debug("purchase exit.");
 			throw new RuntimeException("User does not exist: " + purchase.getUser_id());
 		}
 		
 		User user = existUser.get();
 		user.setPurchase_receipt(purchase_receipt);
-				
-		return this.purchaseDao.createPurchase(purchase, user);
+		
+		String purchaseId = this.purchaseDao.createPurchase(purchase, user);
+		logger.debug("purchase exit.");
+		return purchaseId;
 	}
+	
 	
 	public void verify(String userID) {
 		try {
@@ -204,34 +217,211 @@ public class PurchaseServiceImpl implements PurchaseService{
 			e.printStackTrace();
 		}
 	}
-	
-	private String verifyReceipt(InputStream purchaseReceipt) throws Exception {
-		String url_prod = "https://buy.itunes.apple.com/verifyReceipt";
-		String url_sandbox = "https://sandbox.itunes.apple.com/verifyReceipt";
 
-		StringEntity se = new StringEntity(IOUtils.toString(purchaseReceipt));
-		se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-
-		logger.info(String.format("Verify Receipt URL: %s", url_prod));
-		String jsonString = HttpUtils.post(url_prod, se);
-		logger.info(String.format("Verify Receipt Resout: %s", jsonString));
+	@Override
+	public void processService(String userID) {
+		logger.info("processService enter:");
 		
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode actualObj = mapper.readTree(jsonString);
-
-		if (actualObj != null) {
-			JsonNode jsonNode_status = actualObj.get("status");
-
-			// This receipt is from the test environment, but it was sent to the
-			// production environment for verification.
-			if (jsonNode_status != null && jsonNode_status.intValue() == 21007) {
-				logger.info(String.format("Verify Receipt URL: %s", url_sandbox));
-				jsonString = HttpUtils.post(url_sandbox, se);
-				logger.info(String.format("Verify Receipt Resout: %s", jsonString));
-				actualObj = mapper.readTree(jsonString);
+		logger.info("userID: " + userID);
+		
+		List<Purchase> purchases = this.purchaseDao.getPurchase(userID);
+		if (CollectionUtils.isEmpty(purchases)) {
+			logger.info("processService exit.");
+			return;
+		}
+		
+		List<Purchase> invalidPurchases = purchases.stream().filter(p -> !p.is_valid()).collect(Collectors.toList());
+		if (CollectionUtils.isEmpty(invalidPurchases)) {
+			logger.info("processService exit.");
+			return;
+		}
+		
+		List<Purchase> validPurchases = new ArrayList<Purchase>();
+		List<Purchase> needVerifyPurchases = new ArrayList<Purchase>();
+		
+		for (Purchase invalidPurchase: invalidPurchases) {
+			ProductEnum product = ProductEnum.getEnum(invalidPurchase.getProduct_id());
+			// 不需要驗證的Purchase，直接認定為有效Purchase
+			if (product != null && !product.isNeedVerifyReceipt()) {
+				validPurchases.add(invalidPurchase);
+			}
+			// 加入到"待驗證"清單中
+			if (product != null && product.isNeedVerifyReceipt()) {
+				needVerifyPurchases.add(invalidPurchase);
 			}
 		}
 		
+		// 驗證Purchase
+		if (CollectionUtils.isNotEmpty(needVerifyPurchases)) {
+			List<String> validTransactionIds = this.getTransactionIdsFormReceipt(userID);
+			
+			if (CollectionUtils.isNotEmpty(validTransactionIds)) {
+				for (Purchase needVerifyPurchase: needVerifyPurchases) {
+					if (validTransactionIds.contains(needVerifyPurchase.getTransaction_id())) {
+						validPurchases.add(needVerifyPurchase);
+					}
+				}
+			}
+		}
+		
+		// 進行 Service expire_time 的計算
+		int toaddDays = 0;
+		for (Purchase validPurchase: validPurchases) {			
+			ProductEnum product = ProductEnum.getEnum(validPurchase.getProduct_id());
+			if (product != null) {
+				validPurchase.set_valid(true);
+				toaddDays += product.getStandardDays();
+				toaddDays += product.getExtraDays();
+			}
+		}
+		logger.info("toaddDays: " + toaddDays);
+		
+		Optional<Service> existService = this.serviceDao.getService(userID);
+		
+		Service service = null;
+		if (existService.isPresent()) {
+			service = existService.get();
+		} else {
+			service = new Service();
+			service.setUser_id(userID);
+		}
+		
+		Date newExpireTime = this.calExpireTime(service.getExpire_time(), toaddDays);
+		
+		service.setExpire_time(newExpireTime);
+		service.setUpdate_time(CommonUtils.getUTCNow());
+		
+		
+		
+		if (existService.isPresent()) {
+			logger.info("updateService: " + service);
+			this.serviceDao.updateService(service, validPurchases);
+		} else {
+			logger.info("createService: " + service);
+			this.serviceDao.createService(service, validPurchases);
+		}
+		logger.info("processService exit.");
+	}
+	
+	private Date calExpireTime(Date origExpireTime, int toaddDays) {
+		logger.info("calExpireTime enter:");
+		
+		Date baseTime = null;
+		if (origExpireTime != null && origExpireTime.after(CommonUtils.getUTCNow())) {
+			baseTime = origExpireTime;
+		} else {
+			baseTime = CommonUtils.getUTCNow();
+		}
+
+		Calendar c = Calendar.getInstance();
+		c.setTime(baseTime);
+		c.add(Calendar.DATE, toaddDays);
+		
+		logger.info("calExpireTime exit.");
+		return c.getTime();
+	}
+
+	private List<String> getTransactionIdsFormReceipt(String userID) {
+		logger.info("getTransactionIdsFormReceipt enter:");
+		
+		List<String> emptyCollection = new ArrayList<String>();
+		
+		Optional<User> existUser = this.userDao.getUserById(userID);
+		if (!existUser.isPresent()) {
+			return emptyCollection;
+		}
+		
+		User user = existUser.get();
+		if (user.getPurchase_receipt() == null) {
+			return emptyCollection;
+		}
+		
+		String jsonString = this.verifyReceipt(user.getPurchase_receipt());
+		
+		JsonNode actualObj = null;
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			actualObj = mapper.readTree(jsonString);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		
+		boolean isReceiptValid = false;
+		JsonNode receiptVerifyResult = null;
+		
+		if (actualObj != null) {
+			JsonNode jsonNode_status = actualObj.get("status");
+			// 0 if the receipt is valid
+			if (jsonNode_status != null && jsonNode_status.intValue() == 0) {
+				isReceiptValid = true;
+				receiptVerifyResult = actualObj;
+			}
+		}
+		
+		if (!isReceiptValid || receiptVerifyResult == null) {
+			return emptyCollection;
+		}
+		
+		JsonNode jsonNode_receipt = receiptVerifyResult.get("receipt");
+		if (jsonNode_receipt == null) {
+			return emptyCollection;
+		}
+		
+		JsonNode jsonArrNode_inapp = jsonNode_receipt.get("in_app");
+		if (jsonArrNode_inapp == null) {
+			return emptyCollection;
+		}
+		
+		List<String> receiptTransactionIds = new ArrayList<String>();
+		if (jsonArrNode_inapp.isArray()) {
+			for (final JsonNode jsonNode_inapp : jsonArrNode_inapp) {
+				if (jsonNode_inapp != null) {
+					JsonNode jsonNode_transactionid = jsonNode_inapp.get("transaction_id");
+					if (jsonNode_transactionid != null) {
+						String transactionId = jsonNode_transactionid.textValue();
+						if (StringUtils.isNotBlank(transactionId)) {
+							receiptTransactionIds.add(transactionId);
+						}
+					}
+				}
+		    }
+		}
+
+		logger.info("getTransactionIdsFormReceipt exit.");
+		return receiptTransactionIds;
+	}
+	
+	private String verifyReceipt(InputStream purchaseReceipt) {
+		logger.info("verifyReceipt enter:");
+		
+		String url_prod = "https://buy.itunes.apple.com/verifyReceipt";
+		String url_sandbox = "https://sandbox.itunes.apple.com/verifyReceipt";
+		String jsonString = null;
+		
+		try {
+			logger.info(String.format("Verify Receipt URL: %s", url_prod));
+			StringEntity se = new StringEntity(IOUtils.toString(purchaseReceipt));
+			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+			jsonString = HttpUtils.post(url_prod, se);
+			
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode actualObj = mapper.readTree(jsonString);
+	
+			if (actualObj != null) {
+				JsonNode jsonNode_status = actualObj.get("status");
+				// This receipt is from the test environment, but it was sent to the
+				// production environment for verification.
+				if (jsonNode_status != null && jsonNode_status.intValue() == 21007) {
+					logger.info(String.format("Verify Receipt URL: %s", url_sandbox));
+					jsonString = HttpUtils.post(url_sandbox, se);
+				}
+			}
+		} catch (Exception e) {
+			logger.error(String.format("Verify Receipt Error: %s", e.getMessage()), e);
+		}
+
+		logger.info(String.format("Verify Receipt Result: %s", jsonString));
+		logger.info("verifyReceipt exit.");
 		return jsonString;
 	}
 }

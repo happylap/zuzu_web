@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lap.zuzuweb.App;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.handler.payload.Validable;
 import com.lap.zuzuweb.util.CommonUtils;

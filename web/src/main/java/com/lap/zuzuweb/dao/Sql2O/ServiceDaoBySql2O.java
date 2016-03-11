@@ -6,6 +6,8 @@ package com.lap.zuzuweb.dao.Sql2O;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sql2o.Connection;
 
 import com.lap.zuzuweb.dao.ServiceDao;
@@ -18,6 +20,8 @@ import com.lap.zuzuweb.util.CommonUtils;
  *
  */
 public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao {
+	
+	private static final Logger logger = LoggerFactory.getLogger(ServiceDaoBySql2O.class);
 
 	static private String SQL_GET_SERVICE_BY_USER = "SELECT user_id, expire_time, update_time"
 			+ " FROM \"ZuzuService\" WHERE user_id=:user_id";
@@ -52,6 +56,8 @@ public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao 
 	}
 	
 	public String createService(Service service, List<Purchase> purchases) {
+		logger.debug("createService enter:");
+		
 		try (Connection conn = sql2o.beginTransaction()) {
 			if (service.getUpdate_time() == null) {
 				service.setUpdate_time(CommonUtils.getUTCNow());
@@ -71,11 +77,15 @@ public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao 
             }
             
             conn.commit();
+
+			logger.debug("createService exit.");
             return service.getUser_id();
         }
 	}
 	
 	public String updateService(Service service, List<Purchase> purchases) {
+		logger.debug("updateService enter:");
+		
 		try (Connection conn = sql2o.beginTransaction()) {
 			if (service.getUpdate_time() == null) {
 				service.setUpdate_time(CommonUtils.getUTCNow());
@@ -95,6 +105,8 @@ public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao 
             }
             
             conn.commit();
+
+			logger.debug("updateService exit.");
             return service.getUser_id();
         }
 	}

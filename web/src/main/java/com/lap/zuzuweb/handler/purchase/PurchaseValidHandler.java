@@ -25,7 +25,7 @@ public class PurchaseValidHandler extends AbstractRequestHandler<EmptyPayload> {
 		
 		String userId = urlParams.get(":userid");
 		
-		this.service.verify(userId);
+		this.service.processService(userId);
 		
 		return Answer.ok();
 	}
