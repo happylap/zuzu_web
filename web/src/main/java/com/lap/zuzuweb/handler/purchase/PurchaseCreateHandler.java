@@ -103,9 +103,10 @@ public class PurchaseCreateHandler implements Route {
 			answer = Answer.error(e.getMessage());
 		}
 		
+		response.status(200);
+        response.type("application/json");
 		String json = CommonUtils.toJson(answer);
         logger.info(String.format("Route Path: %s, Answer: %s", request.uri().toString(), json));
-        logger.info("handle exit.");
 		return json;
 		
 	}
