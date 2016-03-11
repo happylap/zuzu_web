@@ -51,38 +51,80 @@ public class PurchaseServiceImpl implements PurchaseService{
 	}
 
 	@Override
+	public String purchaseForFree(Purchase purchase) {
+		logger.debug("purchaseForFree enter:");
+		
+		if (StringUtils.isEmpty(purchase.getUser_id())) {
+			throw new IllegalArgumentException("Missing required field: user_id");
+		}
+
+		if (StringUtils.isEmpty(purchase.getStore())) {
+			throw new IllegalArgumentException("Missing required field: store");
+		}
+		
+		if (StringUtils.isEmpty(purchase.getProduct_id())) {
+			throw new IllegalArgumentException("Missing required field: product_id");
+		}
+		
+		ProductEnum product = ProductEnum.getEnum(purchase.getProduct_id());
+		if (product.isNeedVerifyReceipt()) {
+			throw new IllegalArgumentException("RadarFree product already exists");
+		}
+		
+		List<Purchase> purchases = purchaseDao.getPurchase(purchase.getUser_id());
+		if (CollectionUtils.isNotEmpty(purchases)) {
+			
+			for (Purchase purchaseInDB: purchases) {
+				if (StringUtils.equalsIgnoreCase(purchase.getProduct_id(), purchaseInDB.getProduct_id())) {
+					throw new IllegalArgumentException(String.format("Product %s already exists", product.getProductId()));
+				}
+			}
+		}
+		
+		Purchase newPurchase = new Purchase();
+		newPurchase.setUser_id(purchase.getUser_id());
+		newPurchase.setStore(purchase.getStore());
+		newPurchase.setProduct_id(purchase.getProduct_id());
+		newPurchase.setProduct_title("");
+		newPurchase.setProduct_price(0.0);
+		newPurchase.setProduct_locale_id("");
+		newPurchase.setPurchase_time(CommonUtils.getUTCNow());
+		newPurchase.setTransaction_id(CommonUtils.getRandomUUID());
+		newPurchase.set_valid(false);
+		
+		String purchaseId = this.purchaseDao.createPurchase(newPurchase);
+		
+		logger.debug("purchaseForFree exit.");
+		return purchaseId;
+	}
+
+	@Override
 	public String purchase(Purchase purchase, InputStream purchase_receipt) {
 		logger.debug("purchase enter:");
 		
 		if (StringUtils.isEmpty(purchase.getUser_id())) {
-			logger.debug("purchase exit.");
-			throw new RuntimeException("Missing required field: user_id");
+			throw new IllegalArgumentException("Missing required field: user_id");
 		}
 
 		if (StringUtils.isEmpty(purchase.getStore())) {
-			logger.debug("purchase exit.");
-			throw new RuntimeException("Missing required field: store");
+			throw new IllegalArgumentException("Missing required field: store");
 		}
 		
 		if (StringUtils.isEmpty(purchase.getProduct_id())) {
-			logger.debug("purchase exit.");
-			throw new RuntimeException("Missing required field: product_id");
+			throw new IllegalArgumentException("Missing required field: product_id");
 		}
 		
 		if (purchase_receipt == null) {
-			logger.debug("purchase exit.");
-			throw new RuntimeException("Missing required field: purchase_receipt");
+			throw new IllegalArgumentException("Missing required field: purchase_receipt");
 		}
 		
 		if (StringUtils.isEmpty(purchase.getTransaction_id())) {
-			logger.debug("purchase exit.");
-			throw new RuntimeException("Missing required field: transaction_id");
+			throw new IllegalArgumentException("Missing required field: transaction_id");
 		}
 		
 		Optional<Purchase> existPurchase = purchaseDao.getPurchaseByTransactionId(purchase.getTransaction_id(), purchase.getStore());
 		if (existPurchase.isPresent()) {
-			logger.debug("purchase exit.");
-			throw new RuntimeException("Purchase transaction_id already exists: " + purchase.getTransaction_id());
+			throw new IllegalArgumentException("Purchase transaction_id already exists: " + purchase.getTransaction_id());
 		}
 		
 		purchase.setPurchase_time(CommonUtils.getUTCNow());
@@ -91,14 +133,15 @@ public class PurchaseServiceImpl implements PurchaseService{
 		Optional<User> existUser = userDao.getUserById(purchase.getUser_id());
 		
 		if (!existUser.isPresent()) {
-			logger.debug("purchase exit.");
-			throw new RuntimeException("User does not exist: " + purchase.getUser_id());
+			logger.error("purchase exit.");
+			throw new IllegalArgumentException("User does not exist: " + purchase.getUser_id());
 		}
 		
 		User user = existUser.get();
 		user.setPurchase_receipt(purchase_receipt);
 		
 		String purchaseId = this.purchaseDao.createPurchase(purchase, user);
+		
 		logger.debug("purchase exit.");
 		return purchaseId;
 	}
@@ -176,11 +219,9 @@ public class PurchaseServiceImpl implements PurchaseService{
 			for (Purchase invalid_purchase: invalid_purchases) {
 				if (CollectionUtils.containsAny(receiptTransactionIds, Arrays.asList(invalid_purchase.getTransaction_id()))) {
 					ProductEnum product = ProductEnum.getEnum(invalid_purchase.getProduct_id());
-					if (product != null) {
-						invalid_purchase.set_valid(true);
-						toAddServiceDays += product.getStandardDays();
-						toAddServiceDays += product.getExtraDays();
-					}
+					invalid_purchase.set_valid(true);
+					toAddServiceDays += product.getStandardDays();
+					toAddServiceDays += product.getExtraDays();
 				}
 			}
 			
@@ -294,10 +335,8 @@ public class PurchaseServiceImpl implements PurchaseService{
 		
 		
 		if (existService.isPresent()) {
-			logger.info("updateService: " + service);
 			this.serviceDao.updateService(service, validPurchases);
 		} else {
-			logger.info("createService: " + service);
 			this.serviceDao.createService(service, validPurchases);
 		}
 		logger.info("processService exit.");

@@ -1,6 +1,7 @@
 package com.lap.zuzuweb.dao.Sql2O;
 
 import org.sql2o.Sql2o;
+import org.sql2o.quirks.PostgresQuirks;
 import org.sql2o.quirks.Quirks;
 import org.sql2o.quirks.QuirksDetector;
 
@@ -36,9 +37,9 @@ public class Sql2OManager {
 //		cpds.setAcquireIncrement(5);
 //		cpds.setMaxPoolSize(20);
 //
-//		Quirks quirks = QuirksDetector.forURL(url);
+//		//Quirks quirks = QuirksDetector.forURL(url);
 //
-//		return new Sql2o(cpds, quirks);
+//		return new Sql2o(cpds, new PostgresQuirks());
 	}
 
 }

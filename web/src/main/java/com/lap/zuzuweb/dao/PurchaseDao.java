@@ -14,5 +14,7 @@ public interface PurchaseDao {
 
 	//public String createPurchase(Purchase purchase, User user, Criteria criteria);
 	
+	public String createPurchase(Purchase purchase);
+	
 	public String createPurchase(Purchase purchase, User user);
 }

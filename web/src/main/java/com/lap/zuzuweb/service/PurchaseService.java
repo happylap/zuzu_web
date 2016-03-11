@@ -24,6 +24,8 @@ public interface PurchaseService {
 	//public String purchaseCriteria(Purchase purchase, InputStream purchase_receipt, String criteriaFilters);
 
 	public String purchase(Purchase purchase, InputStream purchase_receipt);
+	
+	public String purchaseForFree(Purchase purchase);
 
 	//@Deprecated
 	//public void verify(String userID);

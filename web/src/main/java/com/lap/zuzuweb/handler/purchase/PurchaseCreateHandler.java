@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.lap.zuzuweb.handler.Answer;
+import com.lap.zuzuweb.model.ProductEnum;
 import com.lap.zuzuweb.model.Purchase;
 import com.lap.zuzuweb.service.PurchaseService;
 import com.lap.zuzuweb.util.CommonUtils;
@@ -65,11 +66,6 @@ public class PurchaseCreateHandler implements Route {
 	    	String transactionId = request.raw().getParameter("transaction_id");
 	    	Part purchaseReceiptFile = request.raw().getPart("purchase_receipt");
 	    	
-	    	if (purchaseReceiptFile == null) {
-	    		logger.error("Missing required field: purchase_receipt");
-	    		throw new IllegalArgumentException("Missing required field: purchase_receipt");  
-	    	}
-	    	
 	    	Purchase purchase = new Purchase();
 	    	purchase.setUser_id(userId);
 	    	purchase.setStore(store);
@@ -83,15 +79,24 @@ public class PurchaseCreateHandler implements Route {
 
 	    	logger.info("service purchase: " + purchase.toString());
 	    	
-	    	InputStream purchase_receipt = purchaseReceiptFile.getInputStream();
+	    	ProductEnum product = ProductEnum.getEnum(purchase.getProduct_id());
 	    	
-	    	String purchase_id = this.service.purchase(purchase, purchase_receipt);
-	    	
+			if (product.isNeedVerifyReceipt()) {
+				if (purchaseReceiptFile == null) {
+		    		logger.error("Missing required field: purchase_receipt");
+		    		throw new IllegalArgumentException("Missing required field: purchase_receipt");  
+		    	}
+				InputStream purchase_receipt = purchaseReceiptFile.getInputStream();
+				String purchase_id = this.service.purchase(purchase, purchase_receipt);
+				answer = Answer.ok(purchase_id);
+			} else {
+				String purchase_id = this.service.purchaseForFree(purchase);
+				answer = Answer.ok(purchase_id);
+			}
+			
 	    	// cleanup
 	    	multipartConfigElement = null;
 	    	purchaseReceiptFile = null;
-	    	
-	    	answer = Answer.ok(purchase_id);
 	    	
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);

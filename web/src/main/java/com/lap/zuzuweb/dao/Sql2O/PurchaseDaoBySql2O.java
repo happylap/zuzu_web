@@ -49,13 +49,43 @@ public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDa
                     .executeAndFetch(Purchase.class);
         }
 	}
-	
+
+	@Override
+	public String createPurchase(Purchase purchase) {
+		logger.debug("createPurchase enter:");
+		
+		purchase.setPurchase_id(CommonUtils.getRandomUUID());
+		
+		logger.info("purchase: " + purchase);
+		
+		try (Connection conn = sql2o.beginTransaction()) {
+			logger.debug("createPurchase beginTransaction:");
+			
+			conn.createQuery(SQL_CREATE_PURCHASE)
+					.addParameter("purchase_id", purchase.getPurchase_id())
+					.addParameter("user_id", purchase.getUser_id())
+					.addParameter("store", purchase.getStore())
+					.addParameter("product_id", purchase.getProduct_id())
+					.addParameter("product_title", purchase.getProduct_title())
+					.addParameter("product_locale_id", purchase.getProduct_locale_id())
+					.addParameter("product_price", purchase.getProduct_price())
+					.addParameter("purchase_time", purchase.getPurchase_time())
+					.addParameter("transaction_id", purchase.getTransaction_id())
+					.addParameter("is_valid", purchase.is_valid())
+					.executeUpdate();
+			
+			conn.commit();
+			
+			logger.debug("createPurchase exit.");
+			return purchase.getPurchase_id();
+		}
+	}
+
+	@Override
 	public String createPurchase(Purchase purchase, User user) {
 		logger.debug("createPurchase enter:");
-
-		String newPurchaseId = CommonUtils.getRandomUUID();
-		logger.info("newPurchaseId: " + newPurchaseId);
-		purchase.setPurchase_id(newPurchaseId);
+		
+		purchase.setPurchase_id(CommonUtils.getRandomUUID());
 		
 		logger.info("purchase: " + purchase);
 		logger.info("user: " + user);
@@ -76,22 +106,15 @@ public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDa
 					.addParameter("is_valid", purchase.is_valid())
 					.executeUpdate();
 			
-			logger.debug("createPurchase SQL_CREATE_PURCHASE");
-			
 			conn.createQuery(SQL_UPDATE_USER_PURCHASE_RECEIPT)
 		    		.addParameter("purchase_receipt", user.getPurchase_receipt())
 		            .addParameter("user_id", user.getUser_id())
 		            .executeUpdate();
-
-			logger.debug("createPurchase SQL_UPDATE_USER_PURCHASE_RECEIPT");
 			
 			conn.commit();
 			
 			logger.debug("createPurchase exit.");
 			return purchase.getPurchase_id();
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			throw e;
 		}
 	}
 	

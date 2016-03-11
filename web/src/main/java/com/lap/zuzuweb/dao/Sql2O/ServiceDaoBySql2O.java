@@ -58,6 +58,9 @@ public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao 
 	public String createService(Service service, List<Purchase> purchases) {
 		logger.debug("createService enter:");
 		
+		logger.info("createService: " + service);
+		logger.info("createService: " + purchases);
+		
 		try (Connection conn = sql2o.beginTransaction()) {
 			if (service.getUpdate_time() == null) {
 				service.setUpdate_time(CommonUtils.getUTCNow());
@@ -85,6 +88,9 @@ public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao 
 	
 	public String updateService(Service service, List<Purchase> purchases) {
 		logger.debug("updateService enter:");
+		
+		logger.info("updateService: " + service);
+		logger.info("updateService: " + purchases);
 		
 		try (Connection conn = sql2o.beginTransaction()) {
 			if (service.getUpdate_time() == null) {
