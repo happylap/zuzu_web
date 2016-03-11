@@ -4,7 +4,10 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.lap.zuzuweb.App;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.model.Purchase;
 import com.lap.zuzuweb.service.PurchaseService;
@@ -16,6 +19,8 @@ import spark.Route;
 
 public class PurchaseCreateHandler implements Route {
 
+	private static final Logger logger = LoggerFactory.getLogger(PurchaseCreateHandler.class);
+	
 	private PurchaseService service = null;
 
 	public PurchaseCreateHandler(PurchaseService service) {
@@ -34,13 +39,13 @@ public class PurchaseCreateHandler implements Route {
 	    	MultipartConfigElement multipartConfigElement = new MultipartConfigElement(location, maxFileSize, maxRequestSize, fileSizeThreshold);
 	    	request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
 	    	
-	    	System.out.println("UserId: " + request.raw().getParameter("user_id"));
-	    	System.out.println("Store: " + request.raw().getParameter("store"));
-	    	System.out.println("ProductId: " + request.raw().getParameter("product_id"));
-	    	System.out.println("ProductTitle: " + request.raw().getParameter("product_title"));
-	    	System.out.println("ProductLocaleId: " + request.raw().getParameter("product_locale_id"));
-	    	System.out.println("ProductPrice: " + request.raw().getParameter("product_price"));
-	    	System.out.println("TransactionId: " + request.raw().getParameter("transaction_id"));
+	    	logger.info("UserId: " + request.raw().getParameter("user_id"));
+	    	logger.info("Store: " + request.raw().getParameter("store"));
+	    	logger.info("ProductId: " + request.raw().getParameter("product_id"));
+	    	logger.info("ProductTitle: " + request.raw().getParameter("product_title"));
+	    	logger.info("ProductLocaleId: " + request.raw().getParameter("product_locale_id"));
+	    	logger.info("ProductPrice: " + request.raw().getParameter("product_price"));
+	    	logger.info("TransactionId: " + request.raw().getParameter("transaction_id"));
 	    	
 	    	if (StringUtils.isBlank(request.raw().getParameter("user_id"))) {
 	    		throw new IllegalArgumentException("user_id is required."); 
@@ -77,13 +82,19 @@ public class PurchaseCreateHandler implements Route {
 	    	purchaseReceiptFile = null;
 	    	
 	    	Answer answer = Answer.ok(purchase_id);
-	    	return CommonUtils.toJson(answer);
-            
+	    	
+	    	String json = CommonUtils.toJson(answer);
+            logger.info(String.format("Route Path: %s, Answer: %s", request.uri().toString(), json));
+			return json;
+	    	
 		} catch (Exception e) {
-			
-			e.printStackTrace();
-			return CommonUtils.toJson(Answer.error(e.getMessage()));
+			logger.error(e.getMessage(), e);
+			String json = CommonUtils.toJson(Answer.error(e.getMessage()));
+            logger.info(String.format("Route Path: %s, Answer: %s", request.uri().toString(), json));
+			return json;
 		}
+		
+		
 	}
 
 }

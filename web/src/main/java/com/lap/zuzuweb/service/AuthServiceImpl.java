@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +24,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.lap.zuzuweb.App;
 import com.lap.zuzuweb.Secrets;
 import com.lap.zuzuweb.util.HttpUtils;
 
@@ -31,6 +34,8 @@ import com.lap.zuzuweb.util.HttpUtils;
  */
 public class AuthServiceImpl implements AuthService {
 
+	private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+	
 	private final String GOOGLE_CLIENT_ID = "846012605406-9tnrh80j8kcbcma29omhlsekot2mo0gm.apps.googleusercontent.com";
 	private final String FACEBOOK_APP_ID = "1039275546115316";
 
@@ -139,40 +144,37 @@ public class AuthServiceImpl implements AuthService {
 	public boolean isFacebookTokenValid(String token) throws Exception {
 		String url = String.format("https://graph.facebook.com/debug_token?input_token=%s&access_token=%s", token,
 				token);
-		try {
-			String jsonString = HttpUtils.get(url);
+		
+		String jsonString = HttpUtils.get(url);
 
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode actualObj = mapper.readTree(jsonString);
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode actualObj = mapper.readTree(jsonString);
 
-			if (!actualObj.isNull()) {
-				JsonNode jsonNode_error = actualObj.get("error");
-				if (jsonNode_error != null) {
-					JsonNode jsonNode_message = jsonNode_error.get("message");
-					if (jsonNode_message != null) {
-						throw new RuntimeException("Valid FB Token Error: " + jsonNode_message.textValue());
-					}
-				}
-
-				JsonNode jsonNode_data = actualObj.get("data");
-
-				if (jsonNode_data != null) {
-					JsonNode jsonNode_appId = jsonNode_data.get("app_id");
-
-					String _appId = null;
-					if (jsonNode_appId != null) {
-						_appId = jsonNode_appId.textValue();
-					}
-
-					if (StringUtils.equals(FACEBOOK_APP_ID, _appId)) {
-						return true;
-					}
+		if (!actualObj.isNull()) {
+			JsonNode jsonNode_error = actualObj.get("error");
+			if (jsonNode_error != null) {
+				JsonNode jsonNode_message = jsonNode_error.get("message");
+				if (jsonNode_message != null) {
+					throw new RuntimeException(jsonNode_message.textValue());
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
+
+			JsonNode jsonNode_data = actualObj.get("data");
+
+			if (jsonNode_data != null) {
+				JsonNode jsonNode_appId = jsonNode_data.get("app_id");
+
+				String _appId = null;
+				if (jsonNode_appId != null) {
+					_appId = jsonNode_appId.textValue();
+				}
+
+				if (StringUtils.equals(FACEBOOK_APP_ID, _appId)) {
+					return true;
+				}
+			}
 		}
+		
 		return false;
 	}
 

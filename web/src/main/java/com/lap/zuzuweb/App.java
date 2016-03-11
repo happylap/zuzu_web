@@ -9,6 +9,8 @@ import static spark.Spark.post;
 import static spark.Spark.put;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.lap.zuzuweb.common.Provider;
 import com.lap.zuzuweb.dao.CriteriaDao;
@@ -72,24 +74,29 @@ import spark.Route;
 
 public class App 
 {
+	private static final Logger logger = LoggerFactory.getLogger(App.class);
+	
 	public static boolean enableAuth = true;
 	
     public static void main( String[] args )
     {	
-
+    	logger.info("App Initialization... authorization enabled: " + enableAuth);
+    	
     	AuthService authSvc = new AuthServiceImpl();
     	
     	before((request, response) -> {
-
-    		System.out.println("url: " + request.uri().toString());
+    		
+    		logger.info("Route Path: " + request.uri().toString());
     		
     		// discharge
     		if (StringUtils.startsWith(request.uri().toString(), "/register")) {
+    			logger.debug("Discharge");
     			return;
     		}
     		
     		// discharge
     		if (StringUtils.startsWith(request.uri().toString(), "/user")) {
+    			logger.debug("Discharge");
     			return;
     		}
     		
@@ -98,32 +105,36 @@ public class App
     		}
     		
     		if (authSvc.isSuperTokenValid(request.headers("Authorization"))) {
+    			logger.debug("Valid Super Token: Pass");
     			return;
     		}
     		
-    		System.out.println("Header Authorization: " + request.headers("Authorization"));
+    		//logger.debug("Header Authorization: " + request.headers("Authorization"));
     		
     		if (authSvc.isBasicTokenValid(request.headers("Authorization"))) {
-    			
-	    		System.out.println("Header UserProvider: " + request.headers("UserProvider"));
-	    		System.out.println("Header UserToken: " + request.headers("UserToken"));
-	
-	    		String userProvider = request.headers("UserProvider");
-	    		String userToken = request.headers("UserToken");
+    			logger.debug("Valid Basic Token: Pass");
+    		
+    			String userProvider = request.headers("UserProvider");
+        		String userToken = request.headers("UserToken");
+        		
+    			logger.debug(String.format("Valid %s Token: %s", userProvider, userToken)); 
 	    		
 	    		try {
 		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.FB.toString())) {
 		    			if (authSvc.isFacebookTokenValid(userToken)) {
+		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
 		    				return;
 		    			}
 		    		}
 		    		
 		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.GOOGLE.toString())) {
 		    			if (authSvc.isGoogleTokenValid(userToken)) {
+		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
 		    				return;
 		    			}
 		    		}
 	    		} catch (Exception e) {
+    				logger.error(String.format("Valid %s Token Error: ", userProvider, e.getMessage()), e);
 	    			response.type("application/json");
 	    			halt(403, CommonUtils.toJson(Answer.forbidden(e.getMessage())));
 	    		}

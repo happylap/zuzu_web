@@ -15,6 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +31,8 @@ import com.lap.zuzuweb.util.CommonUtils;
 import com.lap.zuzuweb.util.HttpUtils;
 
 public class PurchaseServiceImpl implements PurchaseService{
+	
+	private static final Logger logger = LoggerFactory.getLogger(PurchaseServiceImpl.class);
 	
 	private PurchaseDao purchaseDao = null;
 	private UserDao userDao = null;
@@ -45,72 +49,8 @@ public class PurchaseServiceImpl implements PurchaseService{
 	public List<Purchase> getPurchase(String userID) {
 		return this.purchaseDao.getPurchase(userID);
 	}
-
-	/*
-	@Override
-	@Deprecated
-	public String purchaseCriteria(Purchase purchase, InputStream purchase_receipt, String criteriaFilters) {
-		System.out.println(purchase);
-		
-		if (StringUtils.isBlank(purchase.getUser_id())) {
-			throw new RuntimeException("Purchase user_id is required.");
-		}
-
-		if (StringUtils.isBlank(purchase.getStore())) {
-			throw new RuntimeException("Purchase store is required.");
-		}
-		
-		if (StringUtils.isBlank(purchase.getProduct_id())) {
-			throw new RuntimeException("Purchase product_id is required.");
-		}
-		
-		if (purchase_receipt == null) {
-			throw new RuntimeException("Purchase receipt file is required.");
-		}
-		
-		// TODO: 驗證 Purchase Receipt
-//		if (false) {
-//			throw new RuntimeException("Purchase receipt is invalid.");
-//		}
-		
-		purchase.setPurchase_time(CommonUtils.getUTCNow());
-		
-		Optional<User> existUser = userDao.getUser(purchase.getUser_id());
-		
-		if (!existUser.isPresent()) {
-			throw new RuntimeException("User does not exist. [" + purchase.getUser_id() + "]");
-		}
-		
-		User user = existUser.get();
-		user.setPurchase_receipt(purchase_receipt);
-		
-		Optional<Criteria> existCriteria = criteriaDao.getSingleCriteria(purchase.getUser_id());
-		
-		Criteria criteria = null;
-		
-		if (existCriteria.isPresent()) {
-			criteria = existCriteria.get();
-		} else {
-			criteria = new Criteria();
-			criteria.setUser_id(user.getUser_id());
-		}
-		criteria.setEnabled(true);
-		criteria.setFilters(new PGobject());
-		criteria.getFilters().setType("json");
-		criteria.setFiltersValue(criteriaFilters);
-
-		// Calculate expire time
-		criteria.setProductAndCalExpireTime(purchase.getProduct_id());
-		
-		this.purchaseDao.createPurchase(purchase, user, criteria);
-		
-		return criteria.getCriteria_id();
-	}
-	*/
 	
 	public String purchase(Purchase purchase, InputStream purchase_receipt) {
-		System.out.println(purchase);
-		
 		if (StringUtils.isEmpty(purchase.getUser_id())) {
 			throw new RuntimeException("Missing required field: user_id");
 		}
@@ -271,9 +211,10 @@ public class PurchaseServiceImpl implements PurchaseService{
 
 		StringEntity se = new StringEntity(IOUtils.toString(purchaseReceipt));
 		se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-		
+
+		logger.info(String.format("Verify Receipt URL: %s", url_prod));
 		String jsonString = HttpUtils.post(url_prod, se);
-		System.out.println("jsonString: " + jsonString);
+		logger.info(String.format("Verify Receipt Resout: %s", jsonString));
 		
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode actualObj = mapper.readTree(jsonString);
@@ -284,8 +225,9 @@ public class PurchaseServiceImpl implements PurchaseService{
 			// This receipt is from the test environment, but it was sent to the
 			// production environment for verification.
 			if (jsonNode_status != null && jsonNode_status.intValue() == 21007) {
+				logger.info(String.format("Verify Receipt URL: %s", url_sandbox));
 				jsonString = HttpUtils.post(url_sandbox, se);
-				System.out.println("jsonString: " + jsonString);
+				logger.info(String.format("Verify Receipt Resout: %s", jsonString));
 				actualObj = mapper.readTree(jsonString);
 			}
 		}
