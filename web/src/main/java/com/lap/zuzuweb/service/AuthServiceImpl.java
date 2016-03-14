@@ -4,6 +4,7 @@
 package com.lap.zuzuweb.service;
 
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.Arrays;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,7 +25,6 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.lap.zuzuweb.App;
 import com.lap.zuzuweb.Secrets;
 import com.lap.zuzuweb.util.HttpUtils;
 
@@ -35,10 +35,9 @@ import com.lap.zuzuweb.util.HttpUtils;
 public class AuthServiceImpl implements AuthService {
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
-	
-	private final String GOOGLE_CLIENT_ID = "846012605406-9tnrh80j8kcbcma29omhlsekot2mo0gm.apps.googleusercontent.com";
-	private final String FACEBOOK_APP_ID = "1039275546115316";
 
+	private String fbAppToken = null;
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -123,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
 		if (idToken != null) {
 			Payload payload = idToken.getPayload();
 
-			if (CollectionUtils.containsAny(payload.getAudienceAsList(), Arrays.asList(GOOGLE_CLIENT_ID))) {
+			if (CollectionUtils.containsAny(payload.getAudienceAsList(), Arrays.asList(Secrets.GOOGLE_CLIENT_ID))) {
 				return true;
 			}
 
@@ -143,25 +142,26 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public boolean isFacebookTokenValid(String token) throws Exception {
 		String url = String.format("https://graph.facebook.com/debug_token?input_token=%s&access_token=%s", token,
-				token);
+				URLEncoder.encode(this.getFacebookAppToken(), "UTF-8"));
 		
 		String jsonString = HttpUtils.get(url);
 
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode actualObj = mapper.readTree(jsonString);
 
-		if (!actualObj.isNull()) {
-			JsonNode jsonNode_error = actualObj.get("error");
-			if (jsonNode_error != null) {
-				JsonNode jsonNode_message = jsonNode_error.get("message");
-				if (jsonNode_message != null) {
-					throw new RuntimeException(jsonNode_message.textValue());
-				}
-			}
-
+		if (!actualObj.isNull()) {			
 			JsonNode jsonNode_data = actualObj.get("data");
-
 			if (jsonNode_data != null) {
+				JsonNode jsonNode_error = jsonNode_data.get("error");
+				if (jsonNode_error != null) {
+					JsonNode jsonNode_message = jsonNode_error.get("message");
+					if (jsonNode_message != null) {
+						logger.error("Verify FB Token Url: " + url);
+						logger.error("Verify FB Token Error: " + jsonNode_message.textValue());
+						throw new RuntimeException(jsonNode_message.textValue());
+					}
+				}
+				
 				JsonNode jsonNode_appId = jsonNode_data.get("app_id");
 
 				String _appId = null;
@@ -169,7 +169,7 @@ public class AuthServiceImpl implements AuthService {
 					_appId = jsonNode_appId.textValue();
 				}
 
-				if (StringUtils.equals(FACEBOOK_APP_ID, _appId)) {
+				if (StringUtils.equals(Secrets.FACEBOOK_APP_ID, _appId)) {
 					return true;
 				}
 			}
@@ -178,4 +178,25 @@ public class AuthServiceImpl implements AuthService {
 		return false;
 	}
 
+	
+	private String getFacebookAppToken() {
+		if (this.fbAppToken != null) {
+			return this.fbAppToken;
+		}
+		
+		try {
+			String url = String.format("https://graph.facebook.com/oauth/access_token?client_id=%s&client_secret=%s&grant_type=client_credentials", Secrets.FACEBOOK_APP_ID,
+					Secrets.FACEBOOK_APP_SECRET);
+			
+			String jsonString = HttpUtils.get(url);
+			
+			if (StringUtils.startsWith(jsonString, "access_token=")) {
+				fbAppToken = StringUtils.substringAfter(jsonString, "access_token=");
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		
+		return fbAppToken;
+	}
 }

@@ -18,7 +18,7 @@ public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDa
 	
 	static private String SQL_GET_PURCHASE = "SELECT purchase_id, user_id, store, product_id, product_title, product_locale_id, product_price, purchase_time, transaction_id, is_valid" 
 			+ " FROM \"ZuzuPurchase\" " 
-			+ " WHERE user_id = :user_id";
+			+ " WHERE user_id = :user_id ORDER BY purchase_time desc";
 	
 	static private String SQL_GET_PURCHASE_BY_TRANSACTION_ID = "SELECT purchase_id, user_id, store, product_id, product_title, product_locale_id, product_price, purchase_time, transaction_id, is_valid" 
 			+ " FROM \"ZuzuPurchase\" " 

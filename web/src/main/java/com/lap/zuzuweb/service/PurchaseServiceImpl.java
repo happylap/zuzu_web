@@ -85,9 +85,9 @@ public class PurchaseServiceImpl implements PurchaseService{
 		newPurchase.setUser_id(purchase.getUser_id());
 		newPurchase.setStore(purchase.getStore());
 		newPurchase.setProduct_id(purchase.getProduct_id());
-		newPurchase.setProduct_title("");
-		newPurchase.setProduct_price(0.0);
-		newPurchase.setProduct_locale_id("");
+		newPurchase.setProduct_title(purchase.getProduct_title());
+		newPurchase.setProduct_price(purchase.getProduct_price());
+		newPurchase.setProduct_locale_id(purchase.getProduct_locale_id());
 		newPurchase.setPurchase_time(CommonUtils.getUTCNow());
 		newPurchase.setTransaction_id(CommonUtils.getRandomUUID());
 		newPurchase.set_valid(false);
@@ -127,26 +127,36 @@ public class PurchaseServiceImpl implements PurchaseService{
 			throw new IllegalArgumentException("Purchase transaction_id already exists: " + purchase.getTransaction_id());
 		}
 		
-		purchase.setPurchase_time(CommonUtils.getUTCNow());
-		purchase.set_valid(false);
+		//ProductEnum product = ProductEnum.getEnum(purchase.getProduct_id());
 		
-		Optional<User> existUser = userDao.getUserById(purchase.getUser_id());
+		Purchase newPurchase = new Purchase();
+		newPurchase.setUser_id(purchase.getUser_id());
+		newPurchase.setStore(purchase.getStore());
+		newPurchase.setProduct_id(purchase.getProduct_id());
+		newPurchase.setProduct_title(purchase.getProduct_title());
+		newPurchase.setProduct_price(purchase.getProduct_price());
+		newPurchase.setProduct_locale_id(purchase.getProduct_locale_id());
+		newPurchase.setPurchase_time(CommonUtils.getUTCNow());
+		newPurchase.setTransaction_id(purchase.getTransaction_id());
+		newPurchase.set_valid(false);
+		
+		Optional<User> existUser = userDao.getUserById(newPurchase.getUser_id());
 		
 		if (!existUser.isPresent()) {
 			logger.error("purchase exit.");
-			throw new IllegalArgumentException("User does not exist: " + purchase.getUser_id());
+			throw new IllegalArgumentException("User does not exist: " + newPurchase.getUser_id());
 		}
 		
 		User user = existUser.get();
 		user.setPurchase_receipt(purchase_receipt);
 		
-		String purchaseId = this.purchaseDao.createPurchase(purchase, user);
+		String purchaseId = this.purchaseDao.createPurchase(newPurchase, user);
 		
 		logger.debug("purchase exit.");
 		return purchaseId;
 	}
 	
-	
+	@Deprecated
 	public void verify(String userID) {
 		try {
 			List<Purchase> purchases = this.purchaseDao.getPurchase(userID);

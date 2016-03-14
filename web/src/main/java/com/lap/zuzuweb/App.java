@@ -94,12 +94,6 @@ public class App
     			return;
     		}
     		
-    		// discharge
-    		if (StringUtils.startsWith(request.uri().toString(), "/user")) {
-    			logger.debug("Discharge");
-    			return;
-    		}
-    		
     		if (!enableAuth) {
     			return;
     		}
