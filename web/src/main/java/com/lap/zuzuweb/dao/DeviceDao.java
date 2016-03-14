@@ -10,6 +10,8 @@ public interface DeviceDao
 	public Optional<Device> getDevice(String userID, String deviceID);
 	
 	public List<Device> getDevices(String userID);
+
+	public List<Device> getValidDevice();
 	
 	public String createDevice(Device device);
 	

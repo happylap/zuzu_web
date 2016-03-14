@@ -29,6 +29,11 @@ public class CriteriaServiceImpl implements CriteriaService{
 	}
 
 	@Override
+	public List<Criteria> getValidCriteria() {
+		return this.dao.getValidCriteria();
+	}
+
+	@Override
 	public String createCriteria(Criteria criteria) {
 		criteria.setCriteria_id(System.currentTimeMillis()+"");
 		return this.dao.createCriteria(criteria);

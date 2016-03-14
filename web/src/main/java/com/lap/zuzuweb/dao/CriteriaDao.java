@@ -15,6 +15,8 @@ public interface CriteriaDao
 	
 	public List<Criteria> getAllCriteria();
 	
+	public List<Criteria> getValidCriteria();
+	
 	public String createCriteria(Criteria criteria);
 	
 	public String updateCriteria(Criteria criteria);

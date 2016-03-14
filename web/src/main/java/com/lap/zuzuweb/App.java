@@ -39,6 +39,7 @@ import com.lap.zuzuweb.handler.device.DeviceDeleteHandler;
 import com.lap.zuzuweb.handler.device.DeviceGetHandler;
 import com.lap.zuzuweb.handler.device.DeviceQueryHandler;
 import com.lap.zuzuweb.handler.log.LogPatchHandler;
+import com.lap.zuzuweb.handler.notifier.NotifierHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemBatchCreateHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemPatchHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemQueryHandler;
@@ -198,6 +199,9 @@ public class App
         
         // service
         get("/service/:userid", new ServiceQueryHandler(userSvc, purchaseSvc)); // get a list of purchases belonging to some user
+        
+        // notifier
+        get("/notifier", new NotifierHandler(criteriaSvc, deviceSvc)); // get a list of purchases belonging to some user
         
         get("/alive", new Route() {
             @Override

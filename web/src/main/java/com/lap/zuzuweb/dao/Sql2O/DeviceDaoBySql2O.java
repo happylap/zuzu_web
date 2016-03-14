@@ -13,6 +13,12 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 	static private String SQL_GET_DEVICES_BY_USER = "SELECT device_id, user_id, register_time"
 			+ " FROM \"Device\" WHERE user_id=:user_id";
 	
+	static private String SQL_GET_VALID_DEVICES = "SELECT d.device_id, d.user_id, d.register_time"
+			+ " FROM \"Device\" d, \"Criteria\" c, \"ZuzuService\" s"
+			+ " WHERE d.user_id = c.user_id AND c.user_id = s.user_id"
+			+ " AND c.enabled = true AND s.expire_time > now()"
+			+ " ORDER BY d.user_id";
+	
 	static private String SQL_GET_DEVICE = "SELECT device_id, user_id, register_time"
 			+ " FROM \"Device\" WHERE user_id=:user_id AND device_id=:device_id";
 	
@@ -29,6 +35,14 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
         try (Connection conn = sql2o.open()) {
             List<Device> devices = conn.createQuery(SQL_GET_DEVICES_BY_USER)
                     .addParameter("user_id", userID)
+                    .executeAndFetch(Device.class);
+            return devices;
+        }
+	}
+
+	public List<Device> getValidDevice() {
+		try (Connection conn = sql2o.open()) {
+            List<Device> devices = conn.createQuery(SQL_GET_VALID_DEVICES)
                     .executeAndFetch(Device.class);
             return devices;
         }
