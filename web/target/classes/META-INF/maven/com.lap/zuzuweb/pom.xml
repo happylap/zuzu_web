@@ -15,7 +15,6 @@
 		<logback.version>1.1.6</logback.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<sparkjava.version>2.3</sparkjava.version>
-		<c3p0.version>0.9.1.2</c3p0.version>
 		<sql2o.version>1.5.4</sql2o.version>
 		<lombok.version>1.16.6</lombok.version>
 		<jackson.version>2.7.0</jackson.version>
@@ -45,9 +44,9 @@
 			<version>${sparkjava.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>c3p0</groupId>
-			<artifactId>c3p0</artifactId>
-			<version>${c3p0.version}</version>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+			<version>2.4.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.sql2o</groupId>

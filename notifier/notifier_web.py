@@ -2,17 +2,19 @@
 
 import requests
 import json, datetime
-import CommonUtils, TimeUtils
+import CommonUtils, TimeUtils, LocalConstant
 from notifier_model import Device, Criteria
 
 class NotifierWeb(object):
     def __init__(self):
         self.logger = CommonUtils.getLogger()
-        self.web_url = "http://ec2-52-77-238-225.ap-southeast-1.compute.amazonaws.com:4567"
+        self.web_url = LocalConstant.WEB_URL
 
     def get(self, resource):
         try:
-            r = requests.get(self.web_url+resource)
+            headers = {}
+            headers[LocalConstant.WEB_TOKEN_HEADER] = LocalConstant.WEB_TOKEN_VALUE
+            r = requests.get(self.web_url+resource, headers=headers)
             if r.ok == True:
                 js = json.loads(r.content)
                 return js
@@ -25,8 +27,11 @@ class NotifierWeb(object):
 
     def post(self, resource, payload):
         try:
+            headers = {}
+            headers["Content-Type"] = "application/json"
+            headers[LocalConstant.WEB_TOKEN_HEADER] = LocalConstant.WEB_TOKEN_VALUE
             data = json.dumps(payload)
-            r = requests.post(self.web_url+resource, data=data, headers={'Content-Type': 'application/json'})
+            r = requests.post(self.web_url+resource, data=data, headers=headers)
             if r.ok == True:
                 return True
             else:
@@ -38,13 +43,16 @@ class NotifierWeb(object):
 
     def patch_replace(self, resource, path, value):
         try:
+            headers = {}
+            headers["Content-Type"] = "application/json"
+            headers[LocalConstant.WEB_TOKEN_HEADER] = LocalConstant.WEB_TOKEN_VALUE
             payload = {}
             payload["op"] = "replace"
             payload["path"] = path
             payload["value"] = value
             patch_list = [payload]
             data = json.dumps(patch_list)
-            r = requests.patch(self.web_url+resource, data=data, headers={'Content-Type': 'application/json'})
+            r = requests.patch(self.web_url+resource, data=data, headers=headers)
             if r.ok == True:
                 return True
             else:
@@ -76,6 +84,7 @@ class NotifierWeb(object):
         devices = self.get(resource)
         if devices is None or len(devices) < 1:
             return result
+
         for data in devices:
             device = Device(data)
             if device.enabled == True:
