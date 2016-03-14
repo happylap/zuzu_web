@@ -4,6 +4,7 @@ import boto
 import boto.exception
 import boto.sns
 import pprint
+import LocalConstant
 import re
 import json
 
@@ -25,8 +26,8 @@ class RHC_SNS(object):
     def __init__(self):
         region = [r for r in boto.sns.regions() if r.name==u'ap-northeast-1'][0]
         self.sns = boto.sns.SNSConnection(
-            aws_access_key_id="AKIAJ767YDIFH276KCIQ",
-            aws_secret_access_key="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",
+            aws_access_key_id = LocalConstant.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key = LocalConstant.AWS_SECRET_ACCESS_KEY,
             region=region,
         )
         self.endpoint_list = self.initEnpoints()
@@ -34,7 +35,7 @@ class RHC_SNS(object):
     def initEnpoints(self):
         endpoint_list = []
         try:
-            response = self.sns.list_endpoints_by_platform_application("arn:aws:sns:ap-northeast-1:994273935857:app/APNS_SANDBOX/zuzurentals_development")
+            response = self.sns.list_endpoints_by_platform_application(LocalConstant.SNS_PLATFORM)
             res = response['ListEndpointsByPlatformApplicationResponse']
             result = res['ListEndpointsByPlatformApplicationResult']
             endpoints = result['Endpoints']
