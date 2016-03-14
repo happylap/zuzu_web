@@ -2,8 +2,15 @@
 
 import requests
 import json, logging
-import LocalConstant
-from notifier_model import Device, Criteria
+import LocalConstant, TimeUtils
+
+class Notifier(object):
+    def __init__(self, data):
+        self.criteria_id = data.get("criteria_id")
+        self.user_id = data.get("user_id")
+        self.device_id = data.get("device_id")
+        self.last_notify_time = TimeUtils.convertTime(data.get("last_notify_time"), TimeUtils.UTC_FORMT)
+        self.filters = data.get("filters")
 
 class NotifierWeb(object):
     def __init__(self):
@@ -62,34 +69,21 @@ class NotifierWeb(object):
             self.logger.error("Exception while patch resource: " + resource +" , path="+str(path)+" , value="+str(value))
             return False
 
-    def getEffectiveCriteria(self):
+    def getNotifiers(self):
         result = []
-        resource  = "/criteria"
-
+        resource  = "/notifier"
         response = self.get(resource)
         if response is None:
             return result
-        criteria_list = response.get("data")
-        if criteria_list is None or len(criteria_list) < 1:
+        notifier_list = response.get("data")
+        if notifier_list is None or len(notifier_list) < 1:
             return result
 
-        for data in criteria_list:
-            criteria = Criteria(data)
-            result.append(criteria)
+        for data in notifier_list:
+            notifier = Notifier(data)
+            result.append(notifier)
         return result
 
-    def getEnabledDevices(self):
-        result = []
-        resource  = "/device"
-        devices = self.get(resource)
-        if devices is None or len(devices) < 1:
-            return result
-
-        for data in devices:
-            device = Device(data)
-            if device.enabled == True:
-                result.append(device)
-        return result
 
     def updateCriteriaLastNotifyTime(self, criteria_id, user_id, last_notify_time):
         resource  = "/criteria/"+criteria_id+"/"+user_id
@@ -109,4 +103,5 @@ class NotifierWeb(object):
             return 0
         else:
             return len(items)
+
 
