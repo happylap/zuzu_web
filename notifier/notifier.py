@@ -11,7 +11,7 @@ from notifier_push import RHC_SNS
 class Notifier(object):
     PRODUCT_MODE = False
     nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
-    NOTIFY_ITEMS_LIMIT = 10
+    NOTIFY_ITEMS_LIMIT = 5
     TITLE_LENGTH = 15
     NOTIFY_SOUND = "bingbong.aiff"
     def __init__(self):
@@ -147,14 +147,51 @@ class Notifier(object):
 
     def getQuery(self, criteria):
         query = {}
+        query["query"] = "*:*"
+
         filters = {}
+        filters["-parent"] = "*"
         input_filters = JsonUtils.loadsJSONStr(criteria.filters, JsonUtils.UTF8_ENCODE)
         keys = input_filters.keys()
         for field in keys:
             field = str(field)
             filter_string = ""
             obj = input_filters.get(field)
-            if isinstance(obj, unicode) or isinstance(obj, str) or isinstance(obj, int) or isinstance(obj, bool):
+
+            if field == "city":
+                opt = "OR"
+                city_filter_string = ""
+                region_filter_string = ""
+                cities = obj
+                for city in cities:
+                    regions = city.get("regions")
+                    if regions is not None and len(regions) > 0:
+                        for r in regions:
+                            if region_filter_string == "":
+                                region_filter_string =  "( " + str(r) + " "
+                            else:
+                                region_filter_string = region_filter_string + opt + " " + str(r) + " "
+
+                    else:
+                        city_code = city.get("code")
+                        if city_filter_string == "":
+                            city_filter_string =  "( " + str(city_code) + " "
+                        else:
+                            city_filter_string = city_filter_string + opt + " " + str(city_code) + " "
+
+                if city_filter_string != "":
+                    city_filter_string = city_filter_string+")"
+                if region_filter_string != "":
+                    region_filter_string = region_filter_string+")"
+
+                if city_filter_string != "" and region_filter_string != "":
+                    query["query"] = city_filter_string + " "+opt+" " + region_filter_string
+                elif city_filter_string != "":
+                    filters["city"] = city_filter_string
+                elif region_filter_string != "":
+                    filters["region"] = city_filter_string
+
+            elif isinstance(obj, unicode) or isinstance(obj, str) or isinstance(obj, int) or isinstance(obj, bool):
                 if field in self.nearby_fileds:
                     filter_string = "( * )"
                 elif field == "basement":
@@ -179,22 +216,14 @@ class Notifier(object):
                         else:
                             filter_string = filter_string + opt + " " + str(v) + " "
                     filter_string = filter_string+")"
+
             if filter_string != "":
-                if field == "region" or field == "city":
-                    query[field] = filter_string
+                if field == "city":
+                    pass
                 else:
                     filters[field] = filter_string
 
         query["filters"] = filters
-
-        if query.get("city") is not None and  query.get("region") is not None:
-            query["query"] = "city:"+query["city"]+" OR " + "region:"+query["region"]
-        elif query.get("city") is not None:
-            query["query"] = "city:"+query["city"]
-        elif query.get("region") is not None:
-            query["query"] = "region:"+query["region"]
-        else:
-            query["query"] = "*:*"
 
         return query
 
