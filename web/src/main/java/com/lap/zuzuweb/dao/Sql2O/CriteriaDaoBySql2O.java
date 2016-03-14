@@ -12,6 +12,12 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 
 	static private String SQL_GET_CRITERIA = "SELECT criteria_id, user_id, enabled, last_notify_time, filters FROM \"Criteria\"";
 	
+	static private String SQL_GET_VALID_CRITERIA = "SELECT c.criteria_id, c.user_id, c.enabled, c.filters, c.last_notify_time" 
+			+ " FROM \"Criteria\" c, \"ZuzuService\" s" 
+			+ " WHERE c.user_id = s.user_id"
+			+ " AND c.enabled = true AND s.expire_time > now()"
+			+ " ORDER BY c.user_id";
+	
 	static private String SQL_GET_CRITERIA_BY_USER = "SELECT criteria_id, user_id, enabled, last_notify_time, filters"
 			+ " FROM \"Criteria\" WHERE user_id=:user_id ORDER BY criteria_id desc";
 
@@ -78,6 +84,15 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 	public List<Criteria> getAllCriteria() {
         try (Connection conn = sql2o.open()) {
             List<Criteria> criteria = conn.createQuery(SQL_GET_CRITERIA)
+                    .executeAndFetch(Criteria.class);
+            return criteria;
+        }
+	}
+	
+	@Override
+	public List<Criteria> getValidCriteria() {
+        try (Connection conn = sql2o.open()) {
+            List<Criteria> criteria = conn.createQuery(SQL_GET_VALID_CRITERIA)
                     .executeAndFetch(Criteria.class);
             return criteria;
         }

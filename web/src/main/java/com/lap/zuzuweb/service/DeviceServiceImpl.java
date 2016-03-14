@@ -1,6 +1,5 @@
 package com.lap.zuzuweb.service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +24,11 @@ public class DeviceServiceImpl implements DeviceService
 	@Override
 	public List<Device> getDevices(String userID) {
 		return this.dao.getDevices(userID);
+	}
+	
+	@Override
+	public List<Device> getValidDevices() {
+		return this.dao.getValidDevice();
 	}
 	
 	@Override

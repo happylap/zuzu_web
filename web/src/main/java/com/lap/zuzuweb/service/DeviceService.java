@@ -11,6 +11,8 @@ public interface DeviceService {
 
 	public List<Device> getDevices(String userId);
 
+	public List<Device> getValidDevices();
+
 	public String createDevice(Device device);
 
 	public String deleteDevice(String userId, String deviceId);

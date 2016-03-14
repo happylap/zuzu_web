@@ -17,6 +17,8 @@ public interface CriteriaService
 	public List<Criteria> getCriteria(String userID);
 	
 	public List<Criteria> getAllCriteria();
+
+	public List<Criteria> getValidCriteria();
 	
 	public String createCriteria(Criteria criteria);
 	
