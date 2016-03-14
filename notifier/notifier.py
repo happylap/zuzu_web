@@ -2,7 +2,7 @@
 
 import sys
 import logging, datetime
-import JsonUtils, TimeUtils, CommonUtils
+import JsonUtils, TimeUtils, CommonUtils,LocalConstant
 from notifier_web import NotifierWeb
 from notifier_solr import NotifierSolr
 from notifier_push import RHC_SNS
@@ -18,8 +18,8 @@ class Notifier(object):
         self.logger = CommonUtils.getLogger()
         self.json = JsonUtils.getNotifierJson()
         self.notifierWeb = NotifierWeb()
-        self.rhc_solr_url = "http://ec2-52-76-69-228.ap-southeast-1.compute.amazonaws.com:8983/solr/rhc"
-        self.notifier_solr_url = "http://ec2-52-77-238-225.ap-southeast-1.compute.amazonaws.com:8983/solr/newpost"
+        self.rhc_solr_url = LocalConstant.RHC_SOLR_URL
+        self.notifier_solr_url = LocalConstant.NOTIFIER_SOLR_URL
         self.rhcSolr = NotifierSolr(self.rhc_solr_url)
         self.notifierSolr = NotifierSolr(self.notifier_solr_url)
         self.sns = RHC_SNS()
