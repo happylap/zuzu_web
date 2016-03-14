@@ -44,12 +44,15 @@ public class ServiceQueryHandler extends AbstractRequestHandler<EmptyPayload> {
         
         String status = "invalid";
         Date expire_time = null;
+        Date start_time = null;
         Long remaining_second = null;
+        Long total_second = null;
         
         if (existService.isPresent()) {
         	Service service = existService.get();
         	
         	expire_time = service.getExpire_time();
+        	start_time = service.getStart_time();
             
             if (expire_time != null) {
             	Date now = CommonUtils.getUTCNow();
@@ -58,6 +61,15 @@ public class ServiceQueryHandler extends AbstractRequestHandler<EmptyPayload> {
             	}
             	else {
             		remaining_second = Long.valueOf(0);
+            	}
+            	
+            	if (start_time != null) {
+            		if (expire_time.getTime() > start_time.getTime()) {
+            			total_second = ((expire_time.getTime() - start_time.getTime()) / 1000);
+                	}
+                	else {
+                		total_second = Long.valueOf(0);
+                	}
             	}
             }
             
@@ -79,8 +91,10 @@ public class ServiceQueryHandler extends AbstractRequestHandler<EmptyPayload> {
         ServicePayload payload = new ServicePayload();
         payload.setUser_id(userId);
         payload.setStatus(status);
+        payload.setTotal_second(total_second);
         payload.setRemaining_second(remaining_second);
         payload.setExpire_time(expire_time);
+        payload.setStart_time(start_time);
         payload.setValid_purchase_count(valid_purchase_count);
         payload.setInvalid_purchase_count(invalid_purchase_count);
         

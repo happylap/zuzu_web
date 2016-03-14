@@ -23,13 +23,13 @@ public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao 
 	
 	private static final Logger logger = LoggerFactory.getLogger(ServiceDaoBySql2O.class);
 
-	static private String SQL_GET_SERVICE_BY_USER = "SELECT user_id, expire_time, update_time"
+	static private String SQL_GET_SERVICE_BY_USER = "SELECT user_id, start_time, expire_time, update_time"
 			+ " FROM \"ZuzuService\" WHERE user_id=:user_id";
 
-	static private String SQL_CREATE_SERVICE = "INSERT INTO \"ZuzuService\"(user_id, expire_time, update_time) "
-			+ " VALUES (:user_id, :expire_time, :update_time)";
+	static private String SQL_CREATE_SERVICE = "INSERT INTO \"ZuzuService\"(user_id, start_time, expire_time, update_time) "
+			+ " VALUES (:user_id, :start_time, :expire_time, :update_time)";
 
-	static private String SQL_UPDATE_SERVICE = "UPDATE \"ZuzuService\" SET expire_time=:expire_time, update_time=:update_time"
+	static private String SQL_UPDATE_SERVICE = "UPDATE \"ZuzuService\" SET start_time=:start_time, expire_time=:expire_time, update_time=:update_time"
 			+ " WHERE user_id=:user_id";
 
 	static private String SQL_UPDATE_PURCHASE = "UPDATE \"ZuzuPurchase\" SET is_valid=:is_valid WHERE purchase_id=:purchase_id";
@@ -68,6 +68,7 @@ public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao 
 			
             conn.createQuery(SQL_CREATE_SERVICE)
             		.addParameter("user_id", service.getUser_id())
+            		.addParameter("start_time", service.getStart_time())
             		.addParameter("expire_time", service.getExpire_time())
             		.addParameter("update_time", service.getUpdate_time())
                     .executeUpdate();
@@ -99,6 +100,7 @@ public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao 
 			
             conn.createQuery(SQL_UPDATE_SERVICE)
             		.addParameter("user_id", service.getUser_id())
+            		.addParameter("start_time", service.getStart_time())
             		.addParameter("expire_time", service.getExpire_time())
             		.addParameter("update_time", service.getUpdate_time())
                     .executeUpdate();

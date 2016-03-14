@@ -337,12 +337,13 @@ public class PurchaseServiceImpl implements PurchaseService{
 			service.setUser_id(userID);
 		}
 		
+		Date newStartTime = this.calStartTime(service.getStart_time(), service.getExpire_time());
+		service.setStart_time(newStartTime);
+		
 		Date newExpireTime = this.calExpireTime(service.getExpire_time(), toaddDays);
-		
 		service.setExpire_time(newExpireTime);
+		
 		service.setUpdate_time(CommonUtils.getUTCNow());
-		
-		
 		
 		if (existService.isPresent()) {
 			this.serviceDao.updateService(service, validPurchases);
@@ -350,6 +351,23 @@ public class PurchaseServiceImpl implements PurchaseService{
 			this.serviceDao.createService(service, validPurchases);
 		}
 		logger.info("processService exit.");
+	}
+	
+	private Date calStartTime(Date origStartTime, Date origExpireTime) {
+		Date newStartTime = null;
+		
+		if (origStartTime != null) {
+			newStartTime = origStartTime;
+		} else {
+			newStartTime = CommonUtils.getUTCNow();
+		}
+		
+		if (origExpireTime == null || origExpireTime.before(CommonUtils.getUTCNow())) {
+			newStartTime = CommonUtils.getUTCNow();
+		}
+		
+		return newStartTime;
+		
 	}
 	
 	private Date calExpireTime(Date origExpireTime, int toaddDays) {
