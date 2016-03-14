@@ -49,7 +49,7 @@ class RHC_SNS(object):
 
     def getEndpoints(self, device_id):
         for e in self.endpoint_list:
-            if e.user_data is not None and e.token == device_id and e.enabled == True:
+            if e.token is not None and e.token == device_id and e.enabled == True:
                 return e
         return None
 
