@@ -23,6 +23,7 @@ def plusOneSecondAsString(time_string, format):
 
 def getOneHourAgo():
     dt = get_Now()+datetime.timedelta(hours=-1)
+    return dt
 
 def getOneHourAgoAsString(format):
     dt = getOneHourAgo()

@@ -185,7 +185,7 @@ class Notifier(object):
                     region_filter_string = region_filter_string+")"
 
                 if city_filter_string != "" and region_filter_string != "":
-                    query["query"] = city_filter_string + " "+opt+" " + region_filter_string
+                    query["query"] = "city:" +city_filter_string + " "+opt+" region:" + region_filter_string
                 elif city_filter_string != "":
                     filters["city"] = city_filter_string
                 elif region_filter_string != "":

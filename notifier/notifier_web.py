@@ -65,16 +65,20 @@ class NotifierWeb(object):
     def getEffectiveCriteria(self):
         result = []
         resource  = "/criteria"
-        criteria_list = self.get(resource)
+
+        response = self.get(resource)
+        if response is None:
+            return result
+        criteria_list = response.get("data")
         if criteria_list is None or len(criteria_list) < 1:
             return result
 
         for data in criteria_list:
             criteria = Criteria(data)
-            if criteria.enabled == False or criteria.user_id is None or criteria.expire_time is None:
-                continue
-            if TimeUtils.get_Now() > criteria.expire_time:
-                continue
+            #if criteria.enabled == False or criteria.user_id is None or criteria.expire_time is None:
+             #   continue
+            #if TimeUtils.get_Now() > criteria.expire_time:
+             #   continue
             result.append(criteria)
         return result
 
