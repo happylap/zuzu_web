@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import json
 import logging
-from httpcache import CachingHTTPAdapter
+#from httpcache import CachingHTTPAdapter
 import itertools
 import requests
 
@@ -35,7 +35,7 @@ class SolrException(BaseException):
 
 
 class Solr(object):
-    def __init__(self, endpoints, default_endpoint=None, http_cache=True):
+    def __init__(self, endpoints, default_endpoint=None, http_cache=False):
         if not endpoints:
             logger.warning("Faulty Solr configuration, SOLR will not be available!")
             return
@@ -46,9 +46,11 @@ class Solr(object):
         self._add_batch = list()
         self.req_session = requests.Session()
 
+        '''
         if http_cache:
             self.req_session.mount("http://", CachingHTTPAdapter())
             self.req_session.mount("https://", CachingHTTPAdapter())
+        '''
 
         if self._is_string(endpoints):
             self.endpoints = {'default': endpoints}

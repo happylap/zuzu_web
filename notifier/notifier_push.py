@@ -5,8 +5,7 @@ import boto.exception
 import boto.sns
 import pprint
 import LocalConstant
-import re
-import json
+
 
 class RHC_Enpoint(object):
     def __init__(self, endpoint_arn=None, enabled=None, user_data=None):

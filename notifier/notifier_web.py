@@ -1,13 +1,13 @@
 # encoding: utf-8
 
 import requests
-import json, datetime
-import CommonUtils, TimeUtils, LocalConstant
+import json, logging
+import LocalConstant
 from notifier_model import Device, Criteria
 
 class NotifierWeb(object):
     def __init__(self):
-        self.logger = CommonUtils.getLogger()
+        self.logger = logging.getLogger(__name__)
         self.web_url = LocalConstant.WEB_URL
 
     def get(self, resource):
@@ -75,10 +75,6 @@ class NotifierWeb(object):
 
         for data in criteria_list:
             criteria = Criteria(data)
-            #if criteria.enabled == False or criteria.user_id is None or criteria.expire_time is None:
-             #   continue
-            #if TimeUtils.get_Now() > criteria.expire_time:
-             #   continue
             result.append(criteria)
         return result
 

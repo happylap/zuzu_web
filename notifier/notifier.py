@@ -2,7 +2,7 @@
 
 import sys
 import logging, datetime
-import JsonUtils, TimeUtils, CommonUtils,LocalConstant
+import JsonUtils, TimeUtils, LocalConstant
 from notifier_web import NotifierWeb
 from notifier_solr import NotifierSolr
 from notifier_push import RHC_SNS
@@ -15,7 +15,7 @@ class Notifier(object):
     TITLE_LENGTH = 15
     NOTIFY_SOUND = "bingbong.aiff"
     def __init__(self):
-        self.logger = CommonUtils.getLogger()
+        self.logger = logging.getLogger(__name__)
         self.json = JsonUtils.getNotifierJson()
         self.notifierWeb = NotifierWeb()
         self.rhc_solr_url = LocalConstant.RHC_SOLR_URL
@@ -34,9 +34,11 @@ class Notifier(object):
         self.performQueryAndNotify(criteria_list)
 
     def getNewItems(self):
+        self.logger.info("getNewItems after " + self.json["last_post_time"])
         return self.rhcSolr.getNewPostItems(self.json["last_post_time"])
 
     def getCriteria(self):
+        self.logger.info("getCriteria()..")
         criteria = self.notifierWeb.getEffectiveCriteria()
         if criteria is None or len(criteria) < 1:
             self.logger.info("No criteria! Exit")
@@ -44,6 +46,12 @@ class Notifier(object):
         return criteria
 
     def addItems(self, newItems):
+        if newItems is not None:
+            self.logger.info("add " + str(len(newItems) + " items to solr of notifier"))
+        else:
+            self.logger.info("new item is None")
+            return
+
         for item in newItems:
             try:
                 item.pop("_version_", None)
@@ -54,11 +62,14 @@ class Notifier(object):
                 self.logger.error("Fail to add item: "+item["id"])
 
     def updateLastPostTime(self):
+        self.logger.info("updateLastPostTime()...")
         new_time_String = TimeUtils.plusOneSecondAsString(self.json["last_post_time"], TimeUtils.UTC_FORMT)
         self.json["last_post_time"] = new_time_String
+        self.logger.info("last_post_time becomse: " + self.json["last_post_time"])
         JsonUtils.updateNotifierJson(self.json)
 
     def performQueryAndNotify(self, criteria_list):
+        self.logger.info("performQueryAndNotify()...")
         for criteria in criteria_list:
             notify_items = self.getNotifyItems(criteria)
             if notify_items is None or len(notify_items) < 1:
@@ -68,6 +79,7 @@ class Notifier(object):
 
 
     def getNotifyItems(self, criteria):
+        self.logger.info("getNotifyItems()...")
         query_post_time = self.getNextQueryPostTime(criteria.last_notify_time)
         query = self.getQuery(criteria)
         notify_items = self.notifierSolr.getNotifyItems(query["query"],query["filters"], query_post_time)
@@ -92,6 +104,7 @@ class Notifier(object):
         return notify_items[:self.NOTIFY_ITEMS_LIMIT]
 
     def updateNotifyTime(self, criteria):
+        self.logger.info("updateNotifyTime()...")
         criteria_id = criteria.criteria_id
         user_id = criteria.user_id
         last_notify_time = criteria.last_notify_time
@@ -112,6 +125,7 @@ class Notifier(object):
         return result
 
     def sendNotifications(self,notify_items, criteria):
+        self.logger.info("sendNotifications()...")
         badge = self.notifierWeb.getUnreadNotifyItemNum(criteria.user_id)
         alert = self.composeMessageBody(notify_items)
         msg = self.composeAPNSMessage(alert, badge)
