@@ -18,6 +18,7 @@ class NotifierWeb(object):
         self.web_url = LocalConstant.WEB_URL
 
     def get(self, resource):
+        self.logger.info("get "+str(resource))
         try:
             headers = {}
             headers[LocalConstant.WEB_TOKEN_HEADER] = LocalConstant.WEB_TOKEN_VALUE
@@ -26,13 +27,14 @@ class NotifierWeb(object):
                 js = json.loads(r.content)
                 return js
             else:
-                self.logger.error("Fail to get resource: " + resource)
+                self.logger.error("Fail to get resource: " + str(resource))
                 return None
         except:
-            self.logger.error("Exception while getting resource: " + resource)
+            self.logger.error("Exception while getting resource: " + str(resource))
             return None
 
     def post(self, resource, payload):
+        self.logger.info("post "+str(resource)+", payload:"+ str(payload))
         try:
             headers = {}
             headers["Content-Type"] = "application/json"
@@ -49,6 +51,7 @@ class NotifierWeb(object):
             return False
 
     def patch_replace(self, resource, path, value):
+        self.logger.info("post "+str(resource)+", path:"+ str(path)+", value:"+str(value))
         try:
             headers = {}
             headers["Content-Type"] = "application/json"
@@ -63,20 +66,21 @@ class NotifierWeb(object):
             if r.ok == True:
                 return True
             else:
-                self.logger.error("Fail to patch resource: " + resource +" , path="+str(path) +" , value="+str(value))
+                self.logger.error("Fail to patch resource: " + str(resource) +" , path="+str(path) +" , value="+str(value))
                 return False
         except:
-            self.logger.error("Exception while patch resource: " + resource +" , path="+str(path)+" , value="+str(value))
+            self.logger.error("Exception while patch resource: " + str(resource) +" , path="+str(path)+" , value="+str(value))
             return False
 
     def delete(self, resource):
+        self.logger.info("delete "+str(resource))
         try:
             headers = {}
             headers[LocalConstant.WEB_TOKEN_HEADER] = LocalConstant.WEB_TOKEN_VALUE
             r = requests.delete(self.web_url+resource, headers=headers)
             return r.ok
         except:
-            self.logger.error("Exception while delete resource: " + resource)
+            self.logger.error("Exception while delete resource: " + str(resource))
             return False
 
     def getNotifiers(self):
@@ -96,7 +100,7 @@ class NotifierWeb(object):
 
 
     def updateCriteriaLastNotifyTime(self, criteria_id, user_id, last_notify_time):
-        resource  = "/criteria/"+criteria_id+"/"+user_id
+        resource  = "/criteria/"+user_id+"/"+criteria_id
         path = "/lastNotifyTime"
         value = last_notify_time
         self.patch_replace(resource, path, value)
@@ -107,7 +111,7 @@ class NotifierWeb(object):
         self.post(resource, payload)
 
     def getUnreadNotifyItemNum(self, user_id):
-        resource  = "/notifyitem/"+user_id
+        resource  = "/notifyitem/unreadcount/"+user_id
         items = self.get(resource)
         if items is None:
             return 0
@@ -116,7 +120,7 @@ class NotifierWeb(object):
 
     def deleteDevices(self, user_id, deviceList):
         for device_id in deviceList:
-            resource  = "/notifyitem/"+user_id+"/"+device_id
+            resource  = "/device/"+user_id+"/"+device_id
             if True == self.delete(resource):
                 self.logger.indfo("delete token:"+device_id+", of user:"+user_id)
         pass
