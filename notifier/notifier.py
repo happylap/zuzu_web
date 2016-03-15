@@ -24,7 +24,7 @@ class NotifierService(object):
         self.notifierSolr = NotifierSolr(self.notifier_solr_url)
         self.sns = RHC_SNS()
         self.current_notify_time = TimeUtils.get_Now()
-        self.current_query_post_tiem = TimeUtils.getOneHourAgo(dt=self.current_notify_time, hours=1)
+        self.current_query_post_tiem = TimeUtils.getHoursAgo(dt=self.current_notify_time, hours=1)
 
     def run(self):
         self.logger.info("current notify time: " + TimeUtils.getTimeString(self.current_notify_time, TimeUtils.UTC_FORMT))
@@ -81,6 +81,8 @@ class NotifierService(object):
         query = self.getQuery(notifier)
         notify_items = self.notifierSolr.getNotifyItems(query["query"],query["filters"], query_post_time)
         if notify_items is None or len(notify_items) < 1:
+            notifier.last_notify_time = self.current_notify_time
+            self.updateNotifyTime(notifier)
             return notify_items
 
         latest_notify_time = None
