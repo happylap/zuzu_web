@@ -224,15 +224,23 @@ class NotifierService(object):
         msg = self.composeAPNSMessage(alert, badge)
         self.logger.info("start to send notification for user: " + notifier.user_id)
         device_list = notifier.device_id
+        invalid_device = []
+        isSend = False
         for device in device_list:
             endpoint = self.sns.getEndpoints(device)
             if endpoint is not None:
-                self.logger.info("use device: " + str(device) +" to sedn notification")
+                isSend = True
+                self.logger.info("use device: " + str(device) +" to send notification")
                 self.sns.send(endpoint, msg, 'json')
             else:
-                self.logger.info("device: " + str(device) +" not valid, delete it")
-                self.notifierWeb.delete
-                pass
+                self.logger.info("found invalid device: " + str(device))
+                invalid_device.append(device)
+
+            if isSend == False:
+                self.logger.info("Cannot find any device to send for user: " + notifier.user_id)
+
+            if len(invalid_device) > 0:
+                self.notifierWeb.deleteDevices(invalid_device)
 
     def composeMessageBody(self, notify_items):
         item_size = len(notify_items)
