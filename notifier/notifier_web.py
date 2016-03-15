@@ -113,10 +113,10 @@ class NotifierWeb(object):
     def getUnreadNotifyItemNum(self, user_id):
         resource  = "/notifyitem/unreadcount/"+user_id
         items = self.get(resource)
-        if items is None:
-            return 0
+        if items.get("data") is not None:
+            return items.get("data")
         else:
-            return len(items)
+            return 0
 
     def deleteDevices(self, user_id, deviceList):
         for device_id in deviceList:
