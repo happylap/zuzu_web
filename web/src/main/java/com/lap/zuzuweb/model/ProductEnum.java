@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public enum ProductEnum {
 	RADAR1("com.lap.zuzurentals.radar1", true, 30, 0), 
-	RADAR2("com.lap.zuzurentals.radar2", true, 60, 0), 
-	RADAR3("com.lap.zuzurentals.radar3", true, 90, 0),
+	RADAR2("com.lap.zuzurentals.radar2", true, 60, 6), 
+	RADAR3("com.lap.zuzurentals.radar3", true, 90, 18),
 	RADARFREE1("com.lap.zuzurentals.radarfree1", false, 14, 0);
 	
 	private String productId;

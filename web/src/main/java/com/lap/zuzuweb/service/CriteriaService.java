@@ -10,7 +10,7 @@ import com.lap.zuzuweb.model.Criteria;
 
 public interface CriteriaService
 {
-	public Optional<Criteria> getCriteria(String criteriaId,String userID);
+	public Optional<Criteria> getCriteria(String userID, String criteriaId);
 
 	public Optional<Criteria> getSingleCriteria(String userID);
 	
@@ -24,13 +24,13 @@ public interface CriteriaService
 	
 	public String updateCriteria(Criteria criteria);
 	
-	public String deleteCriteria(String criteriaId, String userId);
+	public String deleteCriteria(String userID, String criteriaId);
 	
-	public boolean deleteCriteriaByUser(String userId);
+	public boolean deleteCriteriaByUser(String userID);
 	
-	public void setEnable(String criteriaId, String userId, boolean enabled);
+	public void setEnable(String userID, String criteriaId, boolean enabled);
 	
-	public void setLastNotifyTime(String criteriaId, String userId, Date lastNotifyTime);
+	public void setLastNotifyTime(String userID, String criteriaId, Date lastNotifyTime);
 	
-    public void setFilters(String criteriaId, String userId, PGobject filters);
+    public void setFilters(String userID, String criteriaId, PGobject filters);
 }

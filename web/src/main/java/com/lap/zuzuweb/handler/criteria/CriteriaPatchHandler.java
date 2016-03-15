@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.Map;
 
 import org.postgresql.util.PGobject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +17,10 @@ import com.lap.zuzuweb.handler.payload.Validable;
 import com.lap.zuzuweb.service.CriteriaService;
 import com.lap.zuzuweb.util.CommonUtils;
 
-public class CriteriaPatchHandler extends AbstractRequestArrayHandler {
+public class CriteriaPatchHandler extends AbstractRequestArrayHandler 
+{
+	private static final Logger logger = LoggerFactory.getLogger(CriteriaPatchHandler.class);
+	
 	private CriteriaService service = null;
 
 	public CriteriaPatchHandler(CriteriaService service) {
@@ -40,7 +45,9 @@ public class CriteriaPatchHandler extends AbstractRequestArrayHandler {
 		}
 	}
 
-	private void handleReplace(Map<String, String> urlParams, String path, String value) {
+	private void handleReplace(Map<String, String> urlParams, String path, String value) 
+	{	
+		logger.info("CriteriaPatchHandler.handleReplace: path: " + path + ", value: " + value);
 		
 		if (!urlParams.containsKey(":userid") || !urlParams.containsKey(":criteriaid")) {
 			throw new IllegalArgumentException();
@@ -54,17 +61,17 @@ public class CriteriaPatchHandler extends AbstractRequestArrayHandler {
 			filters.setType("json");
 			try {
 				filters.setValue(value);
-				this.service.setFilters(criteriaId, userId, filters);
+				this.service.setFilters(userId, criteriaId, filters);
 			} catch (final Exception e) {
 				throw new IllegalArgumentException();
 			}
 		} else if (path.equalsIgnoreCase("/enabled")) {
 			boolean enabled = Boolean.valueOf(value).booleanValue();
-			this.service.setEnable(criteriaId, userId, enabled);
+			this.service.setEnable(userId, criteriaId, enabled);
 		} else if (path.equalsIgnoreCase("/lastNotifyTime")) {
 			try {
 				Date lastNotifyTime = CommonUtils.getUTCDateFromString(value);
-				this.service.setLastNotifyTime(criteriaId, userId, lastNotifyTime);
+				this.service.setLastNotifyTime(userId, criteriaId, lastNotifyTime);
 			} catch (Exception e) {
 				throw new IllegalArgumentException();
 			}

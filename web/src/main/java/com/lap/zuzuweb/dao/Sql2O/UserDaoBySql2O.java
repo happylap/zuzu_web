@@ -3,13 +3,18 @@ package com.lap.zuzuweb.dao.Sql2O;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sql2o.Connection;
 
+import com.lap.zuzuweb.App;
 import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.model.User;
 
 public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 {
+	private static final Logger logger = LoggerFactory.getLogger(UserDaoBySql2O.class);
+	
 	static private String SQL_GET_USER_BY_USERID = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time"
 			+ " FROM \"ZuZuUser\" WHERE user_id=:user_id";
 	
@@ -27,10 +32,16 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 
 	@Override
 	public Optional<User> getUserByEmail(String email) {
+		
+		logger.info("UserDao.getUserByEmail: " + email);
+		
 		try (Connection conn = sql2o.open()) {
             User user = conn.createQuery(SQL_GET_USER_BY_EMAIL)
                 .addParameter("email", email)
                 .executeAndFetchFirst(User.class);
+            
+            logger.info("UserDao.getUserByEmail result: " + user);
+            
             return user != null ? Optional.of(user) : Optional.empty();
         }
 	}
@@ -39,10 +50,16 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 	@Override
 	public Optional<User> getUserById(String userID)
 	{
+		logger.info("UserDao.getUserById: " + userID);
+		
         try (Connection conn = sql2o.open()) {
             List<User> users = conn.createQuery(SQL_GET_USER_BY_USERID)
                 .addParameter("user_id", userID)
                 .executeAndFetch(User.class);
+            
+
+    		logger.info("UserDao.getUserById results: " + users);
+    		
             if (users.size() == 0) {
                 return Optional.empty();
             } else if (users.size() == 1) {
@@ -55,6 +72,9 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 
 	@Override
 	public String createUser(User user) {
+
+		logger.info("UserDao.createUser: " + user);
+		
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_CREATE_USER)
                 .addParameter("user_id", user.getUser_id())
@@ -73,6 +93,9 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 	
 	@Override
 	public String updateUser(User user) {
+
+		logger.info("UserDao.updateUser: " + user);
+		
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_UPDATE_USER)
             	//.addParameter("email", user.getEmail())

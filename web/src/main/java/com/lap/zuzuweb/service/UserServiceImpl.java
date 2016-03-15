@@ -3,6 +3,8 @@ package com.lap.zuzuweb.service;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.lap.zuzuweb.dao.ServiceDao;
 import com.lap.zuzuweb.dao.UserDao;
@@ -13,6 +15,8 @@ import com.lap.zuzuweb.util.CommonUtils;
 public class UserServiceImpl implements UserService
 {
 
+	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	
 	private UserDao userDao = null;
 	private ServiceDao serviceDao = null;
 	
@@ -24,18 +28,22 @@ public class UserServiceImpl implements UserService
 
 	@Override
 	public Optional<User> getUserByEmail(String email) {
+		logger.info("UserService.getUserByEmail:  + email");
 		return this.userDao.getUserByEmail(email);
 	}
 	
 	@Override
 	public Optional<User> getUserById(String userID) 
 	{
+		logger.info("UserService.getUserById:  + userID");
 		return this.userDao.getUserById(userID);
 	}
 
 	@Override
-	public String createUser(User user) {
-
+	public String createUser(User user) 
+	{
+		logger.info("UserService.createUser:  + user");
+		
 		if (user == null || StringUtils.isEmpty(user.getEmail())) {
 			throw new RuntimeException("Missing required field");
 		}
@@ -53,7 +61,10 @@ public class UserServiceImpl implements UserService
 	}
 	
 	@Override
-	public void updateUser(User user) {
+	public void updateUser(User user) 
+	{
+		logger.info("UserService.updateUser:  + user");
+		
 		if (user == null || StringUtils.isEmpty(user.getUser_id())) {
 			throw new RuntimeException("Missing required field");
 		}
