@@ -4,11 +4,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.lap.zuzuweb.dao.NotifyItemDao;
 import com.lap.zuzuweb.model.NotifyItem;
 
 public class NotifyItemServiceImpl implements NotifyItemService {
 
+	private static final Logger logger = LoggerFactory.getLogger(NotifyItemService.class);
+	
 	private NotifyItemDao dao = null;
 
 	public NotifyItemServiceImpl(NotifyItemDao dao) {
@@ -17,7 +22,14 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 
 	@Override
 	public List<NotifyItem> getItems(String userID) {
+		logger.info("NotifyItemService.getItems: " + userID);
 		return this.dao.getItems(userID);
+	}
+
+	@Override
+	public List<NotifyItem> getItemsAfterPostTime(String userID, Date postTime) {
+		logger.info("NotifyItemService.getItemsAfterPostTime: " + userID + ", " + postTime);
+		return this.dao.getItemsAfterPostTime(userID, postTime);
 	}
 
 	@Override

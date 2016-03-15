@@ -186,6 +186,7 @@ public class App
         // notify
         post("/notifyitem/batch", new NotifyItemBatchCreateHandler(notifyItemSvc)); // add a list of notify items
         get("/notifyitem/:userid", new NotifyItemQueryHandler(notifyItemSvc)); // get notify belonging to some user
+        get("/notifyitem/:userid/after/:posttime", new NotifyItemQueryHandler(notifyItemSvc)); // get notify belonging to some user
         get("/notifyitem/unreadcount/:userid", new NotifyItemUnreadCountHandler(notifyItemSvc));
         patch("/notifyitem/:userid/:itemid", new NotifyItemPatchHandler(notifyItemSvc)); 
         
