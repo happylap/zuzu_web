@@ -40,13 +40,16 @@ class NotifierService(object):
             sys.exit()
 
         for notifier in notifier_list:
-            notify_items = self.getNotifyItems(notifier)
-            if notify_items is None or len(notify_items) < 1:
-                self.logger.info("no notify items for user: " + notifier.user_id)
-                continue
-            self.logger.info("find "+str(len(notify_items))+" notify items for user: " + notifier.user_id)
-            self.notifierWeb.saveNotifyItems(notify_items)
-            self.sendNotifications(notify_items, notifier)
+            try:
+                notify_items = self.getNotifyItems(notifier)
+                if notify_items is None or len(notify_items) < 1:
+                    self.logger.info("no notify items for user: " + notifier.user_id)
+                    continue
+                self.logger.info("find "+str(len(notify_items))+" notify items for user: " + notifier.user_id)
+                self.notifierWeb.saveNotifyItems(notify_items)
+                self.sendNotifications(notify_items, notifier)
+            except:
+                self.logger.error("Exception while process the notifier of user: "+notifier.user_id)
 
     def getNewItems(self):
         self.logger.info("getNewItems after " + self.json["last_post_time"])
