@@ -29,7 +29,7 @@ public class CriteriaRemoveHandler extends AbstractRequestHandler<EmptyPayload> 
 		String criteriaId = urlParams.get(":criteriaid");
 
 		if (StringUtils.isNotEmpty(userId) && StringUtils.isNotEmpty(criteriaId)) {
-			service.deleteCriteria(criteriaId, userId);
+			service.deleteCriteria(userId, criteriaId);
 		} else if (StringUtils.isNotEmpty(userId)) {
 			service.deleteCriteriaByUser(userId);
 		}

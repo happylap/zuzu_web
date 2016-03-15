@@ -3,13 +3,17 @@ package com.lap.zuzuweb.dao.Sql2O;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sql2o.Connection;
 
 import com.lap.zuzuweb.dao.CriteriaDao;
 import com.lap.zuzuweb.model.Criteria;
 
-public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDao {
-
+public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDao 
+{
+	private static final Logger logger = LoggerFactory.getLogger(CriteriaDaoBySql2O.class);
+	
 	static private String SQL_GET_CRITERIA = "SELECT criteria_id, user_id, enabled, last_notify_time, filters FROM \"Criteria\"";
 	
 	static private String SQL_GET_VALID_CRITERIA = "SELECT c.criteria_id, c.user_id, c.enabled, c.filters, c.last_notify_time" 
@@ -36,6 +40,7 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 	
 	@Override
 	public List<Criteria> getCriteria(String userID) {
+		logger.info("CriteriaDao.getCriteria: " + userID);
         try (Connection conn = sql2o.open()) {
             List<Criteria> criteria = conn.createQuery(SQL_GET_CRITERIA_BY_USER)
                     .addParameter("user_id", userID)
@@ -46,6 +51,7 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 
 	@Override
 	public Optional<Criteria> getSingleCriteria(String userID) {
+		logger.info("CriteriaDao.getSingleCriteria: " + userID);
 		try (Connection conn = sql2o.open()) {
             List<Criteria> criteria = conn.createQuery(SQL_GET_CRITERIA_BY_USER)
                     .addParameter("user_id", userID)
@@ -61,11 +67,13 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 	}
 	
 	@Override
-	public Optional<Criteria> getCriteria(String userID, String criteria_id) {
+	public Optional<Criteria> getCriteria(String userID, String criteriaId) 
+	{
+		logger.info("CriteriaDao.getCriteria: " + userID + ", " + criteriaId);
         try (Connection conn = sql2o.open()) {
             List<Criteria> criteria = conn.createQuery(SQL_GET_SINGLE_SINGLE_CRITERIA)
                     .addParameter("user_id", userID)
-                    .addParameter("criteria_id", criteria_id)
+                    .addParameter("criteria_id", criteriaId)
                     .executeAndFetch(Criteria.class);
             if (criteria.size() == 0) {
                 return Optional.empty();
@@ -79,6 +87,7 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 	
 	@Override
 	public List<Criteria> getAllCriteria() {
+		logger.info("CriteriaDao.getAllCriteria");
         try (Connection conn = sql2o.open()) {
             List<Criteria> criteria = conn.createQuery(SQL_GET_CRITERIA)
                     .executeAndFetch(Criteria.class);
@@ -88,6 +97,7 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 	
 	@Override
 	public List<Criteria> getValidCriteria() {
+		logger.info("CriteriaDao.getValidCriteria");
         try (Connection conn = sql2o.open()) {
             List<Criteria> criteria = conn.createQuery(SQL_GET_VALID_CRITERIA)
                     .executeAndFetch(Criteria.class);
@@ -97,6 +107,7 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 
 	@Override
 	public String createCriteria(Criteria criteria) {
+		logger.info("CriteriaDao.createCriteria: " + criteria);
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_CREATE_CRITERIA)
             		.addParameter("criteria_id", criteria.getCriteria_id())
@@ -112,6 +123,7 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 
 	@Override
 	public String updateCriteria(Criteria criteria) {
+		logger.info("CriteriaDao.updateCriteria: " + criteria);
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_UPDATE_CRITERIA)
             		.addParameter("enabled", criteria.isEnabled())
@@ -126,11 +138,13 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 	}
 
 	@Override
-	public String deleteCriteria(String criteriaId, String userId) {
-        try (Connection conn = sql2o.beginTransaction()) {
+	public String deleteCriteria(String userID, String criteriaId) 
+	{
+		logger.info("CriteriaDao.deleteCriteria: " + userID + ", " + criteriaId);
+		try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_REMOVE_CRITERIA)
             		.addParameter("criteria_id", criteriaId)
-            		.addParameter("user_id", userId)
+            		.addParameter("user_id", userID)
                     .executeUpdate();
             conn.commit();
             return criteriaId;
@@ -138,10 +152,12 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 	}
 
 	@Override
-	public boolean deleteCriteriaByUser(String userId) {
+	public boolean deleteCriteriaByUser(String userID) 
+	{
+		logger.info("CriteriaDao.deleteCriteriaByUser: " + userID);
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_REMOVE_CRITERIA_BY_USER)
-            		.addParameter("user_id", userId)
+            		.addParameter("user_id", userID)
                     .executeUpdate();
             conn.commit();
             return true;

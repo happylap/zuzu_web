@@ -87,7 +87,7 @@ public class App
     	
     	before((request, response) -> {
     		
-    		logger.info("Route Path: " + request.uri().toString());
+    		logger.info(String.format("Route Path: (%s) %s", request.requestMethod(), request.uri().toString()));
     		
     		// discharge
     		if (StringUtils.startsWith(request.uri().toString(), "/register")) {
