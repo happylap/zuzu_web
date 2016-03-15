@@ -1,8 +1,11 @@
 package com.lap.zuzuweb.dao.Sql2O;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sql2o.Connection;
 
 import com.lap.zuzuweb.dao.NotifyItemDao;
@@ -10,9 +13,15 @@ import com.lap.zuzuweb.model.NotifyItem;
 
 public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyItemDao{
 
+	private static final Logger logger = LoggerFactory.getLogger(NotifyItemDaoBySql2O.class);
+	
 	static private String SQL_GET_ITEM_BY_USER = "SELECT item_id, user_id, criteria_id, is_read, notify_time, "
 			+ " post_time, price, size, first_img_url, house_type, purpose_type, title, addr"
 			+ " FROM \"Notify_item\" WHERE user_id=:user_id";
+	
+	static private String SQL_GET_ITEM_BY_USER_AFTER_POSTTIME = "SELECT item_id, user_id, criteria_id, is_read, notify_time, "
+			+ " post_time, price, size, first_img_url, house_type, purpose_type, title, addr"
+			+ " FROM \"Notify_item\" WHERE user_id=:user_id AND post_time>:post_time";
 
 	static private String SQL_GET_SINGLE_ITEM = "SELECT item_id, user_id, criteria_id, is_read, notify_time, "
 			+ " post_time, price, size, first_img_url, house_type, purpose_type, title, addr"
@@ -34,6 +43,7 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 	
 	@Override
 	public List<NotifyItem> getItems(String userID) {
+		logger.info("NotifyItemDao.getItems: " + userID);
         try (Connection conn = sql2o.open()) {
             List<NotifyItem> items = conn.createQuery(SQL_GET_ITEM_BY_USER)
                     .addParameter("user_id", userID)
@@ -41,7 +51,18 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
             return items;
         }
 	}
-	
+
+	@Override
+	public List<NotifyItem> getItemsAfterPostTime(String userID, Date postTime) {
+		logger.info("NotifyItemDao.getItemsAfterPostTime: " + userID + ", " + postTime);
+		try (Connection conn = sql2o.open()) {
+            List<NotifyItem> items = conn.createQuery(SQL_GET_ITEM_BY_USER_AFTER_POSTTIME)
+                    .addParameter("user_id", userID)
+                    .addParameter("post_time", postTime)
+                    .executeAndFetch(NotifyItem.class);
+            return items;
+        }
+	}
 
 	@Override
 	public Optional<NotifyItem> getItem(String userID, String item_id) {
