@@ -11,7 +11,7 @@ from notifier_push import RHC_SNS
 class NotifierService(object):
     PRODUCT_MODE = False
     nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
-    NOTIFY_ITEMS_LIMIT = 5
+    NOTIFY_ITEMS_LIMIT = 100
     TITLE_LENGTH = 15
     NOTIFY_SOUND = "bingbong.aiff"
     def __init__(self):
@@ -44,6 +44,7 @@ class NotifierService(object):
             if notify_items is None or len(notify_items) < 1:
                 self.logger.info("no notify items for user: " + notifier.user_id)
                 continue
+            self.logger.info("find "+str(len(notify_items))+" notify items for user: " + notifier.user_id)
             self.notifierWeb.saveNotifyItems(notify_items)
             self.sendNotifications(notify_items, notifier)
 
@@ -221,14 +222,16 @@ class NotifierService(object):
         badge = self.notifierWeb.getUnreadNotifyItemNum(notifier.user_id)
         alert = self.composeMessageBody(notify_items)
         msg = self.composeAPNSMessage(alert, badge)
-
+        self.logger.info("start to send notification for user: " + notifier.user_id)
         device_list = notifier.device_id
         for device in device_list:
             endpoint = self.sns.getEndpoints(device)
             if endpoint is not None:
+                self.logger.info("use device: " + str(device) +" to sedn notification")
                 self.sns.send(endpoint, msg, 'json')
             else:
-                #delete device from AWS SNS
+                self.logger.info("device: " + str(device) +" not valid, delete it")
+                self.notifierWeb.delete
                 pass
 
     def composeMessageBody(self, notify_items):
