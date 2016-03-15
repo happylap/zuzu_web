@@ -23,8 +23,12 @@ class NotifierService(object):
         self.rhcSolr = NotifierSolr(self.rhc_solr_url)
         self.notifierSolr = NotifierSolr(self.notifier_solr_url)
         self.sns = RHC_SNS()
+        self.current_notify_time = TimeUtils.get_Now()
+        self.current_query_post_tiem = TimeUtils.getOneHourAgo(dt=self.current_notify_time, hours=1)
 
     def run(self):
+        self.logger.info("current notify time: " + TimeUtils.getTimeString(self.current_notify_time, TimeUtils.UTC_FORMT))
+
         newItems = self.getNewItems()
         if newItems is not None and len(newItems) > 0:
             self.addItems(newItems)
@@ -67,7 +71,7 @@ class NotifierService(object):
         self.logger.info("updateLastPostTime()...")
         new_time_String = TimeUtils.plusOneSecondAsString(self.json["last_post_time"], TimeUtils.UTC_FORMT)
         self.json["last_post_time"] = new_time_String
-        self.logger.info("last_post_time becomse: " + self.json["last_post_time"])
+        self.logger.info("last_post_time becomes: " + self.json["last_post_time"])
         JsonUtils.updateNotifierJson(self.json)
 
 
@@ -79,7 +83,7 @@ class NotifierService(object):
         if notify_items is None or len(notify_items) < 1:
             return notify_items
 
-        latest = None
+        latest_notify_time = None
         for item in notify_items:
             item["item_id"] = item["id"]
             item["criteria_id"] = notifier.criteria_id
@@ -89,10 +93,15 @@ class NotifierService(object):
                 item["first_img_url"] = img_list[0]
             item.pop("img", None)
             item.pop("id", None)
+
             post_time = TimeUtils.convertTime(item["post_time"],TimeUtils.UTC_FORMT)
-            if latest is None or post_time > latest:
-                latest = post_time
-        notifier.last_notify_time = latest
+            if latest_notify_time is None or post_time > latest_notify_time:
+                latest_notify_time = post_time # use latest post time as latest notify time
+
+        if latest_notify_time is None:
+            notifier.last_notify_time = self.current_notify_time # use current time as latest notify time
+        else:
+            notifier.last_notify_time = latest_notify_time
         self.updateNotifyTime(notifier)
         return notify_items[:self.NOTIFY_ITEMS_LIMIT]
 
@@ -101,14 +110,20 @@ class NotifierService(object):
         criteria_id = notifier.criteria_id
         user_id = notifier.user_id
         last_notify_time = notifier.last_notify_time
-        self.notifierWeb.updateCriteriaLastNotifyTime(criteria_id, user_id, last_notify_time.strftime(TimeUtils.UTC_FORMT))
+        last_notify_time_str = TimeUtils.getTimeString(last_notify_time, TimeUtils.UTC_FORMT)
+        self.logger.info("last_notify_time becomes: " + last_notify_time_str)
+        self.notifierWeb.updateCriteriaLastNotifyTime(criteria_id, user_id, last_notify_time_str)
 
-    def getNextQueryPostTime(self, last_post_time):
-        if last_post_time is None:
+    def getNextQueryPostTime(self, last_notify_time):
+        if last_notify_time is None:
             return TimeUtils.getOneHourAgoAsString(TimeUtils.UTC_FORMT)
         else:
-            time_string = last_post_time.strftime(TimeUtils.UTC_FORMT)
-            return TimeUtils.plusOneSecondAsString(time_string, TimeUtils.UTC_FORMT)
+            if last_notify_time < self.current_query_post_tiem:
+                time_string = TimeUtils.getTimeString(self.current_query_post_tiem, TimeUtils.UTC_FORMT)
+                return time_string
+            else:
+                time_string = TimeUtils.getTimeString(self.last_notify_time, TimeUtils.UTC_FORMT)
+                return TimeUtils.plusOneSecondAsString(time_string, TimeUtils.UTC_FORMT)
 
     def getQuery(self, notifier):
         query = {}

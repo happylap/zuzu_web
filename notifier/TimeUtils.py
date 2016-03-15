@@ -7,6 +7,12 @@ UTC_FORMT = "%Y-%m-%dT%H:%M:%SZ"
 def get_Now():
     return datetime.datetime.utcnow()
 
+def getHoursAgo(dt, hours):
+    return dt - datetime.timedelta(hours=hours)
+
+def getTimeString(dt, format):
+    return dt.strftime(format)
+
 def convertTime(time_string, format):
     try:
         return datetime.datetime.strptime(time_string, format)
