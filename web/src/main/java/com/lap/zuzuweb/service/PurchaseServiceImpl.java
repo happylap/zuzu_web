@@ -487,7 +487,7 @@ public class PurchaseServiceImpl implements PurchaseService{
 			logger.error(String.format("Verify Receipt Error: %s", e.getMessage()), e);
 		}
 
-		logger.info(String.format("Verify Receipt Result: %s", jsonString));
+		logger.info(String.format("Verify Receipt Result Status: %s", StringUtils.substring(jsonString, 0, 60)));
 		logger.info("verifyReceipt exit.");
 		return jsonString;
 	}
