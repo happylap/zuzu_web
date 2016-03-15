@@ -122,7 +122,7 @@ class NotifierWeb(object):
         for device_id in deviceList:
             resource  = "/device/"+user_id+"/"+device_id
             if True == self.delete(resource):
-                self.logger.indfo("delete token:"+device_id+", of user:"+user_id)
+                self.logger.info("delete token:"+str(device_id)+", of user:"+str(user_id))
         pass
 
 

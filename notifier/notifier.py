@@ -241,7 +241,7 @@ class NotifierService(object):
                 self.logger.info("Cannot find any device to send for user: " + notifier.user_id)
 
             if len(invalid_device) > 0:
-                self.notifierWeb.deleteDevices(invalid_device)
+                self.notifierWeb.deleteDevices(notifier.user_id, invalid_device)
 
     def composeMessageBody(self, notify_items):
         item_size = len(notify_items)
