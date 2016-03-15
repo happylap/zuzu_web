@@ -170,6 +170,13 @@ class NotifierService(object):
                 if obj.get("from") is not None:
                     fromVal =  str(obj.get("from"))
                     toVal =  str(obj.get("to"))
+
+                    if field == "price" or field == "size":
+                        if toVal == "-1":
+                            toVal = "*"
+                        if fromVal == "-1":
+                            fromVal = "*"
+
                     filter_string = "[ " +fromVal + " TO " + toVal +" ]"
                 elif obj.get("operator") is not None:
                     opt = str(obj.get("operator"))
