@@ -8,7 +8,7 @@ from notifier_solr import NotifierSolr
 from notifier_push import RHC_SNS
 
 
-class Notifier(object):
+class NotifierService(object):
     PRODUCT_MODE = False
     nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
     NOTIFY_ITEMS_LIMIT = 5
@@ -30,24 +30,26 @@ class Notifier(object):
             self.addItems(newItems)
             self.updateLastPostTime()
 
-        criteria_list = self.getCriteria()
-        self.performQueryAndNotify(criteria_list)
+        notifier_list = self.notifierWeb.getNotifiers()
+        if notifier_list is None or len(notifier_list) <=0:
+            self.logger.info("no notifiers -> exit")
+            sys.exit()
+
+        for notifier in notifier_list:
+            notify_items = self.getNotifyItems(notifier)
+            if notify_items is None or len(notify_items) < 1:
+                self.logger.info("no notify items for user: " + notifier.user_id)
+                continue
+            self.notifierWeb.saveNotifyItems(notify_items)
+            self.sendNotifications(notify_items, notifier)
 
     def getNewItems(self):
         self.logger.info("getNewItems after " + self.json["last_post_time"])
         return self.rhcSolr.getNewPostItems(self.json["last_post_time"])
 
-    def getCriteria(self):
-        self.logger.info("getCriteria()..")
-        criteria = self.notifierWeb.getEffectiveCriteria()
-        if criteria is None or len(criteria) < 1:
-            self.logger.info("No criteria! Exit")
-            sys.exit()
-        return criteria
-
     def addItems(self, newItems):
         if newItems is not None:
-            self.logger.info("add " + str(len(newItems) + " items to solr of notifier"))
+            self.logger.info("add " + str(len(newItems)) + " items to solr of notifier")
         else:
             self.logger.info("new item is None")
             return
@@ -68,20 +70,11 @@ class Notifier(object):
         self.logger.info("last_post_time becomse: " + self.json["last_post_time"])
         JsonUtils.updateNotifierJson(self.json)
 
-    def performQueryAndNotify(self, criteria_list):
-        self.logger.info("performQueryAndNotify()...")
-        for criteria in criteria_list:
-            notify_items = self.getNotifyItems(criteria)
-            if notify_items is None or len(notify_items) < 1:
-                continue
-            self.notifierWeb.saveNotifyItems(notify_items)
-            self.sendNotifications(notify_items, criteria)
 
-
-    def getNotifyItems(self, criteria):
+    def getNotifyItems(self, notifier):
         self.logger.info("getNotifyItems()...")
-        query_post_time = self.getNextQueryPostTime(criteria.last_notify_time)
-        query = self.getQuery(criteria)
+        query_post_time = self.getNextQueryPostTime(notifier.last_notify_time)
+        query = self.getQuery(notifier)
         notify_items = self.notifierSolr.getNotifyItems(query["query"],query["filters"], query_post_time)
         if notify_items is None or len(notify_items) < 1:
             return notify_items
@@ -89,8 +82,8 @@ class Notifier(object):
         latest = None
         for item in notify_items:
             item["item_id"] = item["id"]
-            item["criteria_id"] = criteria.criteria_id
-            item["user_id"] = criteria.user_id
+            item["criteria_id"] = notifier.criteria_id
+            item["user_id"] = notifier.user_id
             img_list = item.get("img")
             if  img_list is not None and len(img_list) > 0:
                 item["first_img_url"] = img_list[0]
@@ -99,15 +92,15 @@ class Notifier(object):
             post_time = TimeUtils.convertTime(item["post_time"],TimeUtils.UTC_FORMT)
             if latest is None or post_time > latest:
                 latest = post_time
-        criteria.last_notify_time = latest
-        self.updateNotifyTime(criteria)
+        notifier.last_notify_time = latest
+        self.updateNotifyTime(notifier)
         return notify_items[:self.NOTIFY_ITEMS_LIMIT]
 
-    def updateNotifyTime(self, criteria):
+    def updateNotifyTime(self, notifier):
         self.logger.info("updateNotifyTime()...")
-        criteria_id = criteria.criteria_id
-        user_id = criteria.user_id
-        last_notify_time = criteria.last_notify_time
+        criteria_id = notifier.criteria_id
+        user_id = notifier.user_id
+        last_notify_time = notifier.last_notify_time
         self.notifierWeb.updateCriteriaLastNotifyTime(criteria_id, user_id, last_notify_time.strftime(TimeUtils.UTC_FORMT))
 
     def getNextQueryPostTime(self, last_post_time):
@@ -117,55 +110,13 @@ class Notifier(object):
             time_string = last_post_time.strftime(TimeUtils.UTC_FORMT)
             return TimeUtils.plusOneSecondAsString(time_string, TimeUtils.UTC_FORMT)
 
-    def getDevices(self, device_list, user_id):
-        result = []
-        for device in device_list:
-            if user_id == device.user_id:
-                result.append(device)
-        return result
-
-    def sendNotifications(self,notify_items, criteria):
-        self.logger.info("sendNotifications()...")
-        badge = self.notifierWeb.getUnreadNotifyItemNum(criteria.user_id)
-        alert = self.composeMessageBody(notify_items)
-        msg = self.composeAPNSMessage(alert, badge)
-        endpoint_list = self.sns.getEndpoints(criteria.user_id)
-        for e in endpoint_list:
-            self.sns.send(e, msg, 'json')
-
-    def composeMessageBody(self, notify_items):
-        item_size = len(notify_items)
-        if item_size == 1:
-            item = notify_items[0]
-            price = str(item.get("price"))
-            title = item.get("title")
-            title = title[:self.TITLE_LENGTH]
-            msg = u"一筆新刊登租屋符合您的需求\n租金:"+price+"\n"+u"標題:"+title
-        else:
-            msg = str(item_size)+u"筆新刊登租屋符合您的需求"
-        return msg
-
-    def composeAPNSMessage(self, alert, badge):
-        apns_dict = {}
-        body = {}
-        body["alert"] = alert
-        body["badge"] = badge
-        body["sound"] = self.NOTIFY_SOUND
-        apns_dict["aps"] = body
-        apns_string = JsonUtils.dumps(apns_dict,JsonUtils.UTF8_ENCODE)
-        if self.PRODUCT_MODE == True:
-            message = {'APNS':apns_string}
-        else:
-            message = {'APNS_SANDBOX':apns_string}
-        return JsonUtils.dumps(message, JsonUtils.UTF8_ENCODE)
-
-    def getQuery(self, criteria):
+    def getQuery(self, notifier):
         query = {}
         query["query"] = "*:*"
 
         filters = {}
         filters["-parent"] = "*"
-        input_filters = JsonUtils.loadsJSONStr(criteria.filters, JsonUtils.UTF8_ENCODE)
+        input_filters = JsonUtils.loadsJSONStr(notifier.filters, JsonUtils.UTF8_ENCODE)
         keys = input_filters.keys()
         for field in keys:
             field = str(field)
@@ -219,6 +170,13 @@ class Notifier(object):
                 if obj.get("from") is not None:
                     fromVal =  str(obj.get("from"))
                     toVal =  str(obj.get("to"))
+
+                    if field == "price" or field == "size":
+                        if toVal == "-1":
+                            toVal = "*"
+                        if fromVal == "-1":
+                            fromVal = "*"
+
                     filter_string = "[ " +fromVal + " TO " + toVal +" ]"
                 elif obj.get("operator") is not None:
                     opt = str(obj.get("operator"))
@@ -241,6 +199,47 @@ class Notifier(object):
 
         return query
 
+    def sendNotifications(self,notify_items, notifier):
+        self.logger.info("sendNotifications()...")
+        badge = self.notifierWeb.getUnreadNotifyItemNum(notifier.user_id)
+        alert = self.composeMessageBody(notify_items)
+        msg = self.composeAPNSMessage(alert, badge)
+
+        device_list = notifier.device_id
+        for device in device_list:
+            endpoint = self.sns.getEndpoints(device)
+            if endpoint is not None:
+                self.sns.send(endpoint, msg, 'json')
+            else:
+                #delete device from AWS SNS
+                pass
+
+    def composeMessageBody(self, notify_items):
+        item_size = len(notify_items)
+        if item_size == 1:
+            item = notify_items[0]
+            price = str(item.get("price"))
+            title = item.get("title")
+            title = title[:self.TITLE_LENGTH]
+            msg = u"一筆新刊登租屋符合您的需求\n租金:"+price+"\n"+u"標題:"+title
+        else:
+            msg = str(item_size)+u"筆新刊登租屋符合您的需求"
+        return msg
+
+    def composeAPNSMessage(self, alert, badge):
+        apns_dict = {}
+        body = {}
+        body["alert"] = alert
+        body["badge"] = badge
+        body["sound"] = self.NOTIFY_SOUND
+        apns_dict["aps"] = body
+        apns_string = JsonUtils.dumps(apns_dict,JsonUtils.UTF8_ENCODE)
+        if self.PRODUCT_MODE == True:
+            message = {'APNS':apns_string}
+        else:
+            message = {'APNS_SANDBOX':apns_string}
+        return JsonUtils.dumps(message, JsonUtils.UTF8_ENCODE)
+
 def main():
     logname = "log/notifier"+"_%s.log" % datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     logging.basicConfig(filename=logname,
@@ -249,7 +248,7 @@ def main():
                         datefmt='%H:%M:%S',
                         level=logging.INFO)
 
-    notifier = Notifier()
+    notifier = NotifierService()
     notifier.run()
 
 main()

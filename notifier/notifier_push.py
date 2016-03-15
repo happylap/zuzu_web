@@ -8,16 +8,16 @@ import LocalConstant
 
 
 class RHC_Enpoint(object):
-    def __init__(self, endpoint_arn=None, enabled=None, user_data=None):
+    def __init__(self, endpoint_arn=None, enabled=None, token=None):
         self.arn = endpoint_arn
         if 'true' == enabled:
             self.enabled = True
         else:
             self.enabled = False
-        if user_data is not None:
-            self.user_data = user_data
+        if token is not None:
+            self.token = token
         else:
-            self.user_data = None
+            self.token = None
 
 
 class RHC_SNS(object):
@@ -41,18 +41,17 @@ class RHC_SNS(object):
             for e in endpoints:
                 arn = e.get('EndpointArn')
                 enable = e.get('Attributes').get('Enabled')
-                user_data = e.get('Attributes').get('CustomUserData')
-                endpoint_list.append(RHC_Enpoint(arn,enable,user_data))
+                token = e.get('Attributes').get('Token')
+                endpoint_list.append(RHC_Enpoint(arn,enable,token))
         except:
             pass
         return endpoint_list
 
-    def getEndpoints(self, user_id):
-        result = []
+    def getEndpoints(self, device_id):
         for e in self.endpoint_list:
-            if e.user_data is not None and e.user_data == user_id and e.enabled == True:
-                result.append(e)
-        return result
+            if e.token is not None and e.token == device_id and e.enabled == True:
+                return e
+        return None
 
     def send(self, endpoint, msg, msg_structure):
         publish_result = self.sns.publish(target_arn=endpoint.arn, message=msg, message_structure=msg_structure)
