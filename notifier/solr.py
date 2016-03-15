@@ -85,6 +85,7 @@ class Solr(object):
 
     def _send_solr_query(self, request_url, query):
         try:
+            logger.info("\nsolr query --> " + str(query))
             response = self.req_session.post(request_url, data=query)
             response.raise_for_status()
             results = response.json()
@@ -261,7 +262,6 @@ class Solr(object):
         # Do request to Solr server to default endpoint (other cores will be queried with shard functionality)
         assert self.default_endpoint in self.endpoints
         request_url = _get_url(self.endpoints[self.default_endpoint], "select")
-        logger.info("request_url: " + str(request_url))
         results = self._send_solr_query(request_url, fields)
         if not results:
             return None

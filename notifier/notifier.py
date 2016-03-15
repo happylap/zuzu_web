@@ -77,7 +77,7 @@ class NotifierService(object):
 
 
     def getNotifyItems(self, notifier):
-        self.logger.info("getNotifyItems()...")
+        self.logger.info("getNotifyItems for user: "+ notifier.user_id)
         query_post_time = self.getNextQueryPostTime(notifier.last_notify_time)
         self.logger.info("query_post_time: " +str(query_post_time))
         query = self.getQuery(notifier)
@@ -126,7 +126,7 @@ class NotifierService(object):
                 time_string = TimeUtils.getTimeString(self.current_query_post_tiem, TimeUtils.UTC_FORMT)
                 return time_string
             else:
-                time_string = TimeUtils.getTimeString(self.last_notify_time, TimeUtils.UTC_FORMT)
+                time_string = TimeUtils.getTimeString(last_notify_time, TimeUtils.UTC_FORMT)
                 return TimeUtils.plusOneSecondAsString(time_string, TimeUtils.UTC_FORMT)
 
     def getQuery(self, notifier):

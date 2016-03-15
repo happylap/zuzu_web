@@ -7,6 +7,7 @@ class NotifierSolr(object):
     def __init__(self, solr_url):
         self.solr_url = solr_url
         self.solr = Solr(endpoints=self.solr_url, http_cache=False)
+        self.logger = logging.getLogger(__name__)
         
     def _error_callback(self, document=None, item_id=None, query=None):
         """
@@ -24,7 +25,7 @@ class NotifierSolr(object):
         filters = {}
         filters["post_time"] = "["+post_time+" TO *]"
         filters["-parent"] = "*"
-        columns = ["id, mobile_link, link, city, region, title, price, size house_type, purpose_type, addr, img, post_time"]
+        columns = ["*"]
         sort = ["post_time asc"]
         rows = self._get_rows(query, filters)
         if rows > 0:
@@ -39,7 +40,11 @@ class NotifierSolr(object):
         filters["post_time"] = "["+post_time+" TO *]"
         columns = ["id, title, price, size house_type, purpose_type, addr, img, post_time"]
         sort = ["price asc, post_time desc"]
+
+        self.logger.info("query -> " + str(query))
+        self.logger.info("filters -> " + str(filters))
         rows = self._get_rows(query=query, filters=filters)
+
         if rows:
             r = self.solr.query(query=query, filters=filters, columns= columns, rows=rows, sort=sort)
             docs = r.documents
