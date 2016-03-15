@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.util.Optional;
 
 import com.lap.zuzuweb.dao.Sql2O.CriteriaDaoBySql2O;
-import com.lap.zuzuweb.dao.Sql2O.UserDaoBySql2O;
 import com.lap.zuzuweb.model.Criteria;
 import com.lap.zuzuweb.model.Purchase;
 import com.lap.zuzuweb.model.User;
@@ -54,8 +53,6 @@ public class PurchaseDaoBySql2OTest extends TestCase {
 		if (existCriteria.isPresent()) {
 			criteria = existCriteria.get();
 			criteria.setEnabled(true);
-			//criteria.setExpire_time(CommonUtils.getUTCNow());
-			//criteria.setApple_product_id(purchase.getProduct_id());
 		}
 		
 		User user = existUser.get();

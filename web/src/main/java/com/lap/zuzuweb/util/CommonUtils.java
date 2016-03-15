@@ -51,10 +51,6 @@ public class CommonUtils {
 		return decodeString;
 	}
 	
-	public static String combineUserID(String provider, String userid) {
-		return provider + userid;
-	}
-	
 	public static String getRandomUUID() {
 		return UUID.randomUUID().toString();
 	}

@@ -1,13 +1,10 @@
 package com.lap.zuzuweb;
 
-import java.util.Date;
 import java.util.Optional;
 
 import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.dao.Sql2O.UserDaoBySql2O;
-import com.lap.zuzuweb.model.Criteria;
 import com.lap.zuzuweb.model.User;
-import com.lap.zuzuweb.util.CommonUtils;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -44,16 +41,5 @@ public class UserDaoBySql2OTest extends TestCase {
         }
         
 		assertTrue(true);
-	}
-	public void test2() throws Exception {
-		
-		Date utc1 = CommonUtils.getUTCDateFromString("2016-02-02T10:10:10Z");
-		Date utc2 = CommonUtils.getUTCDateFromString("2016-02-02T10:10:09Z");
-		
-		Criteria criteria = new Criteria();
-		//criteria.setExpire_time(utc1);
-		
-		//assertTrue((criteria.getExpire_time() != null && criteria.getExpire_time().after(utc2)));
-		
 	}
 }

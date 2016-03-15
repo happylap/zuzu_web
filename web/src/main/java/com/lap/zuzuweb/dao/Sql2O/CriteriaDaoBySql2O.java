@@ -29,9 +29,6 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 
 	static private String SQL_UPDATE_CRITERIA = "UPDATE \"Criteria\" SET enabled=:enabled, last_notify_time=:last_notify_time, filters=:filters"
 			+ " WHERE criteria_id=:criteria_id AND user_id=:user_id";
-
-	/*static private String SQL_UPDATE_ENABLE = "UPDATE \"Criteria\" SET enabled=:enabled"
-			+ " WHERE criteria_id=:criteria_id AND user_id=:user_id";*/
 	
 	static private String SQL_REMOVE_CRITERIA = "DELETE FROM \"Criteria\" Where criteria_id=:criteria_id AND user_id=:user_id";
 	
@@ -105,8 +102,6 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
             		.addParameter("criteria_id", criteria.getCriteria_id())
             		.addParameter("user_id", criteria.getUser_id())
             		.addParameter("enabled", criteria.isEnabled())
-                    //.addParameter("expire_time", criteria.getExpire_time())
-                    //.addParameter("apple_product_id", criteria.getApple_product_id())
                     .addParameter("last_notify_time", criteria.getLast_notify_time())
                     .addParameter("filters", criteria.getFilters())
                     .executeUpdate();
@@ -120,8 +115,6 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_UPDATE_CRITERIA)
             		.addParameter("enabled", criteria.isEnabled())
-                    //.addParameter("expire_time", criteria.getExpire_time())
-                    //.addParameter("apple_product_id", criteria.getApple_product_id())
                     .addParameter("last_notify_time", criteria.getLast_notify_time())
                     .addParameter("filters", criteria.getFilters())
                     .addParameter("criteria_id", criteria.getCriteria_id())
