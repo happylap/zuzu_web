@@ -34,7 +34,7 @@ class NotifierWeb(object):
             return None
 
     def post(self, resource, payload):
-        self.logger.info("post "+str(resource)+", payload:"+ str(payload))
+        self.logger.info("post "+str(resource))
         try:
             headers = {}
             headers["Content-Type"] = "application/json"

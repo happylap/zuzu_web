@@ -261,6 +261,7 @@ class Solr(object):
         # Do request to Solr server to default endpoint (other cores will be queried with shard functionality)
         assert self.default_endpoint in self.endpoints
         request_url = _get_url(self.endpoints[self.default_endpoint], "select")
+        logger.info("request_url: " + str(request_url))
         results = self._send_solr_query(request_url, fields)
         if not results:
             return None

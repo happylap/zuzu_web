@@ -79,6 +79,7 @@ class NotifierService(object):
     def getNotifyItems(self, notifier):
         self.logger.info("getNotifyItems()...")
         query_post_time = self.getNextQueryPostTime(notifier.last_notify_time)
+        self.logger.info("query_post_time: " +str(query_post_time))
         query = self.getQuery(notifier)
         notify_items = self.notifierSolr.getNotifyItems(query["query"],query["filters"], query_post_time)
         if notify_items is None or len(notify_items) < 1:
