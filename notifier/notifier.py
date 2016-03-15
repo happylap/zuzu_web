@@ -67,7 +67,7 @@ class NotifierService(object):
         self.logger.info("updateLastPostTime()...")
         new_time_String = TimeUtils.plusOneSecondAsString(self.json["last_post_time"], TimeUtils.UTC_FORMT)
         self.json["last_post_time"] = new_time_String
-        self.logger.info("last_post_time becomse: " + self.json["last_post_time"])
+        self.logger.info("last_post_time becomes: " + self.json["last_post_time"])
         JsonUtils.updateNotifierJson(self.json)
 
 
@@ -154,7 +154,7 @@ class NotifierService(object):
                 elif city_filter_string != "":
                     filters["city"] = city_filter_string
                 elif region_filter_string != "":
-                    filters["region"] = city_filter_string
+                    filters["region"] = region_filter_string
 
             elif isinstance(obj, unicode) or isinstance(obj, str) or isinstance(obj, int) or isinstance(obj, bool):
                 if field in self.nearby_fileds:
