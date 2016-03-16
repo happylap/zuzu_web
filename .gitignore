@@ -1,6 +1,7 @@
 *.class
 *.pyc
 *.log
+*.lock
 .idea/
 Secrets.java
 LocalConstant.py
