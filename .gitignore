@@ -1,7 +1,15 @@
 *.class
-*.pyc
+
 *.log
-*.lock
-.idea/
+
+
 Secrets.java
+
+#python
+*.lock
+*.pyc
 LocalConstant.py
+notifier.json
+
+#pytcharm IDE
+.idea/
