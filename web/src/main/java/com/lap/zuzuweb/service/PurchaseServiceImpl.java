@@ -54,6 +54,18 @@ public class PurchaseServiceImpl implements PurchaseService{
 	public String purchaseForFree(Purchase purchase) {
 		logger.debug("purchaseForFree enter:");
 		
+		// 免費活動截止日 2016-06-30T23:59:59Z
+		Date deadline = null;
+		try {
+			deadline = CommonUtils.getUTCDateFromString("2016-06-30T23:59:59Z");
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		
+		if (CommonUtils.getUTCNow().after(deadline)) {
+			throw new RuntimeException("15天的租屋雷達服務禮包，兌換時間已截止。 (dealine: " + CommonUtils.getUTCStringFromDate(deadline) + ")");
+		}
+		
 		if (StringUtils.isEmpty(purchase.getUser_id())) {
 			throw new IllegalArgumentException("Missing required field: user_id");
 		}
