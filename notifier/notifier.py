@@ -9,22 +9,37 @@ from notifier_push import RHC_SNS
 
 
 class NotifierService(object):
-    PRODUCT_MODE = False
-    nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
-    NOTIFY_ITEMS_LIMIT = 100
-    TITLE_LENGTH = 15
-    NOTIFY_SOUND = "bingbong.aiff"
+
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+
         self.json = JsonUtils.getNotifierJson()
+
+        self.NOTIFY_INTERVAL_HOURS = 1
+        self.NOTIFY_ITEMS_LIMIT = 5
+        self.TITLE_LENGTH = 15
+        self.NOTIFY_SOUND = "bingbong.aiff"
+
+        self.nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
+
         self.notifierWeb = NotifierWeb()
+        self.sns = RHC_SNS()
+
         self.rhc_solr_url = LocalConstant.RHC_SOLR_URL
         self.notifier_solr_url = LocalConstant.NOTIFIER_SOLR_URL
         self.rhcSolr = NotifierSolr(self.rhc_solr_url)
         self.notifierSolr = NotifierSolr(self.notifier_solr_url)
-        self.sns = RHC_SNS()
+
+
         self.current_notify_time = TimeUtils.get_Now()
-        self.current_query_post_tiem = TimeUtils.getHoursAgo(dt=self.current_notify_time, hours=1)
+
+        if self.current_notify_time.hour == 0:
+            self.NOTIFY_INTERVAL_HOURS = 8
+            self.NOTIFY_ITEMS_LIMIT = 10
+        else:
+            pass
+
+        self.current_query_post_tiem = TimeUtils.getHoursAgo(dt=self.current_notify_time, hours= self.NOTIFY_INTERVAL_HOURS)
 
     def run(self):
         self.logger.info("current notify time: " + TimeUtils.getTimeString(self.current_notify_time, TimeUtils.UTC_FORMT))
@@ -266,7 +281,7 @@ class NotifierService(object):
         body["sound"] = self.NOTIFY_SOUND
         apns_dict["aps"] = body
         apns_string = JsonUtils.dumps(apns_dict,JsonUtils.UTF8_ENCODE)
-        if self.PRODUCT_MODE == True:
+        if LocalConstant.PRODUCT_MODE == True:
             message = {'APNS':apns_string}
         else:
             message = {'APNS_SANDBOX':apns_string}
