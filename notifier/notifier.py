@@ -17,7 +17,7 @@ class NotifierService(object):
 
         self.NOTIFY_INTERVAL_HOURS = 1
         self.NOTIFY_ITEMS_LIMIT = 5
-        self.TITLE_LENGTH = 15
+        self.TITLE_LENGTH = 30
         self.NOTIFY_SOUND = "bingbong.aiff"
 
         self.nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
@@ -267,8 +267,12 @@ class NotifierService(object):
             item = notify_items[0]
             price = str(item.get("price"))
             title = item.get("title")
-            title = title[:self.TITLE_LENGTH]
-            msg = u"一筆新刊登租屋符合您的需求\n租金:"+price+"\n"+u"標題:"+title
+
+            if len(title) > self.TITLE_LENGTH:
+                title = title[:self.TITLE_LENGTH] + "..."
+            else:
+                title = title[:self.TITLE_LENGTH]
+            msg = price+"，"+title
         else:
             msg = str(item_size)+u"筆新刊登租屋符合您的需求"
         return msg
