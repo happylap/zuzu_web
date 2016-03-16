@@ -19,6 +19,7 @@ class NotifierService(object):
         self.NOTIFY_ITEMS_LIMIT = 5
         self.TITLE_LENGTH = 30
         self.NOTIFY_SOUND = "bingbong.aiff"
+        self.FULLWIDTH_COMMA= FULLWIDTH_COMMA = unichr(65292) #unicode: FF0C (，)
 
         self.nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
 
@@ -264,15 +265,16 @@ class NotifierService(object):
     def composeMessageBody(self, notify_items):
         item_size = len(notify_items)
         if item_size == 1:
-            item = notify_items[0]
-            price = str(item.get("price"))
-            title = item.get("title")
+            try:
+                item = notify_items[0]
+                price = str(item.get("price"))
+                title = item.get("title")
 
-            if len(title) > self.TITLE_LENGTH:
-                title = title[:self.TITLE_LENGTH] + "..."
-            else:
-                title = title[:self.TITLE_LENGTH]
-            msg = price+"，"+title
+                if len(title) > self.TITLE_LENGTH:
+                    title = title[:self.TITLE_LENGTH] + "..."
+                msg = str(price)+self.FULLWIDTH_COMMA+title
+            except:
+                msg = str(item_size)+u"筆新刊登租屋符合您的需求"
         else:
             msg = str(item_size)+u"筆新刊登租屋符合您的需求"
         return msg
