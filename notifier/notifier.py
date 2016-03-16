@@ -6,7 +6,7 @@ import JsonUtils, TimeUtils, LocalConstant
 from notifier_web import NotifierWeb
 from notifier_solr import NotifierSolr
 from notifier_push import RHC_SNS
-
+from quicklock import singleton
 
 class NotifierService(object):
 
@@ -299,6 +299,13 @@ def main():
                         datefmt='%H:%M:%S',
                         level=logging.INFO)
 
+    logger = logging.getLogger(__name__)
+
+    try:
+        singleton("notifier_service")
+    except:
+        logger.error("notifier_service process is running...")
+        sys.exit()
     notifier = NotifierService()
     notifier.run()
 
