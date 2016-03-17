@@ -306,7 +306,7 @@ def main():
     try:
         singleton("notifier_service")
     except:
-        logger.error("notifier_service process is running...")
+        logger.error("notifier_service process is already running...")
         sys.exit()
     notifier = NotifierService()
     notifier.run()
