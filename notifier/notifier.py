@@ -201,7 +201,7 @@ class NotifierService(object):
                     filter_string = "{0 TO *}"
                     field = "floor"
                 elif field == "shortest_lease":
-                    filter_string = "{0 TO "+str(obj)+"}"
+                    filter_string = "[0 TO "+str(obj)+"]"
                 else:
                     filter_string= str(obj)
             elif isinstance(obj, dict):
