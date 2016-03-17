@@ -294,7 +294,7 @@ class NotifierService(object):
         return JsonUtils.dumps(message, JsonUtils.UTF8_ENCODE)
 
 def main():
-    logname = "log/notifier"+"_%s.log" % datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    logname = LocalConstant.LOG_FOLDER+"/notifier"+"_%s.log" % datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     logging.basicConfig(filename=logname,
                         filemode='wb',
                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
