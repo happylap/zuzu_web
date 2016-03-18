@@ -272,7 +272,7 @@ class NotifierService(object):
 
                 if len(title) > self.TITLE_LENGTH:
                     title = title[:self.TITLE_LENGTH] + "..."
-                msg = str(price)+self.FULLWIDTH_COMMA+title
+                msg = str(price)+u"元"+self.FULLWIDTH_COMMA+title
             except:
                 msg = str(item_size)+u"筆新刊登租屋符合您的需求"
         else:
