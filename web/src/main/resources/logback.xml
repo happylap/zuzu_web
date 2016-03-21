@@ -3,7 +3,8 @@
 <configuration>
 	
 	<!-- <property name="LOG_DIR" value="~/temp/log/zuzuweb" /> -->
-	<property name="LOG_DIR" value="/var/log/zuzuweb" />
+	<!-- <property name="LOG_DIR" value="/var/log/zuzuweb" /> -->
+	<property name="LOG_DIR" value="/data/log/zuzuweb" />
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
