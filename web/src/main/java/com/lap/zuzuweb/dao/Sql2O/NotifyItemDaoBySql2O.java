@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sql2o.Connection;
@@ -18,6 +19,10 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 	static private String SQL_GET_ITEM_BY_USER = "SELECT item_id, user_id, criteria_id, is_read, notify_time, "
 			+ " post_time, price, size, first_img_url, house_type, purpose_type, title, addr"
 			+ " FROM \"Notify_item\" WHERE user_id=:user_id";
+	
+	static private String SQL_GET_ITEM_BY_USER_ORDER_BY_POST_TIME = "SELECT item_id, user_id, criteria_id, is_read, notify_time, "
+			+ " post_time, price, size, first_img_url, house_type, purpose_type, title, addr"
+			+ " FROM \"Notify_item\" WHERE user_id=:user_id order by post_time";
 	
 	static private String SQL_GET_ITEM_BY_USER_AFTER_POSTTIME = "SELECT item_id, user_id, criteria_id, is_read, notify_time, "
 			+ " post_time, price, size, first_img_url, house_type, purpose_type, title, addr"
@@ -40,6 +45,7 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 	
 	static private String SQL_GET_UNREAD_COUNT_BY_USER = "SELECT COUNT(*) FROM \"Notify_item\" WHERE is_read = false and user_id=:user_id";
 
+	static private String SQL_REMOVE_ITEM = "DELETE FROM \"Notify_item\" Where item_id=:item_id AND user_id=:user_id";
 	
 	@Override
 	public List<NotifyItem> getItems(String userID) {
@@ -82,28 +88,50 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 	}
 
 	@Override
-	public boolean addItems(List<NotifyItem> items) {
+	public boolean addItems(List<NotifyItem> toAddItems) {
         try (Connection conn = sql2o.beginTransaction()) {
         	
-        	for (NotifyItem item: items){
-                conn.createQuery(SQL_CREATE_ITEM)
-        		.addParameter("item_id", item.getItem_id())
-        		.addParameter("user_id", item.getUser_id())
-        		.addParameter("criteria_id", item.getCriteria_id())
-        		.addParameter("is_read", item.is_read())
-                .addParameter("notify_time", item.getNotify_time())
-                .addParameter("post_time", item.getPost_time())
-                .addParameter("price", item.getPrice())
-                .addParameter("size", item.getSize())
-                .addParameter("first_img_url", item.getFirst_img_url())
-                .addParameter("house_type", item.getHouse_type())
-                .addParameter("purpose_type", item.getPurpose_type())
-                .addParameter("title", item.getTitle())
-                .addParameter("addr", item.getAddr())
-                .executeUpdate();       		
+        	if (CollectionUtils.isNotEmpty(toAddItems)) {
+        		
+        		// 刪除較舊的Items，只保留最新的200個 Start:
+        		String userId = toAddItems.get(0).getUser_id();
+        		List<NotifyItem> existedItems = conn.createQuery(SQL_GET_ITEM_BY_USER)
+                        .addParameter("user_id", userId)
+                        .executeAndFetch(NotifyItem.class);
+        		
+        		if (CollectionUtils.isNotEmpty(existedItems)) {
+	        		int existedCount = existedItems.size();
+	        		int toRemoveCount = Math.max((existedCount + toAddItems.size()), 200) - 200;
+	        		
+	        		for (int i=0; i<toRemoveCount; i++) {
+	        			NotifyItem toRemvoeItem = existedItems.get(i);
+	        			conn.createQuery(SQL_REMOVE_ITEM)
+		        			.addParameter("item_id", toRemvoeItem.getItem_id())
+		            		.addParameter("user_id", toRemvoeItem.getUser_id())
+		                    .executeUpdate();       		
+	        		}
+        		}
+        		// 刪除較舊的Item，只保留最新的200個 end.
+        		
+            	for (NotifyItem toAddItem: toAddItems){
+                    conn.createQuery(SQL_CREATE_ITEM)
+            		.addParameter("item_id", toAddItem.getItem_id())
+            		.addParameter("user_id", toAddItem.getUser_id())
+            		.addParameter("criteria_id", toAddItem.getCriteria_id())
+            		.addParameter("is_read", toAddItem.is_read())
+                    .addParameter("notify_time", toAddItem.getNotify_time())
+                    .addParameter("post_time", toAddItem.getPost_time())
+                    .addParameter("price", toAddItem.getPrice())
+                    .addParameter("size", toAddItem.getSize())
+                    .addParameter("first_img_url", toAddItem.getFirst_img_url())
+                    .addParameter("house_type", toAddItem.getHouse_type())
+                    .addParameter("purpose_type", toAddItem.getPurpose_type())
+                    .addParameter("title", toAddItem.getTitle())
+                    .addParameter("addr", toAddItem.getAddr())
+                    .executeUpdate();       		
+            	}
         	}
         	
- 
             conn.commit();
             return true;
         }
