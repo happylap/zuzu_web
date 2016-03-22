@@ -45,10 +45,11 @@ class NotifierService(object):
     def run(self):
         self.logger.info("current notify time: " + TimeUtils.getTimeString(self.current_notify_time, TimeUtils.UTC_FORMT))
 
-        newItems = self.getNewItems()
-        if newItems is not None and len(newItems) > 0:
-            self.addItems(newItems)
-            self.updateLastPostTime()
+        if LocalConstant.PRODUCT_MODE == True:
+            newItems = self.getNewItems()
+            if newItems is not None and len(newItems) > 0:
+                self.addItems(newItems)
+                self.updateLastPostTime()
 
         notifier_list = self.notifierWeb.getNotifiers()
         if notifier_list is None or len(notifier_list) <=0:
@@ -108,7 +109,7 @@ class NotifierService(object):
     def getNotifyItems(self, notifier):
         self.logger.info("getNotifyItems for user: "+ notifier.user_id)
         query_post_time = self.getNextQueryPostTime(notifier.last_notify_time)
-        
+
         self.logger.info("query_post_time: " +str(query_post_time))
         query = self.getQuery(notifier)
         notify_items = self.notifierSolr.getNotifyItems(query["query"],query["filters"], query_post_time)

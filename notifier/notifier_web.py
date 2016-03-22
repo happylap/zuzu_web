@@ -42,7 +42,14 @@ class NotifierWeb(object):
             data = json.dumps(payload)
             r = requests.post(self.web_url+resource, data=data, headers=headers)
             if r.ok == True:
-                return True
+                js = json.loads(r.content)
+                if js.get("code") is not None and js.get("code") == 200:
+                    return True
+                else:
+                    error_msg = js.get("message")
+                    if error_msg is not None:
+                        self.logger.error("save notify items error: "+error_msg)
+                    return False
             else:
                 self.logger.error("Fail to post resource: " + resource +" , payload="+str(payload))
                 return False
@@ -122,7 +129,9 @@ class NotifierWeb(object):
         for device_id in deviceList:
             resource  = "/device/"+user_id+"/"+device_id
             if True == self.delete(resource):
-                self.logger.info("delete token:"+str(device_id)+", of user:"+str(user_id))
+                self.logger.info("delete token: "+str(device_id)+", of user:"+str(user_id))
+            else:
+                self.logger.error("delete token error: "+str(device_id)+", of user:"+str(user_id))
         pass
 
 
