@@ -98,6 +98,7 @@ class NotifierService(object):
     def getNotifyItems(self, notifier):
         self.logger.info("getNotifyItems for user: "+ notifier.user_id)
         query_post_time = self.getNextQueryPostTime(notifier.last_notify_time)
+        
         self.logger.info("query_post_time: " +str(query_post_time))
         query = self.getQuery(notifier)
         notify_items = self.notifierSolr.getNotifyItems(query["query"],query["filters"], query_post_time)
@@ -247,20 +248,23 @@ class NotifierService(object):
         invalid_device = []
         isSend = False
         for device in device_list:
-            endpoint = self.sns.getEndpoints(device)
-            if endpoint is not None:
-                isSend = True
-                self.logger.info("use device: " + str(device) +" to send notification")
-                self.sns.send(endpoint, msg, 'json')
-            else:
-                self.logger.info("found invalid device: " + str(device))
-                invalid_device.append(device)
+            try:
+                endpoint = self.sns.getEndpoints(device)
+                if endpoint is not None:
+                    isSend = True
+                    self.logger.info("use device: " + str(device) +" to send notification")
+                    self.sns.send(endpoint, msg, 'json')
+                else:
+                    self.logger.info("found invalid device: " + str(device))
+                    invalid_device.append(device)
 
-            if isSend == False:
-                self.logger.info("Cannot find any device to send for user: " + notifier.user_id)
+                if isSend == False:
+                    self.logger.info("Cannot find any device to send for user: " + notifier.user_id)
 
-            if len(invalid_device) > 0:
-                self.notifierWeb.deleteDevices(notifier.user_id, invalid_device)
+                if len(invalid_device) > 0:
+                    self.notifierWeb.deleteDevices(notifier.user_id, invalid_device)
+            except:
+                pass
 
     def composeMessageBody(self, notify_items):
         item_size = len(notify_items)
@@ -287,10 +291,7 @@ class NotifierService(object):
         body["sound"] = self.NOTIFY_SOUND
         apns_dict["aps"] = body
         apns_string = JsonUtils.dumps(apns_dict,JsonUtils.UTF8_ENCODE)
-        if LocalConstant.PRODUCT_MODE == True:
-            message = {'APNS':apns_string}
-        else:
-            message = {'APNS_SANDBOX':apns_string}
+        message = {LocalConstant.APNS_MSG_HEADR:apns_string}
         return JsonUtils.dumps(message, JsonUtils.UTF8_ENCODE)
 
 def main():
