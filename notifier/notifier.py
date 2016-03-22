@@ -63,6 +63,7 @@ class NotifierService(object):
                     continue
                 self.logger.info("find "+str(len(notify_items))+" notify items for user: " + notifier.user_id)
                 self.notifierWeb.saveNotifyItems(notify_items)
+                self.updateNotifyTime(notifier)
                 self.sendNotifications(notify_items, notifier)
             except:
                 self.logger.error("Exception while process the notifier of user: "+notifier.user_id)
@@ -104,7 +105,6 @@ class NotifierService(object):
         notify_items = self.notifierSolr.getNotifyItems(query["query"],query["filters"], query_post_time)
         if notify_items is None or len(notify_items) < 1:
             notifier.last_notify_time = self.current_notify_time
-            self.updateNotifyTime(notifier)
             return notify_items
 
         latest_notify_time = None
@@ -126,7 +126,6 @@ class NotifierService(object):
             notifier.last_notify_time = self.current_notify_time # use current time as latest notify time
         else:
             notifier.last_notify_time = latest_notify_time
-        self.updateNotifyTime(notifier)
         return notify_items[:self.NOTIFY_ITEMS_LIMIT]
 
     def updateNotifyTime(self, notifier):
