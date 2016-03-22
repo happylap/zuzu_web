@@ -3,6 +3,7 @@ package com.lap.zuzuweb.handler;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,9 @@ public abstract class AbstractRequestArrayHandler implements RequestArrayHandler
         response.status(200);
         response.type("application/json");
         String json = CommonUtils.toJson(answer);
-        logger.info(String.format("Route Path: (%s) %s, Answer: %s", request.requestMethod(), request.uri().toString(), json));
+        
+        logger.info(String.format("Route Path: (%s) %s, Answer: %s", request.requestMethod(), request.uri().toString(), StringUtils.abbreviate(json, 1024)));
+        
 		return json;
     }
     
