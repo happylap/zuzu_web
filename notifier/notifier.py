@@ -58,12 +58,21 @@ class NotifierService(object):
         for notifier in notifier_list:
             try:
                 notify_items = self.getNotifyItems(notifier)
+
                 if notify_items is None or len(notify_items) < 1:
                     self.logger.info("no notify items for user: " + notifier.user_id)
                     continue
+
                 self.logger.info("find "+str(len(notify_items))+" notify items for user: " + notifier.user_id)
-                self.notifierWeb.saveNotifyItems(notify_items)
+
+                is_save = self.notifierWeb.saveNotifyItems(notify_items)
+
+                if is_save == False:
+                    self.logger.error("save notify items error, user:"+notifier.user_id+", current_query_post_tiem="+str(self.current_query_post_tiem))
+                    continue
+
                 self.updateNotifyTime(notifier)
+
                 self.sendNotifications(notify_items, notifier)
             except:
                 self.logger.error("Exception while process the notifier of user: "+notifier.user_id)

@@ -108,7 +108,7 @@ class NotifierWeb(object):
     def saveNotifyItems(self, notify_items):
         resource  = "/notifyitem/batch"
         payload = {"items":notify_items}
-        self.post(resource, payload)
+        return self.post(resource, payload)
 
     def getUnreadNotifyItemNum(self, user_id):
         resource  = "/notifyitem/unreadcount/"+user_id
