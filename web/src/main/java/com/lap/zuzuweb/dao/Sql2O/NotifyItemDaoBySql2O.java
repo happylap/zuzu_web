@@ -95,7 +95,7 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
         		
         		// 刪除較舊的Items，只保留最新的200個 Start:
         		String userId = toAddItems.get(0).getUser_id();
-        		List<NotifyItem> existedItems = conn.createQuery(SQL_GET_ITEM_BY_USER)
+        		List<NotifyItem> existedItems = conn.createQuery(SQL_GET_ITEM_BY_USER_ORDER_BY_POST_TIME)
                         .addParameter("user_id", userId)
                         .executeAndFetch(NotifyItem.class);
         		
