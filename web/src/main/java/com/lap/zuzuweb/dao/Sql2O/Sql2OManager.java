@@ -27,7 +27,7 @@ public class Sql2OManager {
 		config.addDataSourceProperty("prepStmtCacheSize", "250");
 		config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
 		config.setMinimumIdle(20);
-		config.setMaximumPoolSize(20);
+		config.setMaximumPoolSize(100);
 		config.setConnectionTimeout(30000);
 		
 		HikariDataSource ds = new HikariDataSource(config);

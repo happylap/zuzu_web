@@ -99,12 +99,16 @@ public class App
     			return;
     		}
     		
+    		//logger.debug("Header Authorization: " + request.headers("Authorization"));
+    		
+    		if (StringUtils.isEmpty(request.headers("Authorization"))) {
+    			logger.debug("Request Headers must includes Authorization parameter.");
+    		}
+    		
     		if (authSvc.isSuperTokenValid(request.headers("Authorization"))) {
     			logger.debug("Valid Super Token: Pass");
     			return;
     		}
-    		
-    		//logger.debug("Header Authorization: " + request.headers("Authorization"));
     		
     		if (authSvc.isBasicTokenValid(request.headers("Authorization"))) {
     			logger.debug("Valid Basic Token: Pass");
