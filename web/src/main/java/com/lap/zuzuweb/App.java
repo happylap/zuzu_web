@@ -68,6 +68,7 @@ import com.lap.zuzuweb.service.PurchaseServiceImpl;
 import com.lap.zuzuweb.service.UserService;
 import com.lap.zuzuweb.service.UserServiceImpl;
 import com.lap.zuzuweb.util.CommonUtils;
+import com.lap.zuzuweb.util.HttpUtils;
 
 import spark.Request;
 import spark.Response;
@@ -87,7 +88,7 @@ public class App
     	
     	before((request, response) -> {
     		
-    		logger.info(String.format("Route Path: (%s) %s", request.requestMethod(), request.uri().toString()));
+    		logger.info(String.format("Route Path: (%s) %s, From IP: %s", request.requestMethod(), request.uri().toString(), HttpUtils.getIpAddr(request)));
     		
     		// discharge
     		if (StringUtils.startsWith(request.uri().toString(), "/register")) {
