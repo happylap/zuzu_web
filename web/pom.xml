@@ -5,7 +5,7 @@
 	<groupId>com.lap</groupId>
 	<artifactId>zuzuweb</artifactId>
 	<version>1.0</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>zuzuweb</name>
 	<url>http://maven.apache.org</url>
@@ -42,6 +42,24 @@
 			<groupId>com.sparkjava</groupId>
 			<artifactId>spark-core</artifactId>
 			<version>${sparkjava.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-server</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-webapp</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.eclipse.jetty.websocket</groupId>
+					<artifactId>websocket-server</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.eclipse.jetty.websocket</groupId>
+					<artifactId>websocket-servlet</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.zaxxer</groupId>
@@ -99,7 +117,11 @@
 			<artifactId>google-api-client</artifactId>
 			<version>${google-api.version}</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -107,7 +129,9 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
 	<build>
+		<finalName>zuzuweb</finalName>
 		<pluginManagement>
 			<plugins>
 				<plugin>

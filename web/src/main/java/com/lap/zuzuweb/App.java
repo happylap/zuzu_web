@@ -73,16 +73,18 @@ import com.lap.zuzuweb.util.HttpUtils;
 import spark.Request;
 import spark.Response;
 import spark.Route;
+import spark.servlet.SparkApplication;
 
-public class App 
+public class App implements SparkApplication
 {
 	private static final Logger logger = LoggerFactory.getLogger(App.class);
 	
-	public static boolean enableAuth = true;
+	private static boolean enableAuth = false;
 	
-    public static void main( String[] args )
-    {	
-    	logger.info("App Initialization... authorization enabled: " + enableAuth);
+	public void init() {
+		logger.info("App Initialization...");
+		
+		logger.info("Authorization enabled: " + enableAuth);
     	
     	AuthService authSvc = new AuthServiceImpl();
     	
@@ -215,6 +217,10 @@ public class App
                 return "ok";
             }
         });
-        
-    }
+	}
+	
+	public void destroy() {
+		logger.info("App destroy.");
+	}
+	
 }
