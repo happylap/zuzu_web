@@ -3,7 +3,7 @@
 import logging
 import pysolarized
 import aiosolr
-from zuzuNotify import TimeUtils, JsonUtils
+from zuzuNotify import TimeUtils, JsonUtils, LocalConstant
 
 class SolrClient(object):
     def __init__(self, solr_url):
@@ -58,10 +58,10 @@ class AsyncSolrClient(object):
 
         if self.current_notify_time.hour == 0:
             self.NOTIFY_INTERVAL_HOURS = 8
-            self.NOTIFY_ITEMS_LIMIT = 10
+            self.NOTIFY_ITEMS_LIMIT = 20
         else:
             self.NOTIFY_INTERVAL_HOURS = 1
-            self.NOTIFY_ITEMS_LIMIT = 5
+            self.NOTIFY_ITEMS_LIMIT = 10
 
         self.current_query_post_tiem = TimeUtils.getHoursAgo(dt=self.current_notify_time, hours= self.NOTIFY_INTERVAL_HOURS)
 
@@ -98,7 +98,10 @@ class AsyncSolrClient(object):
         query = self.getQuery(notifier)
 
         query_post_time = self.getNextQueryPostTime(notifier.last_notify_time)
-        query_post_time = "2016-04-12T10:57:13Z"
+
+        #if LocalConstant.PRODUCT_MODE == False:
+            #query_post_time = "2016-04-13T04:57:13Z"
+
         self.logger.info("query_post_time: " +str(query_post_time))
 
         q = query["query"]

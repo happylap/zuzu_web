@@ -9,9 +9,9 @@ from zuzuNotify import JsonUtils, TimeUtils, LocalConstant
 from zuzuNotify.zuzu_solr import SolrClient, AsyncSolrClient
 from zuzuNotify.zuzu_web import ZuzuWeb, AsyncZuzuWeb
 from zuzuNotify.zuzu_sns import SNSClient, AsyncSNSClient
+from zuzuNotify import zuzu_single_process
 
 class NotifyService(object):
-
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
@@ -178,19 +178,20 @@ def main():
                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                         datefmt='%H:%M:%S',
                         level=logging.INFO)
-
-    '''
-    logger = logging.getLogger(__name__)
-
     try:
-        singleton("notifier_service")
-    except:
-        logger.error("notifier_service process is already running...")
+        logger = logging.getLogger(__name__)
+
+        zuzu_single_process.scriptStarter('no-force')
+
+        notifier = NotifyService()
+        notifier.prepareData()
+        notifier.startNotify()
+        zuzu_single_process.removePIDfile()
+    except SystemExit:
         sys.exit()
-    '''
+    except:
+        logger.error("exception!!")
+        zuzu_single_process.removePIDfile()
 
-    notifier = NotifyService()
-    notifier.prepareData()
-    notifier.startNotify()
-
-main()
+if __name__=="__main__":
+    main()
