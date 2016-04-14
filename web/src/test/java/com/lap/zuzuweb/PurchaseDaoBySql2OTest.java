@@ -30,7 +30,7 @@ public class PurchaseDaoBySql2OTest extends TestCase {
 	 * @return the suite of tests being tested
 	 */
 	public static Test suite() {
-		return new TestSuite(AppTest.class);
+		return null;//new TestSuite(AppTest.class);
 	}
 
 	public void testCreatePurchase() throws Exception {

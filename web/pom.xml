@@ -59,7 +59,7 @@
 					<groupId>org.eclipse.jetty.websocket</groupId>
 					<artifactId>websocket-servlet</artifactId>
 				</exclusion>
-			</exclusions>
+			 </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.zaxxer</groupId>
@@ -116,6 +116,11 @@
 			<groupId>com.google.api-client</groupId>
 			<artifactId>google-api-client</artifactId>
 			<version>${google-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-cognitoidentity</artifactId>
+			<version>1.9.12</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>

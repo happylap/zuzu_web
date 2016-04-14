@@ -1,12 +1,18 @@
 package com.lap.zuzuweb.service;
 
-import java.io.InputStream;
+import java.util.Map;
+
+import com.lap.zuzuweb.exception.DataAccessException;
+import com.lap.zuzuweb.exception.UnauthorizedException;
+import com.lap.zuzuweb.handler.payload.CognitoTokenResultPayload;
 
 public interface AuthService {
 
-	public boolean isSuperTokenValid(String token);
-	public boolean isBasicTokenValid(String token);
-	public boolean isPurchaseReceiptValid(InputStream purchaseReceipt) throws Exception;
-	public boolean isGoogleTokenValid(String idTokenString) throws Exception;
-	public boolean isFacebookTokenValid(String token) throws Exception;
+	
+	public boolean validateSignature(String stringToSign, String key, String targetSignature);
+	public void validateTokenRequest(String userId, String signature, String stringToSign) throws DataAccessException, UnauthorizedException;
+	public CognitoTokenResultPayload getCognitoToken(String userId, Map<String, String> logins, String identityId) throws Exception;
+	public void validateLoginRequest(String email, String signature, String timestamp) throws DataAccessException, UnauthorizedException;
+	
+	public String getZuzuToken(String email) throws DataAccessException, UnauthorizedException;
 }

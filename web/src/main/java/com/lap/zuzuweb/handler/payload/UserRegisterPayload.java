@@ -8,28 +8,32 @@ import com.lap.zuzuweb.model.User;
 import lombok.Data;
 
 @Data
-public class UserCreatePayload implements Validable {
+public class UserRegisterPayload implements Validable {
 	private String provider;
+	//private String userId;
 	private String email;
 	private String name;
 	private String gender;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
 	private Date birthday;
-	private String picture_url;
+	private String pictureUrl;
+	private String password;
 
+	
 	@Override
 	public boolean isValid() {
-		return this.getEmail() != null;
+		return this.getProvider() != null && this.getEmail() != null;
 	}
 	
 	public User toUser() {
 		User user = new User();
-		user.setProvider(provider);
-		user.setEmail(email);
+		user.setProvider(this.provider);
+		user.setEmail(this.email);
 		user.setName(name);
 		user.setGender(gender);
 		user.setBirthday(birthday);
-		user.setPicture_url(picture_url);
-		return user;
+		user.setPicture_url(pictureUrl);
+		
+		return null;
 	}
 }

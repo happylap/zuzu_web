@@ -16,6 +16,9 @@ public class User {
 	private Date birthday;
 	private String picture_url;
 	private InputStream purchase_receipt;
+	private String provider;
+	private String hashed_password;
+	private String zuzu_token;
+	
 	private Date update_time;
-
 }

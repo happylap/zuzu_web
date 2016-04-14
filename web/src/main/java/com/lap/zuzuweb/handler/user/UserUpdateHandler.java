@@ -2,6 +2,7 @@ package com.lap.zuzuweb.handler.user;
 
 import java.util.Map;
 
+import com.lap.zuzuweb.exception.DataAccessException;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.UserUpdatePayload;
@@ -18,7 +19,11 @@ public class UserUpdateHandler extends AbstractRequestHandler<UserUpdatePayload>
 
 	@Override
 	protected Answer processImpl(UserUpdatePayload value, Map<String, String> urlParams) {
-		service.updateUser(value.toUser());
-		return Answer.ok();
+		try {
+	    	service.updateUser(value.toUser());
+	    	return Answer.ok();
+    	} catch (DataAccessException e) {
+    		return Answer.error(e.getMessage());
+    	}
 	}
 }

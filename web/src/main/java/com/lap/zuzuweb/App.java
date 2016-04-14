@@ -28,6 +28,7 @@ import com.lap.zuzuweb.dao.Sql2O.PurchaseDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.ServiceDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.UserDaoBySql2O;
 import com.lap.zuzuweb.handler.Answer;
+import com.lap.zuzuweb.handler.cognito.CognitoTokenHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaCreateHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaModifyHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaPatchHandler;
@@ -48,9 +49,12 @@ import com.lap.zuzuweb.handler.purchase.PurchaseCreateHandler;
 import com.lap.zuzuweb.handler.purchase.PurchaseQueryHandler;
 import com.lap.zuzuweb.handler.purchase.PurchaseValidHandler;
 import com.lap.zuzuweb.handler.service.ServiceQueryHandler;
+import com.lap.zuzuweb.handler.user.UserCheckHandler;
 import com.lap.zuzuweb.handler.user.UserCreateHandler;
 import com.lap.zuzuweb.handler.user.UserEmailExistHandler;
+import com.lap.zuzuweb.handler.user.UserLoginHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
+import com.lap.zuzuweb.handler.user.UserRegisterHandler;
 import com.lap.zuzuweb.handler.user.UserRemoveHandler;
 import com.lap.zuzuweb.handler.user.UserUpdateHandler;
 import com.lap.zuzuweb.service.AuthService;
@@ -67,6 +71,7 @@ import com.lap.zuzuweb.service.PurchaseService;
 import com.lap.zuzuweb.service.PurchaseServiceImpl;
 import com.lap.zuzuweb.service.UserService;
 import com.lap.zuzuweb.service.UserServiceImpl;
+import com.lap.zuzuweb.util.AuthUtils;
 import com.lap.zuzuweb.util.CommonUtils;
 import com.lap.zuzuweb.util.HttpUtils;
 
@@ -79,20 +84,22 @@ public class App implements SparkApplication
 {
 	private static final Logger logger = LoggerFactory.getLogger(App.class);
 	
-	private static boolean enableAuth = false;
+	private static boolean enableAuth = true;
 	
 	public void init() {
 		logger.info("App Initialization...");
 		
 		logger.info("Authorization enabled: " + enableAuth);
     	
-    	AuthService authSvc = new AuthServiceImpl();
-    	
     	before((request, response) -> {
     		
     		logger.info(String.format("Route Path: (%s) %s, From IP: %s", request.requestMethod(), request.uri().toString(), HttpUtils.getIpAddr(request)));
     		
     		// discharge
+    		if (StringUtils.startsWith(request.uri().toString(), "/public")) {
+    			logger.debug("Discharge");
+    			return;
+    		}
     		if (StringUtils.startsWith(request.uri().toString(), "/register")) {
     			logger.debug("Discharge");
     			return;
@@ -108,12 +115,12 @@ public class App implements SparkApplication
     			logger.debug("Request Headers must includes Authorization parameter.");
     		}
     		
-    		if (authSvc.isSuperTokenValid(request.headers("Authorization"))) {
+    		if (AuthUtils.isSuperTokenValid(request.headers("Authorization"))) {
     			logger.debug("Valid Super Token: Pass");
     			return;
     		}
     		
-    		if (authSvc.isBasicTokenValid(request.headers("Authorization"))) {
+    		if (AuthUtils.isBasicTokenValid(request.headers("Authorization"))) {
     			logger.debug("Valid Basic Token: Pass");
     		
     			String userProvider = request.headers("UserProvider");
@@ -123,14 +130,14 @@ public class App implements SparkApplication
 	    		
 	    		try {
 		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.FB.toString())) {
-		    			if (authSvc.isFacebookTokenValid(userToken)) {
+		    			if (AuthUtils.isFacebookTokenValid(userToken)) {
 		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
 		    				return;
 		    			}
 		    		}
 		    		
 		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.GOOGLE.toString())) {
-		    			if (authSvc.isGoogleTokenValid(userToken)) {
+		    			if (AuthUtils.isGoogleTokenValid(userToken)) {
 		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
 		    				return;
 		    			}
@@ -162,10 +169,19 @@ public class App implements SparkApplication
     	NotifyItemService notifyItemSvc = new NotifyItemServiceImpl(notifyItemDao);
     	LogService logSvc = new LogServiceImpl(logDao);
     	PurchaseService purchaseSvc = new PurchaseServiceImpl(purchaseDao, userDao, serviceDao);
+    	AuthService authSvc = new AuthServiceImpl(userDao);
+    	
+    	// public 
+    	get("/public/user/check/:email", new UserCheckHandler(userSvc));
+    	post("/public/user/register", new UserRegisterHandler(userSvc));
+    	post("/public/user/login", new UserLoginHandler(authSvc));
     	
     	// register
     	get("/register/valid/:email", new UserEmailExistHandler(userSvc));
     	post("/register", new UserCreateHandler(userSvc));
+    	
+    	// cognito
+    	post("/cognito/token", new CognitoTokenHandler(authSvc));
     	
     	// user
         get("/user/:userid", new UserQueryHandler(userSvc)); //get user by user id

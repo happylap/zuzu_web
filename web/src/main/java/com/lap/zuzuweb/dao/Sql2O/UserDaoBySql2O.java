@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sql2o.Connection;
 
-import com.lap.zuzuweb.App;
 import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.model.User;
 
@@ -15,21 +14,20 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 {
 	private static final Logger logger = LoggerFactory.getLogger(UserDaoBySql2O.class);
 	
-	static private String SQL_GET_USER_BY_USERID = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time"
+	static private String SQL_GET_USER_BY_USERID = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time, provider, hashed_password, zuzu_token"
 			+ " FROM \"ZuZuUser\" WHERE user_id=:user_id";
 	
-	static private String SQL_GET_USER_BY_EMAIL = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time"
+	static private String SQL_GET_USER_BY_EMAIL = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time, provider, hashed_password, zuzu_token"
 			+ " FROM \"ZuZuUser\" WHERE email=:email";
 	
+	static private String SQL_CREATE_USER = "INSERT INTO \"ZuZuUser\"(user_id, email, register_time, name, gender, birthday, picture_url, update_time, provider, hashed_password, zuzu_token) "
+			+ " VALUES (:user_id, :email, :register_time, :name, :gender, :birthday, :picture_url, :update_time, :provider, :hashed_password, :zuzu_token)";
 	
-	static private String SQL_CREATE_USER = "INSERT INTO \"ZuZuUser\"(user_id, email, register_time, name, gender, birthday, picture_url, update_time) "
-			+ " VALUES (:user_id, :email, :register_time, :name, :gender, :birthday, :picture_url, :update_time)";
-	
-	static private String SQL_UPDATE_USER = "UPDATE \"ZuZuUser\" SET name=:name, gender=:gender, birthday=:birthday, picture_url=:picture_url, update_time=:update_time"
+	static private String SQL_UPDATE_USER = "UPDATE \"ZuZuUser\" SET name=:name, gender=:gender, birthday=:birthday, picture_url=:picture_url, update_time=:update_time, provider=:provider, hashed_password=:hashed_password, zuzu_token=:zuzu_token"
 			+ " WHERE user_id=:user_id";
 	
 	static private String SQL_REMOVE_USER_BY_ID_AND_EMAIL = "DELETE FROM \"ZuZuUser\" Where user_id=:user_id AND email=:email";
-
+	
 	@Override
 	public Optional<User> getUserByEmail(String email) {
 		
@@ -85,7 +83,11 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 	            .addParameter("birthday", user.getBirthday())
 	            .addParameter("picture_url", user.getPicture_url())
 	            .addParameter("update_time", user.getUpdate_time())
+	            .addParameter("provider", user.getProvider())
+	            .addParameter("hashed_password", user.getHashed_password())
+	            .addParameter("zuzu_token", user.getZuzu_token())
                 .executeUpdate();
+            
             conn.commit();
             return user.getUser_id();
         }
@@ -98,14 +100,17 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 		
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_UPDATE_USER)
-            	//.addParameter("email", user.getEmail())
 	            .addParameter("name", user.getName())
 	            .addParameter("gender", user.getGender())
 	            .addParameter("birthday", user.getBirthday())
 	            .addParameter("picture_url", user.getPicture_url())
 	            .addParameter("update_time", user.getUpdate_time())
+	            .addParameter("provider", user.getProvider())
 	            .addParameter("user_id", user.getUser_id())
+            	.addParameter("hashed_password", user.getHashed_password())
+            	.addParameter("zuzu_token", user.getZuzu_token())
                 .executeUpdate();
+            	
             conn.commit();
             return user.getUser_id();
         }

@@ -6,6 +6,7 @@ public class Answer {
 	private static int NO_DATA = 204;
 	private static int BAD_REQUEST = 400;
 	private static int FORBIDDEN = 403;
+	private static int NOT_ACCEPTABLE = 406;
 	private static int INTERNAL_SERVER_ERROR = 500;
 
 	public static Answer ok() {
@@ -39,6 +40,10 @@ public class Answer {
 	public static Answer forbidden(String message) {
         return new Answer(FORBIDDEN, null, "Server 403 forbidden: " + message);
     }
+	
+	public static Answer not_acceptable(String message) {
+		return new Answer(NOT_ACCEPTABLE, null, "Not Acceptable: " + message);
+	}
 	
 	private int code;
     private Object data;
