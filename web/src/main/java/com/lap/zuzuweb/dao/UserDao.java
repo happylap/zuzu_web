@@ -9,6 +9,8 @@ public interface UserDao
 	public Optional<User> getUserByEmail(String email);
 	
 	public Optional<User> getUserById(String userID);
+
+	public Optional<User> getUserByToken(String zuzuToken);
 	
 	public String createUser(User user);
 	

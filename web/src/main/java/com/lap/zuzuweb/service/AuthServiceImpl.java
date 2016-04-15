@@ -6,6 +6,7 @@ package com.lap.zuzuweb.service;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,5 +142,14 @@ public class AuthServiceImpl implements AuthService {
         
         logger.info("Responding with encrypted key for email : " + email);
         return user.getZuzu_token();
+	}
+
+	@Override
+	public boolean isZuzuTokenValid(String zuzuToken) {
+		if (StringUtils.isBlank(zuzuToken)) {
+			return false;
+		}
+		Optional<User> existUser = this.userDao.getUserByToken(zuzuToken);
+		return existUser.isPresent();
 	}
 }

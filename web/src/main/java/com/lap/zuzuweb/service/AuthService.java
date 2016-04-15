@@ -15,4 +15,5 @@ public interface AuthService {
 	public void validateLoginRequest(String email, String signature, String timestamp) throws DataAccessException, UnauthorizedException;
 	
 	public String getZuzuToken(String email) throws DataAccessException, UnauthorizedException;
+	public boolean isZuzuTokenValid(String zuzuToken);
 }

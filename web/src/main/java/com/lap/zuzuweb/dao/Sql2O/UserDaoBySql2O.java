@@ -20,6 +20,9 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 	static private String SQL_GET_USER_BY_EMAIL = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time, provider, hashed_password, zuzu_token"
 			+ " FROM \"ZuZuUser\" WHERE email=:email";
 	
+	static private String SQL_GET_USER_BY_TOKEN = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time, provider, hashed_password, zuzu_token"
+			+ " FROM \"ZuZuUser\" WHERE zuzu_token=:zuzu_token";
+	
 	static private String SQL_CREATE_USER = "INSERT INTO \"ZuZuUser\"(user_id, email, register_time, name, gender, birthday, picture_url, update_time, provider, hashed_password, zuzu_token) "
 			+ " VALUES (:user_id, :email, :register_time, :name, :gender, :birthday, :picture_url, :update_time, :provider, :hashed_password, :zuzu_token)";
 	
@@ -57,6 +60,27 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
             
 
     		logger.info("UserDao.getUserById results: " + users);
+    		
+            if (users.size() == 0) {
+                return Optional.empty();
+            } else if (users.size() == 1) {
+                return Optional.of(users.get(0));
+            } else {
+                throw new RuntimeException();
+            }
+        }
+	}
+
+	@Override
+	public Optional<User> getUserByToken(String zuzuToken) 
+	{
+		logger.info("UserDao.getUserByToken: " + zuzuToken);
+		try (Connection conn = sql2o.open()) {
+            List<User> users = conn.createQuery(SQL_GET_USER_BY_TOKEN)
+                .addParameter("zuzu_token", zuzuToken)
+                .executeAndFetch(User.class);
+            
+    		logger.info("UserDao.getUserByToken results: " + users);
     		
             if (users.size() == 0) {
                 return Optional.empty();

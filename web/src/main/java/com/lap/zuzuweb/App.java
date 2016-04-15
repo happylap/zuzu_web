@@ -88,11 +88,28 @@ public class App implements SparkApplication
 	
 	public void init() {
 		logger.info("App Initialization...");
-		
 		logger.info("Authorization enabled: " + enableAuth);
     	
+		// Create Dao
+    	UserDao userDao = new UserDaoBySql2O();
+    	DeviceDao deviceDao = new DeviceDaoBySql2O();
+    	CriteriaDao criteriaDao = new CriteriaDaoBySql2O();
+    	NotifyItemDao notifyItemDao = new NotifyItemDaoBySql2O();
+    	LogDao logDao = new LogDaoBySql2O();
+    	PurchaseDao purchaseDao = new PurchaseDaoBySql2O();
+    	ServiceDao serviceDao = new ServiceDaoBySql2O();
+    	
+    	// Create Svc
+    	UserService userSvc = new UserServiceImpl(userDao, serviceDao);
+    	DeviceService deviceSvc = new DeviceServiceImpl(deviceDao);
+    	CriteriaService criteriaSvc = new CriteriaServiceImpl(criteriaDao);
+    	NotifyItemService notifyItemSvc = new NotifyItemServiceImpl(notifyItemDao);
+    	LogService logSvc = new LogServiceImpl(logDao);
+    	PurchaseService purchaseSvc = new PurchaseServiceImpl(purchaseDao, userDao, serviceDao);
+    	AuthService authSvc = new AuthServiceImpl(userDao);
+    	
+    	
     	before((request, response) -> {
-    		
     		logger.info(String.format("Route Path: (%s) %s, From IP: %s", request.requestMethod(), request.uri().toString(), HttpUtils.getIpAddr(request)));
     		
     		// discharge
@@ -142,6 +159,13 @@ public class App implements SparkApplication
 		    				return;
 		    			}
 		    		}
+		    		
+		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.ZUZU.toString())) {
+		    			if (authSvc.isZuzuTokenValid(userToken)) {
+		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
+		    				return;
+		    			}
+		    		}
 	    		} catch (Exception e) {
     				logger.error(String.format("Valid %s Token Error: ", userProvider, e.getMessage()), e);
 	    			response.type("application/json");
@@ -152,24 +176,6 @@ public class App implements SparkApplication
     		response.type("application/json");
 			halt(403, CommonUtils.toJson(Answer.forbidden()));
         });
-        
-    	// Create Dao
-    	UserDao userDao = new UserDaoBySql2O();
-    	DeviceDao deviceDao = new DeviceDaoBySql2O();
-    	CriteriaDao criteriaDao = new CriteriaDaoBySql2O();
-    	NotifyItemDao notifyItemDao = new NotifyItemDaoBySql2O();
-    	LogDao logDao = new LogDaoBySql2O();
-    	PurchaseDao purchaseDao = new PurchaseDaoBySql2O();
-    	ServiceDao serviceDao = new ServiceDaoBySql2O();
-    	
-    	// Create Svc
-    	UserService userSvc = new UserServiceImpl(userDao, serviceDao);
-    	DeviceService deviceSvc = new DeviceServiceImpl(deviceDao);
-    	CriteriaService criteriaSvc = new CriteriaServiceImpl(criteriaDao);
-    	NotifyItemService notifyItemSvc = new NotifyItemServiceImpl(notifyItemDao);
-    	LogService logSvc = new LogServiceImpl(logDao);
-    	PurchaseService purchaseSvc = new PurchaseServiceImpl(purchaseDao, userDao, serviceDao);
-    	AuthService authSvc = new AuthServiceImpl(userDao);
     	
     	// public 
     	get("/public/user/check/:email", new UserCheckHandler(userSvc));
