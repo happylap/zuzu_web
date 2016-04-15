@@ -271,8 +271,8 @@ class NotifierService(object):
                 if isSend == False:
                     self.logger.info("Cannot find any device to send for user: " + notifier.user_id)
 
-                if len(invalid_device) > 0 and LocalConstant.PRODUCT_MODE == True:
-                    self.notifierWeb.deleteDevices(notifier.user_id, invalid_device)
+                #if len(invalid_device) > 0 and LocalConstant.PRODUCT_MODE == True:
+                    #self.notifierWeb.deleteDevices(notifier.user_id, invalid_device)
             except:
                 pass
 
