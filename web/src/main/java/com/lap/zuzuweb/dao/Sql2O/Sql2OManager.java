@@ -21,7 +21,7 @@ public class Sql2OManager {
 		}
 		return instance;
 	}
-
+	
 	static private Sql2o createSql2O() {
 		logger.info("Create a Sql2O instance...");
 		try {
@@ -47,5 +47,13 @@ public class Sql2OManager {
 		}
 		return null;
 	}
-
+	
+	static public void close() {
+		if (instance != null) {
+			HikariDataSource ds = ((HikariDataSource) instance.getDataSource());
+			if (ds != null) {
+				ds.close();
+			}
+		}
+	}
 }

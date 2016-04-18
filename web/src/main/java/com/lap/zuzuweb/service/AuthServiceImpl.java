@@ -74,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
 
 		User user = existUser.get();
 
-		if (user != null && !user.getEmail().equals(logins.get(Configuration.DEVELOPER_PROVIDER_NAME))) {
+		if (user != null && !user.getUser_id().equals(logins.get(Configuration.DEVELOPER_PROVIDER_NAME))) {
 			throw new UnauthorizedException("User mismatch for provider and logins map");
 		}
 

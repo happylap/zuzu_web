@@ -26,6 +26,7 @@ import com.lap.zuzuweb.dao.Sql2O.LogDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.NotifyItemDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.PurchaseDaoBySql2O;
 import com.lap.zuzuweb.dao.Sql2O.ServiceDaoBySql2O;
+import com.lap.zuzuweb.dao.Sql2O.Sql2OManager;
 import com.lap.zuzuweb.dao.Sql2O.UserDaoBySql2O;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.cognito.CognitoTokenHandler;
@@ -180,7 +181,7 @@ public class App implements SparkApplication
     	// public 
     	get("/public/user/check/:email", new UserCheckHandler(userSvc));
     	post("/public/user/register", new UserRegisterHandler(userSvc));
-    	post("/public/user/login", new UserLoginHandler(authSvc));
+    	post("/public/user/login", new UserLoginHandler(authSvc, userSvc));
     	
     	// register
     	get("/register/valid/:email", new UserEmailExistHandler(userSvc));
@@ -243,6 +244,7 @@ public class App implements SparkApplication
 	
 	public void destroy() {
 		logger.info("App destroy.");
+		Sql2OManager.close();
 	}
 	
 }
