@@ -73,6 +73,10 @@ public class AuthUtils {
 	}
 
 	public static boolean isGoogleTokenValid(String idTokenString) throws Exception {
+		if (StringUtils.isBlank(idTokenString)) {
+			return false;
+		}
+		
 		// Set up the HTTP transport and JSON factory
 		HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 		JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
@@ -96,6 +100,10 @@ public class AuthUtils {
 	}
 
 	public static boolean isFacebookTokenValid(String token) throws Exception {
+		if (StringUtils.isBlank(token)) {
+			return false;
+		}
+		
 		String url = String.format("https://graph.facebook.com/debug_token?input_token=%s&access_token=%s", token,
 				URLEncoder.encode(AuthUtils.getFacebookAppToken(), "UTF-8"));
 		
