@@ -16,6 +16,7 @@ import com.amazonaws.services.cognitoidentity.model.GetOpenIdTokenForDeveloperId
 import com.lap.zuzuweb.CognitoDeveloperIdentityManagement;
 import com.lap.zuzuweb.Configuration;
 import com.lap.zuzuweb.Utilities;
+import com.lap.zuzuweb.common.Provider;
 import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.exception.DataAccessException;
 import com.lap.zuzuweb.exception.UnauthorizedException;
@@ -184,5 +185,40 @@ public class AuthServiceImpl implements AuthService {
 			mail.addMailTo(email);
 			MailSender.sendEmail(mail);
 		}
+	}
+	
+	@Override
+	public boolean isVerificationCodeValid(String email, String verificationCode) {
+		if (StringUtils.isBlank(email) || StringUtils.isBlank(verificationCode)) {
+			return false;
+		}
+		
+		Optional<User> existUser = this.userDao.getUserByEmail(email);
+        if (!existUser.isPresent()) {
+        	return false;
+        }
+        
+        User user = existUser.get();
+        
+        return StringUtils.equalsIgnoreCase(user.getVerification_code(), verificationCode);
+	}
+
+	@Override
+	public boolean resetPassword(String email, String password) {
+		
+		Optional<User> existUser = this.userDao.getUserByEmail(email);
+        if (existUser.isPresent()) {
+        	String hashedSaltedPassword = Utilities.getSaltedPassword(email, password);
+    		
+    		User user = existUser.get();
+    		user.setHashed_password(hashedSaltedPassword);
+    		user.setVerification_code(null);
+    		user.setVerify_expire_time(null);
+    		this.userDao.updateUser(user);
+            
+    		return true;
+        }
+        
+        return false;
 	}
 }

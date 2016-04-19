@@ -10,20 +10,20 @@ import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.service.AuthService;
 
-public class UserPasswordForgetHandler extends AbstractRequestHandler<EmptyPayload> {
+public class UserForgetPasswordHandler extends AbstractRequestHandler<EmptyPayload> {
 
-	private static final Logger logger = LoggerFactory.getLogger(UserPasswordForgetHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserForgetPasswordHandler.class);
 
 	private AuthService service = null;
 
-	public UserPasswordForgetHandler(AuthService service) {
+	public UserForgetPasswordHandler(AuthService service) {
 		super(EmptyPayload.class);
 		this.service = service;
 	}
 
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
-		logger.info("UserPasswordForgetHandler.processImpl enter:");
+		logger.info("UserForgetPasswordHandler.processImpl enter:");
 
 		if (!urlParams.containsKey(":email")) {
 			return Answer.bad_request();
@@ -31,7 +31,7 @@ public class UserPasswordForgetHandler extends AbstractRequestHandler<EmptyPaylo
 
 		String email = urlParams.get(":email");
 
-		logger.info("UserPasswordForgetHandler.processImpl urlParams email: " + email);
+		logger.info("UserForgetPasswordHandler.processImpl urlParams email: " + email);
 
 		try {
 			this.service.forgotPassword(email);

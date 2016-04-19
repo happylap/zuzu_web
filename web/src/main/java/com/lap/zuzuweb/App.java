@@ -52,11 +52,13 @@ import com.lap.zuzuweb.handler.purchase.PurchaseValidHandler;
 import com.lap.zuzuweb.handler.service.ServiceQueryHandler;
 import com.lap.zuzuweb.handler.user.UserCheckHandler;
 import com.lap.zuzuweb.handler.user.UserLoginHandler;
-import com.lap.zuzuweb.handler.user.UserPasswordForgetHandler;
+import com.lap.zuzuweb.handler.user.UserForgetPasswordHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
 import com.lap.zuzuweb.handler.user.UserRegisterHandler;
 import com.lap.zuzuweb.handler.user.UserRemoveHandler;
+import com.lap.zuzuweb.handler.user.UserResetPasswordHandler;
 import com.lap.zuzuweb.handler.user.UserUpdateHandler;
+import com.lap.zuzuweb.handler.user.UserVerifyCodeHandler;
 import com.lap.zuzuweb.service.AuthService;
 import com.lap.zuzuweb.service.AuthServiceImpl;
 import com.lap.zuzuweb.service.CriteriaService;
@@ -181,9 +183,9 @@ public class App implements SparkApplication
     	get("/public/user/check/:email", new UserCheckHandler(userSvc));
     	post("/public/user/register", new UserRegisterHandler(userSvc));
     	post("/public/user/login", new UserLoginHandler(authSvc, userSvc));
-    	get("/public/user/password/forget/:email", new UserPasswordForgetHandler(authSvc));
-    	post("/public/user/password/reset/", new UserCheckHandler(userSvc));
-    	get("/public/user/verify/:email/:verificationcode", new UserCheckHandler(userSvc));
+    	get("/public/user/password/forget/:email", new UserForgetPasswordHandler(authSvc));
+    	post("/public/user/password/reset", new UserResetPasswordHandler(authSvc, userSvc));
+    	get("/public/user/verify/:email/:verificationcode", new UserVerifyCodeHandler(authSvc));
     	
     	
     	// cognito

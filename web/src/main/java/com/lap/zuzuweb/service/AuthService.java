@@ -18,4 +18,6 @@ public interface AuthService {
 	public boolean isZuzuTokenValid(String zuzuToken);
 	
 	public void forgotPassword(String email) throws Exception;
+	public boolean isVerificationCodeValid(String email, String verificationCode);
+	public boolean resetPassword(String email, String password);
 }
