@@ -3,6 +3,8 @@
  */
 package com.lap.zuzuweb.service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,6 +21,9 @@ import com.lap.zuzuweb.exception.DataAccessException;
 import com.lap.zuzuweb.exception.UnauthorizedException;
 import com.lap.zuzuweb.handler.payload.CognitoTokenResultPayload;
 import com.lap.zuzuweb.model.User;
+import com.lap.zuzuweb.util.CommonUtils;
+import com.lap.zuzuweb.util.mail.Mail;
+import com.lap.zuzuweb.util.mail.MailSender;
 
 /**
  * @author eechih
@@ -151,5 +156,33 @@ public class AuthServiceImpl implements AuthService {
 		}
 		Optional<User> existUser = this.userDao.getUserByToken(zuzuToken);
 		return existUser.isPresent();
+	}
+	
+	@Override
+	public void forgotPassword(String email) throws Exception {
+		Optional<User> existUser = this.userDao.getUserByEmail(email);
+		if (existUser.isPresent()) {
+			String verificationCode = Utilities.generateRandomNumber(4);
+			
+			Calendar c = Calendar.getInstance();
+			c.setTime(CommonUtils.getUTCNow());
+			c.add(Calendar.MINUTE, 30);
+			Date verify_expire_time = c.getTime();
+			
+			User user = existUser.get();
+			user.setVerification_code(verificationCode);
+			user.setVerify_expire_time(verify_expire_time);
+			this.userDao.updateUser(user);
+			
+			String subjectTemplate = "豬豬快租 Password Reset - Forget Password, %s";
+			// *** 此郵件由豬豬快租管理系统自動發送，請勿直接回覆。 *** <br><br>
+			String bodyTemplate = "Verification Code: %s";
+			Mail mail = new Mail();
+			mail.subject = String.format(subjectTemplate, CommonUtils.getUTCStringFromDate(CommonUtils.getUTCNow()));
+			mail.body = String.format(bodyTemplate, user.getVerification_code());
+			mail.contentType = "text/plain";
+			mail.addMailTo(email);
+			MailSender.sendEmail(mail);
+		}
 	}
 }

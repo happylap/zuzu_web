@@ -16,4 +16,6 @@ public interface AuthService {
 	
 	public String getZuzuToken(String email) throws DataAccessException, UnauthorizedException;
 	public boolean isZuzuTokenValid(String zuzuToken);
+	
+	public void forgotPassword(String email) throws Exception;
 }

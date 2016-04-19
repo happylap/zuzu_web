@@ -2,6 +2,7 @@ package com.lap.zuzuweb;
 
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
+import java.util.Random;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -10,6 +11,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class Utilities {
 
@@ -43,7 +46,21 @@ public class Utilities {
         return new String(signature, Constants.ENCODING_FORMAT);
     }
 	
-
+	public static String generateRandomNumber(int size) {
+		if (size <= 0 ) {
+			size = 1;
+		}
+		
+		long seed = CommonUtils.getUTCNow().getTime();
+		Random rand = new Random(seed);
+		StringBuilder randomString = new StringBuilder();
+		for (int i=0; i < size; i++) {
+			randomString.append(rand.nextInt(10));
+		}
+		
+        return randomString.toString();
+    }
+	
     public static String generateRandomString() {
         byte[] randomBytes = new byte[16];
         RANDOM.nextBytes(randomBytes);

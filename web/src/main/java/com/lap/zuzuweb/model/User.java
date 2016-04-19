@@ -19,6 +19,8 @@ public class User {
 	private String provider;
 	private String hashed_password;
 	private String zuzu_token;
+	private String verification_code;
+	private Date verify_expire_time;
 	
 	private Date update_time;
 }

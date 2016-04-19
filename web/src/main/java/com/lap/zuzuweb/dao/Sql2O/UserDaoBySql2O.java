@@ -14,19 +14,19 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 {
 	private static final Logger logger = LoggerFactory.getLogger(UserDaoBySql2O.class);
 	
-	static private String SQL_GET_USER_BY_USERID = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time, provider, hashed_password, zuzu_token"
+	static private String SQL_GET_USER_BY_USERID = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time, provider, hashed_password, zuzu_token, verification_code, verify_expire_time"
 			+ " FROM \"ZuZuUser\" WHERE user_id=:user_id";
 	
-	static private String SQL_GET_USER_BY_EMAIL = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time, provider, hashed_password, zuzu_token"
+	static private String SQL_GET_USER_BY_EMAIL = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time, provider, hashed_password, zuzu_token, verification_code, verify_expire_time"
 			+ " FROM \"ZuZuUser\" WHERE email=:email";
 	
-	static private String SQL_GET_USER_BY_TOKEN = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time, provider, hashed_password, zuzu_token"
+	static private String SQL_GET_USER_BY_TOKEN = "SELECT user_id, email, register_time, name, gender, birthday, picture_url, purchase_receipt, update_time, provider, hashed_password, zuzu_token, verification_code, verify_expire_time"
 			+ " FROM \"ZuZuUser\" WHERE zuzu_token=:zuzu_token";
 	
-	static private String SQL_CREATE_USER = "INSERT INTO \"ZuZuUser\"(user_id, email, register_time, name, gender, birthday, picture_url, update_time, provider, hashed_password, zuzu_token) "
-			+ " VALUES (:user_id, :email, :register_time, :name, :gender, :birthday, :picture_url, :update_time, :provider, :hashed_password, :zuzu_token)";
+	static private String SQL_CREATE_USER = "INSERT INTO \"ZuZuUser\"(user_id, email, register_time, name, gender, birthday, picture_url, update_time, provider, hashed_password, zuzu_token, verification_code, verify_expire_time) "
+			+ " VALUES (:user_id, :email, :register_time, :name, :gender, :birthday, :picture_url, :update_time, :provider, :hashed_password, :zuzu_token, :verification_code, :verify_expire_time)";
 	
-	static private String SQL_UPDATE_USER = "UPDATE \"ZuZuUser\" SET name=:name, gender=:gender, birthday=:birthday, picture_url=:picture_url, update_time=:update_time, provider=:provider, hashed_password=:hashed_password, zuzu_token=:zuzu_token"
+	static private String SQL_UPDATE_USER = "UPDATE \"ZuZuUser\" SET name=:name, gender=:gender, birthday=:birthday, picture_url=:picture_url, update_time=:update_time, provider=:provider, hashed_password=:hashed_password, zuzu_token=:zuzu_token, verification_code=:verification_code, verify_expire_time=:verify_expire_time"
 			+ " WHERE user_id=:user_id";
 	
 	static private String SQL_REMOVE_USER_BY_ID_AND_EMAIL = "DELETE FROM \"ZuZuUser\" Where user_id=:user_id AND email=:email";
@@ -110,6 +110,8 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 	            .addParameter("provider", user.getProvider())
 	            .addParameter("hashed_password", user.getHashed_password())
 	            .addParameter("zuzu_token", user.getZuzu_token())
+	            .addParameter("verification_code", user.getVerification_code())
+	            .addParameter("verify_expire_time", user.getVerify_expire_time())
                 .executeUpdate();
             
             conn.commit();
@@ -130,9 +132,11 @@ public class UserDaoBySql2O extends AbstratcDaoBySql2O implements UserDao
 	            .addParameter("picture_url", user.getPicture_url())
 	            .addParameter("update_time", user.getUpdate_time())
 	            .addParameter("provider", user.getProvider())
-	            .addParameter("user_id", user.getUser_id())
             	.addParameter("hashed_password", user.getHashed_password())
             	.addParameter("zuzu_token", user.getZuzu_token())
+	            .addParameter("verification_code", user.getVerification_code())
+	            .addParameter("verify_expire_time", user.getVerify_expire_time())
+	            .addParameter("user_id", user.getUser_id())
                 .executeUpdate();
             	
             conn.commit();

@@ -52,6 +52,7 @@ import com.lap.zuzuweb.handler.purchase.PurchaseValidHandler;
 import com.lap.zuzuweb.handler.service.ServiceQueryHandler;
 import com.lap.zuzuweb.handler.user.UserCheckHandler;
 import com.lap.zuzuweb.handler.user.UserLoginHandler;
+import com.lap.zuzuweb.handler.user.UserPasswordForgetHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
 import com.lap.zuzuweb.handler.user.UserRegisterHandler;
 import com.lap.zuzuweb.handler.user.UserRemoveHandler;
@@ -180,6 +181,10 @@ public class App implements SparkApplication
     	get("/public/user/check/:email", new UserCheckHandler(userSvc));
     	post("/public/user/register", new UserRegisterHandler(userSvc));
     	post("/public/user/login", new UserLoginHandler(authSvc, userSvc));
+    	get("/public/user/password/forget/:email", new UserPasswordForgetHandler(authSvc));
+    	post("/public/user/password/reset/", new UserCheckHandler(userSvc));
+    	get("/public/user/verify/:email/:verificationcode", new UserCheckHandler(userSvc));
+    	
     	
     	// cognito
     	post("/cognito/token", new CognitoTokenHandler(authSvc));
