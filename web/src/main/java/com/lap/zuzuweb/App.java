@@ -51,8 +51,6 @@ import com.lap.zuzuweb.handler.purchase.PurchaseQueryHandler;
 import com.lap.zuzuweb.handler.purchase.PurchaseValidHandler;
 import com.lap.zuzuweb.handler.service.ServiceQueryHandler;
 import com.lap.zuzuweb.handler.user.UserCheckHandler;
-import com.lap.zuzuweb.handler.user.UserCreateHandler;
-import com.lap.zuzuweb.handler.user.UserEmailExistHandler;
 import com.lap.zuzuweb.handler.user.UserLoginHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
 import com.lap.zuzuweb.handler.user.UserRegisterHandler;
@@ -114,11 +112,11 @@ public class App implements SparkApplication
     		logger.info(String.format("Route Path: (%s) %s, From IP: %s", request.requestMethod(), request.uri().toString(), HttpUtils.getIpAddr(request)));
     		
     		// discharge
-    		if (StringUtils.startsWith(request.uri().toString(), "/public")) {
+    		if (StringUtils.equalsIgnoreCase(request.uri().toString(), "/alive")) {
     			logger.debug("Discharge");
     			return;
     		}
-    		if (StringUtils.startsWith(request.uri().toString(), "/register")) {
+    		if (StringUtils.startsWith(request.uri().toString(), "/public")) {
     			logger.debug("Discharge");
     			return;
     		}
@@ -182,10 +180,6 @@ public class App implements SparkApplication
     	get("/public/user/check/:email", new UserCheckHandler(userSvc));
     	post("/public/user/register", new UserRegisterHandler(userSvc));
     	post("/public/user/login", new UserLoginHandler(authSvc, userSvc));
-    	
-    	// register
-    	get("/register/valid/:email", new UserEmailExistHandler(userSvc));
-    	post("/register", new UserCreateHandler(userSvc));
     	
     	// cognito
     	post("/cognito/token", new CognitoTokenHandler(authSvc));
