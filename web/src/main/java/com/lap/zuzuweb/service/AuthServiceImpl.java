@@ -16,7 +16,6 @@ import com.amazonaws.services.cognitoidentity.model.GetOpenIdTokenForDeveloperId
 import com.lap.zuzuweb.CognitoDeveloperIdentityManagement;
 import com.lap.zuzuweb.Configuration;
 import com.lap.zuzuweb.Utilities;
-import com.lap.zuzuweb.common.Provider;
 import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.exception.DataAccessException;
 import com.lap.zuzuweb.exception.UnauthorizedException;
@@ -190,17 +189,34 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public boolean isVerificationCodeValid(String email, String verificationCode) {
 		if (StringUtils.isBlank(email) || StringUtils.isBlank(verificationCode)) {
+			logger.warn(String.format("Bad paramters email [%s], verificationCode [%s]", email, verificationCode));
 			return false;
 		}
 		
 		Optional<User> existUser = this.userDao.getUserByEmail(email);
         if (!existUser.isPresent()) {
+            logger.warn(String.format("Failed to find user [%s]", email));
         	return false;
         }
         
         User user = existUser.get();
         
-        return StringUtils.equalsIgnoreCase(user.getVerification_code(), verificationCode);
+        if (StringUtils.isBlank(user.getVerification_code()) || user.getVerify_expire_time() == null) {
+        	logger.warn(String.format("Failed to find verification_code or verify_expire_time for user [%s]", email));
+            return false; 
+        }
+        
+        if (CommonUtils.getUTCNow().after(user.getVerify_expire_time())) {
+        	logger.warn(String.format("verify_expire_time has expired for user [%s]", email));
+        	return false;
+        }
+        
+        if (!StringUtils.equalsIgnoreCase(user.getVerification_code(), verificationCode)) {
+        	logger.warn(String.format("Invalid verification code [%s] for user [%s]", verificationCode, email));
+        	return false;
+        }
+        
+        return true; 
 	}
 
 	@Override
