@@ -16,7 +16,7 @@ class NotifierService(object):
         self.json = JsonUtils.getNotifierJson()
 
         self.NOTIFY_INTERVAL_HOURS = 1
-        self.NOTIFY_ITEMS_LIMIT = 5
+        self.NOTIFY_ITEMS_LIMIT = 10
         self.TITLE_LENGTH = 30
         self.NOTIFY_SOUND = "bingbong.aiff"
         self.FULLWIDTH_COMMA= FULLWIDTH_COMMA = unichr(65292) #unicode: FF0C (，)
@@ -36,7 +36,7 @@ class NotifierService(object):
 
         if self.current_notify_time.hour == 0:
             self.NOTIFY_INTERVAL_HOURS = 8
-            self.NOTIFY_ITEMS_LIMIT = 10
+            self.NOTIFY_ITEMS_LIMIT = 20
         else:
             pass
 
