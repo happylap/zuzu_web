@@ -6,11 +6,24 @@ import logging
 import time
 import datetime
 import asyncio
-from zuzuNotify import JsonUtils, TimeUtils, LocalConstant
-from zuzuNotify.zuzu_solr import SolrClient, AsyncSolrClient
-from zuzuNotify.zuzu_web import ZuzuWeb, AsyncZuzuWeb
-from zuzuNotify.zuzu_sns import SNSClient, AsyncSNSClient
-from zuzuNotify import zuzu_single_process
+
+args = sys.argv
+IS_LOCAL = 0
+if len(args) > 1 and args[1] == "IS_LOCAL":
+    IS_LOCAL = 1
+
+if IS_LOCAL:
+    from zuzuNotify import JsonUtils, TimeUtils, LocalConstant
+    from zuzuNotify.zuzu_solr import SolrClient, AsyncSolrClient
+    from zuzuNotify.zuzu_web import ZuzuWeb, AsyncZuzuWeb
+    from zuzuNotify.zuzu_sns import SNSClient, AsyncSNSClient
+    from zuzuNotify import zuzu_single_process
+else:
+    import JsonUtils, TimeUtils, LocalConstant
+    from zuzu_solr import SolrClient, AsyncSolrClient
+    from zuzu_web import ZuzuWeb, AsyncZuzuWeb
+    from zuzu_sns import SNSClient, AsyncSNSClient
+    import zuzu_single_process
 
 
 class Timer(object):
@@ -43,7 +56,7 @@ class NotifyService(object):
         #
         self.endpoint_list = []
         #
-        self.conn_limit = 20
+        self.conn_limit = 50
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             self.test_limit = 10000
             self.item_id_seq = 1

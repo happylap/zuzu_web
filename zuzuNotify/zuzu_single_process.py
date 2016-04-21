@@ -3,14 +3,16 @@
 import logging
 import tempfile
 import os
+import shutil
 import signal
 
 logger = logging.getLogger("zuzu_single_process")
 
 # Path to file storing PID of running script process.
 # Place it outside of methods in the beggining, or make sure it visible for all methods, which use it.
-pid_file = tempfile.gettempdir() + 'zuzu_notify_pid.txt'
-
+temp_dir = tempfile.mkdtemp()
+pid_file = temp_dir + '/zuzu_notify_pid.txt'
+print(pid_file)
 # This method checks if file pid_file exists.
 #  If it was found, depends of mode - exit, or kill process which PID is stored in file.
 def scriptStarter(mode = 'force'):
@@ -46,6 +48,9 @@ def removePIDfile():
     logger.info('deleting pidfile')
     try:
         os.remove(pid_file)
+        shutil.rmtree(temp_dir)
     except OSError:
+        logger.error("remove temp dir or file error")
+        print("remove temp dir or file error")
         pass
     return

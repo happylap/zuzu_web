@@ -1,11 +1,21 @@
 # encoding: utf-8
 
+import sys
 import logging
 import json
 import requests
 import aiohttp
-from zuzuNotify import LocalConstant
-from zuzuNotify import TimeUtils
+
+args = sys.argv
+IS_LOCAL = 0
+if len(args) > 1 and args[1] == "IS_LOCAL":
+    IS_LOCAL = 1
+
+if IS_LOCAL:
+    from zuzuNotify import LocalConstant
+    from zuzuNotify import TimeUtils
+else:
+    import LocalConstant, TimeUtils
 
 class Notifier(object):
     def __init__(self, data):
