@@ -56,7 +56,7 @@ class NotifyService(object):
         #
         self.endpoint_list = []
         #
-        self.conn_limit = 50
+        self.conn_limit = 30
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             self.test_limit = 10000
             self.item_id_seq = 1
@@ -267,7 +267,7 @@ def main():
         zuzu_single_process.removePIDfile()
         sys.exit()
     except:
-        logger.error("exception!!")
+        logger.error("Unexpected error:", sys.exc_info())
         zuzu_single_process.removePIDfile()
 
 if __name__=="__main__":
