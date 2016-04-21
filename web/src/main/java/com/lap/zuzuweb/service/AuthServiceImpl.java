@@ -174,13 +174,12 @@ public class AuthServiceImpl implements AuthService {
 			user.setVerify_expire_time(verify_expire_time);
 			this.userDao.updateUser(user);
 			
-			String subjectTemplate = "豬豬快租 Password Reset - Forget Password, %s";
-			// *** 此郵件由豬豬快租管理系统自動發送，請勿直接回覆。 *** <br><br>
-			String bodyTemplate = "Verification Code: %s";
+			String subjectTemplate = "豬豬快租-發送驗證碼 %s";
+			String bodyTemplate = "*** 此為系統自動發送，請勿直接回覆 ***<br/><br/><h2>驗證碼: %s</h2><br/>提醒您，此驗證碼將於30分鐘後失效。";
 			Mail mail = new Mail();
 			mail.subject = String.format(subjectTemplate, CommonUtils.getUTCStringFromDate(CommonUtils.getUTCNow()));
 			mail.body = String.format(bodyTemplate, user.getVerification_code());
-			mail.contentType = "text/plain";
+			mail.contentType = "text/html;charset=UTF-8";
 			mail.addMailTo(email);
 			MailSender.sendEmail(mail);
 		}

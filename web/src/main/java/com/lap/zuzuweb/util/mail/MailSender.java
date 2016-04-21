@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.lap.zuzuweb.Secrets;
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class MailSender 
 {
@@ -23,12 +24,15 @@ public class MailSender
  
 	public static void main(String args[]) throws AddressException, MessagingException 
 	{
+		
+		String subjectTemplate = "豬豬快租-發送驗證碼 %s";
+		String bodyTemplate = "*** 此為系統自動發送，請勿直接回覆 ***<br/><br/><h2>驗證碼: %s</h2><br/>提醒您，此驗證碼將於30分鐘後失效。";
 		Mail mail = new Mail();
-		mail.subject = "no-reply 豬豬快租Emial測試";
-		mail.body = "Test email by rentals.zuzu.com JavaMail API example. " + "<br><br> Regards, <br>Ted Lee";
-		mail.contentType = "text/html";
-		mail.addMailTo("alight.lee@gmail.com");
-		mail.addMailTo("eechih@gmail.com");
+		mail.subject = String.format(subjectTemplate, CommonUtils.getUTCStringFromDate(CommonUtils.getUTCNow()));
+		mail.body = String.format(bodyTemplate, "1234");
+		mail.contentType = "text/html;charset=UTF-8";
+		
+		mail.addMailTo("test@gmail.com");
 		sendEmail(mail);
 		
 		System.out.println("\n\n ===> Your Java Program has just sent an Email successfully. Check your email..");
@@ -48,6 +52,7 @@ public class MailSender
 		
 		generateMailMessage.setSubject(mail.subject);
 		logger.info("mail subject: " + mail.subject);
+		//generateMailMessage.setContent(mail.body, mail.contentType);
 		generateMailMessage.setContent(mail.body, mail.contentType);
 		logger.info("mail body: " + mail.body);
 		logger.info("mail contentType: " + mail.contentType);
