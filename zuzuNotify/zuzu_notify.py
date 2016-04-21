@@ -39,12 +39,11 @@ class NotifyService(object):
         self.NOTIFY_SOUND = "bingbong.aiff"
         self.FULLWIDTH_COMMA= "，"
         #
-        self.async_zuzu_web = AsyncZuzuWeb()
         self.async_notify_solr = AsyncSolrClient(LocalConstant.NOTIFIER_SOLR_URL)
         #
         self.endpoint_list = []
         #
-        self.conn_limit=20
+        self.conn_limit = 20
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             self.test_limit = 3000
             self.item_id_seq = 1
@@ -103,12 +102,21 @@ class NotifyService(object):
         with Timer() as t:
             loop = asyncio.get_event_loop()
             self.async_sns_client = AsyncSNSClient(loop)
+            self.async_zuzu_web = AsyncZuzuWeb(loop)
             loop.run_until_complete(self.notitfy(notifier_list))
-            loop.close()
-            self.async_zuzu_web.session.close()
-
+            self.logger.info("close zuzuweb session")
+            self.close(loop)
         print("elasped time: %s s" % t.secs)
         self.logger.info("elasped time: %s s" % t.secs)
+
+
+    def close(self, loop):
+        self.async_zuzu_web.close()
+        self.async_sns_client.close()
+        self.async_notify_solr.solr.close()
+        loop.close()
+        self.logger.info("loop.close()")
+
 
     async def notitfy(self, notifier_list):
         semaphore = asyncio.Semaphore(self.conn_limit)
