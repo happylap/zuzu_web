@@ -1,11 +1,21 @@
 # encoding: utf-8
 
+import sys
 import logging
 import json
 import requests
 import aiohttp
-from zuzuNotify import LocalConstant
-from zuzuNotify import TimeUtils
+
+args = sys.argv
+IS_LOCAL = 0
+if len(args) > 1 and args[1] == "IS_LOCAL":
+    IS_LOCAL = 1
+
+if IS_LOCAL:
+    from zuzuNotify import LocalConstant
+    from zuzuNotify import TimeUtils
+else:
+    import LocalConstant, TimeUtils
 
 class Notifier(object):
     def __init__(self, data):
@@ -55,11 +65,10 @@ class ZuzuWeb(object):
 
 class AsyncZuzuWeb(object):
 
-    def __init__(self):
+    def __init__(self, loop):
         self.logger = logging.getLogger(__name__)
         self.web_url = LocalConstant.WEB_URL
-        self.session = aiohttp.ClientSession()
-
+        self.session = aiohttp.ClientSession(loop=loop)
 
     async def get(self, resource):
         self.logger.info("get "+str(resource))
@@ -79,6 +88,8 @@ class AsyncZuzuWeb(object):
             headers[LocalConstant.WEB_TOKEN_HEADER] = LocalConstant.WEB_TOKEN_VALUE
             r = await self.session.delete(self.web_url+resource, headers=headers)
 
+            await r.release()
+
             if r.status == 200:
                 return True
             return False
@@ -97,6 +108,9 @@ class AsyncZuzuWeb(object):
             r = await self.session.post(self.web_url+resource, data=data, headers=headers)
 
             js = await r.json()
+
+            await r.release()
+
             if js.get("code") is not None and js.get("code") == 200:
                 return True
             else:
@@ -125,6 +139,8 @@ class AsyncZuzuWeb(object):
             r = await self.session.patch(self.web_url+resource, data=data, headers=headers)
 
             js = await r.json()
+
+            await r.release()
 
             if js.get("code") is not None and js.get("code") == 200:
                 return True
@@ -161,6 +177,8 @@ class AsyncZuzuWeb(object):
         response = await self.get(resource)
         js = await response.json()
 
+        await response.release()
+
         data_size = js.get("data")
         if data_size is not None:
             return data_size
@@ -181,3 +199,6 @@ class AsyncZuzuWeb(object):
             else:
                 self.logger.error("delete token error: "+str(device_id)+", of user:"+str(user_id))
         pass
+
+    def close(self):
+        self.session.close()

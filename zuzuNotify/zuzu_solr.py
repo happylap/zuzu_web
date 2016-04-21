@@ -1,9 +1,20 @@
 # encoding: utf-8
 
+
+import sys
 import logging
 import pysolarized
 import aiosolr
-from zuzuNotify import TimeUtils, JsonUtils, LocalConstant
+
+args = sys.argv
+IS_LOCAL = 0
+if len(args) > 1 and args[1] == "IS_LOCAL":
+    IS_LOCAL = 1
+
+if IS_LOCAL:
+    from zuzuNotify import TimeUtils, JsonUtils, LocalConstant
+else:
+    import TimeUtils, JsonUtils, LocalConstant
 
 class SolrClient(object):
     def __init__(self, solr_url):
@@ -65,6 +76,8 @@ class AsyncSolrClient(object):
 
         self.current_query_post_tiem = TimeUtils.getHoursAgo(dt=self.current_notify_time, hours= self.NOTIFY_INTERVAL_HOURS)
 
+        if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
+            self.price_seq = 0
 
     async def query(self, query, filters=None, columns=None, sort=None, start=0, rows=30):
         if not columns:
@@ -99,8 +112,8 @@ class AsyncSolrClient(object):
 
         query_post_time = self.getNextQueryPostTime(notifier.last_notify_time)
 
-        #if LocalConstant.PRODUCT_MODE == False:
-            #query_post_time = "2016-04-13T04:57:13Z"
+        if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
+            query_post_time = "2016-03-21T00:00:00Z"
 
         self.logger.info("query_post_time: " +str(query_post_time))
 
@@ -217,8 +230,12 @@ class AsyncSolrClient(object):
                             toVal = "*"
                         if fromVal == "-1":
                             fromVal = "*"
-
                     filter_string = "[ " +fromVal + " TO " + toVal +" ]"
+
+                    if field == "price" and LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
+                        filter_string = "[ " +str(self.price_seq) + " TO * ]"
+                        self.price_seq = self.price_seq + 1
+
                 elif obj.get("operator") is not None:
                     opt = str(obj.get("operator"))
                     values = obj.get("value")

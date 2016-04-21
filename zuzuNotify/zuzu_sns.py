@@ -1,10 +1,19 @@
 # encoding: utf-8
 
+import sys
 import logging
 import boto3
 import aiobotocore
 
-from zuzuNotify import LocalConstant
+args = sys.argv
+IS_LOCAL = 0
+if len(args) > 1 and args[1] == "IS_LOCAL":
+    IS_LOCAL = 1
+
+if IS_LOCAL:
+    from zuzuNotify import LocalConstant
+else:
+    import LocalConstant
 
 class SNS_Enpoint(object):
     def __init__(self, endpoint_arn=None, enabled=None, token=None):
@@ -49,19 +58,23 @@ class AsyncSNSClient(object):
 
     def __init__(self, loop):
         session = aiobotocore.get_session(loop=loop)
+
         self.async_client = session.create_client('sns', region_name=LocalConstant.AWS_REGION,
                             aws_secret_access_key=LocalConstant.AWS_SECRET_ACCESS_KEY,
                             aws_access_key_id=LocalConstant.AWS_ACCESS_KEY_ID)
+
         self.logger = logging.getLogger(__name__)
 
     async def send(self, endpoint, msg, msg_structure):
-        response = await self.async_client.publish(TargetArn=endpoint.arn, Message=msg, MessageStructure=msg_structure)
-        print(response)
         try:
+            response = await self.async_client.publish(TargetArn=endpoint.arn, Message=msg, MessageStructure=msg_structure)
+            self.logger.info(response)
             if response.get('ResponseMetadata').get('HTTPStatusCode') == 200:
-                self.logger.info("Notify successfully, endpoint: "  + str(endpoint.endpoint_arn))
+                self.logger.info("Notify successfully, endpoint: "  + str(endpoint))
             else:
-                self.logger.error("Notify failed, endpoint: "  + str(endpoint.endpoint_arn))
+                self.logger.error("Notify failed, endpoint: "  + str(endpoint))
         except:
-            self.logger.error("Notify failed, endpoint: "  + str(endpoint.endpoint_arn))
+            self.logger.error("Notify failed, endpoint: "  + str(endpoint))
 
+    def close(self):
+        self.async_client.close()
