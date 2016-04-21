@@ -49,19 +49,23 @@ class AsyncSNSClient(object):
 
     def __init__(self, loop):
         session = aiobotocore.get_session(loop=loop)
+
         self.async_client = session.create_client('sns', region_name=LocalConstant.AWS_REGION,
                             aws_secret_access_key=LocalConstant.AWS_SECRET_ACCESS_KEY,
                             aws_access_key_id=LocalConstant.AWS_ACCESS_KEY_ID)
+
         self.logger = logging.getLogger(__name__)
 
     async def send(self, endpoint, msg, msg_structure):
-        response = await self.async_client.publish(TargetArn=endpoint.arn, Message=msg, MessageStructure=msg_structure)
-        print(response)
         try:
+            response = await self.async_client.publish(TargetArn=endpoint.arn, Message=msg, MessageStructure=msg_structure)
+            self.logger.info(response)
             if response.get('ResponseMetadata').get('HTTPStatusCode') == 200:
-                self.logger.info("Notify successfully, endpoint: "  + str(endpoint.endpoint_arn))
+                self.logger.info("Notify successfully, endpoint: "  + str(endpoint))
             else:
-                self.logger.error("Notify failed, endpoint: "  + str(endpoint.endpoint_arn))
+                self.logger.error("Notify failed, endpoint: "  + str(endpoint))
         except:
-            self.logger.error("Notify failed, endpoint: "  + str(endpoint.endpoint_arn))
+            self.logger.error("Notify failed, endpoint: "  + str(endpoint))
 
+    def close(self):
+        self.async_client.close()
