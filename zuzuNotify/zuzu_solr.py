@@ -99,8 +99,8 @@ class AsyncSolrClient(object):
 
         query_post_time = self.getNextQueryPostTime(notifier.last_notify_time)
 
-        #if LocalConstant.PRODUCT_MODE == False:
-            #query_post_time = "2016-04-13T04:57:13Z"
+        if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
+            query_post_time = "2016-04-13T04:57:13Z"
 
         self.logger.info("query_post_time: " +str(query_post_time))
 

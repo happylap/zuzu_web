@@ -55,13 +55,12 @@ class AsyncSNSClient(object):
         self.logger = logging.getLogger(__name__)
 
     async def send(self, endpoint, msg, msg_structure):
-        response = await self.async_client.publish(TargetArn=endpoint.arn, Message=msg, MessageStructure=msg_structure)
-        print(response)
         try:
+            response = await self.async_client.publish(TargetArn=endpoint.arn, Message=msg, MessageStructure=msg_structure)
+            self.logger.info(response)
             if response.get('ResponseMetadata').get('HTTPStatusCode') == 200:
-                self.logger.info("Notify successfully, endpoint: "  + str(endpoint.endpoint_arn))
+                self.logger.info("Notify successfully, endpoint: "  + str(endpoint))
             else:
-                self.logger.error("Notify failed, endpoint: "  + str(endpoint.endpoint_arn))
+                self.logger.error("Notify failed, endpoint: "  + str(endpoint))
         except:
-            self.logger.error("Notify failed, endpoint: "  + str(endpoint.endpoint_arn))
-
+            self.logger.error("Notify failed, endpoint: "  + str(endpoint))
