@@ -1,10 +1,19 @@
 # encoding: utf-8
 
+import sys
 import logging
 import boto3
 import aiobotocore
 
-from zuzuNotify import LocalConstant
+args = sys.argv
+IS_LOCAL = 0
+if len(args) > 1 and args[1] == "IS_LOCAL":
+    IS_LOCAL = 1
+
+if IS_LOCAL:
+    from zuzuNotify import LocalConstant
+else:
+    import LocalConstant
 
 class SNS_Enpoint(object):
     def __init__(self, endpoint_arn=None, enabled=None, token=None):

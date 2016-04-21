@@ -1,9 +1,20 @@
 # encoding: utf-8
 
+
+import sys
 import logging
 import pysolarized
 import aiosolr
-from zuzuNotify import TimeUtils, JsonUtils, LocalConstant
+
+args = sys.argv
+IS_LOCAL = 0
+if len(args) > 1 and args[1] == "IS_LOCAL":
+    IS_LOCAL = 1
+
+if IS_LOCAL:
+    from zuzuNotify import TimeUtils, JsonUtils, LocalConstant
+else:
+    import TimeUtils, JsonUtils, LocalConstant
 
 class SolrClient(object):
     def __init__(self, solr_url):
