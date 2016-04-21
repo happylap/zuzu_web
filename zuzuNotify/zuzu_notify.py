@@ -45,7 +45,7 @@ class NotifyService(object):
         #
         self.conn_limit = 20
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
-            self.test_limit = 3000
+            self.test_limit = 10000
             self.item_id_seq = 1
 
 
@@ -84,6 +84,7 @@ class NotifyService(object):
         new_list = []
         count = 0
 
+
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             while(1):
                 for n in notifier_list:
@@ -94,6 +95,7 @@ class NotifyService(object):
                 if count >= self.test_limit:
                     break
             notifier_list = new_list
+
 
         if notifier_list is None or len(notifier_list) <=0:
             self.logger.info("no notifiers -> exit")
@@ -177,8 +179,11 @@ class NotifyService(object):
 
     def getEndpoints(self, device_id):
         for e in self.endpoint_list:
-            if e.token is not None and e.token == device_id and e.enabled == True:
-                return e
+            if e.token is not None and e.token == device_id:
+                if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
+                    return e
+                elif e.enabled == True:
+                    return e
         return None
 
     async def sendNotifications(self,notify_items, notifier, user_endpoint_list):

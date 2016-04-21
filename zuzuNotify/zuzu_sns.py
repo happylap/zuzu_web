@@ -48,9 +48,9 @@ class SNSClient(object):
 class AsyncSNSClient(object):
 
     def __init__(self, loop):
-        self.session = aiobotocore.get_session(loop=loop)
+        session = aiobotocore.get_session(loop=loop)
 
-        self.async_client = self.session.create_client('sns', region_name=LocalConstant.AWS_REGION,
+        self.async_client = session.create_client('sns', region_name=LocalConstant.AWS_REGION,
                             aws_secret_access_key=LocalConstant.AWS_SECRET_ACCESS_KEY,
                             aws_access_key_id=LocalConstant.AWS_ACCESS_KEY_ID)
 
