@@ -12,6 +12,7 @@ IS_LOCAL = 0
 if len(args) > 1 and args[1] == "IS_LOCAL":
     IS_LOCAL = 1
 
+
 if IS_LOCAL:
     from zuzuNotify import JsonUtils, TimeUtils, LocalConstant
     from zuzuNotify.zuzu_solr import SolrClient, AsyncSolrClient
@@ -56,9 +57,9 @@ class NotifyService(object):
         #
         self.endpoint_list = []
         #
-        self.conn_limit = 20
+        self.conn_limit = 30
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
-            self.test_limit = 20000
+            self.test_limit = 10000
             self.item_id_seq = 1
 
 
@@ -121,8 +122,8 @@ class NotifyService(object):
             loop.run_until_complete(self.notitfy(notifier_list))
             self.logger.info("close zuzuweb session")
             self.close(loop)
-        print("elasped time: %s s" % t.secs)
         self.logger.info("elasped time: %s s" % t.secs)
+        print("elasped time: %s s" % t.secs)
 
 
     def close(self, loop):
@@ -244,7 +245,7 @@ class NotifyService(object):
         messageJSON = json.dumps(message,ensure_ascii=False)
         return messageJSON
 
-#@profile
+@profile
 def main():
 
     logname = LocalConstant.LOG_FOLDER+"/notifier"+"_%s.log" % datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")

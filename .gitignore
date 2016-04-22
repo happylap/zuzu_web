@@ -13,3 +13,8 @@ notifier.json
 
 #pytcharm IDE
 .idea/
+bin/
+include/
+lib/
+pip-selfcheck.json
+pyvenv.cfg
