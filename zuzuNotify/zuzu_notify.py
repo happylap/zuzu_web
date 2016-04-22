@@ -56,9 +56,9 @@ class NotifyService(object):
         #
         self.endpoint_list = []
         #
-        self.conn_limit = 10
+        self.conn_limit = 20
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
-            self.test_limit = 10000
+            self.test_limit = 20000
             self.item_id_seq = 1
 
 
@@ -88,7 +88,7 @@ class NotifyService(object):
         except:
             self.logger.error("Fail to add items")
 
-    @profile
+
     def startNotify(self):
         self.endpoint_list = SNSClient().getEnpoints()
 
@@ -244,6 +244,7 @@ class NotifyService(object):
         messageJSON = json.dumps(message,ensure_ascii=False)
         return messageJSON
 
+#@profile
 def main():
 
     logname = LocalConstant.LOG_FOLDER+"/notifier"+"_%s.log" % datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
