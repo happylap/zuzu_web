@@ -56,7 +56,7 @@ class NotifyService(object):
         #
         self.endpoint_list = []
         #
-        self.conn_limit = 20
+        self.conn_limit = 80
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             self.test_limit = 20000
             self.item_id_seq = 1
