@@ -43,6 +43,7 @@ import com.lap.zuzuweb.handler.device.DeviceQueryHandler;
 import com.lap.zuzuweb.handler.log.LogPatchHandler;
 import com.lap.zuzuweb.handler.notifier.NotifierHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemBatchCreateHandler;
+import com.lap.zuzuweb.handler.notifyItem.NotifyItemLatestReceiveCountHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemPatchHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemQueryHandler;
 import com.lap.zuzuweb.handler.notifyItem.NotifyItemUnreadCountHandler;
@@ -51,8 +52,8 @@ import com.lap.zuzuweb.handler.purchase.PurchaseQueryHandler;
 import com.lap.zuzuweb.handler.purchase.PurchaseValidHandler;
 import com.lap.zuzuweb.handler.service.ServiceQueryHandler;
 import com.lap.zuzuweb.handler.user.UserCheckHandler;
-import com.lap.zuzuweb.handler.user.UserLoginHandler;
 import com.lap.zuzuweb.handler.user.UserForgetPasswordHandler;
+import com.lap.zuzuweb.handler.user.UserLoginHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
 import com.lap.zuzuweb.handler.user.UserRegisterHandler;
 import com.lap.zuzuweb.handler.user.UserRemoveHandler;
@@ -105,7 +106,7 @@ public class App implements SparkApplication
     	UserService userSvc = new UserServiceImpl(userDao, serviceDao);
     	DeviceService deviceSvc = new DeviceServiceImpl(deviceDao);
     	CriteriaService criteriaSvc = new CriteriaServiceImpl(criteriaDao);
-    	NotifyItemService notifyItemSvc = new NotifyItemServiceImpl(notifyItemDao);
+    	NotifyItemService notifyItemSvc = new NotifyItemServiceImpl(notifyItemDao, logDao);
     	LogService logSvc = new LogServiceImpl(logDao);
     	PurchaseService purchaseSvc = new PurchaseServiceImpl(purchaseDao, userDao, serviceDao);
     	AuthService authSvc = new AuthServiceImpl(userDao);
@@ -219,6 +220,7 @@ public class App implements SparkApplication
         get("/notifyitem/:userid", new NotifyItemQueryHandler(notifyItemSvc)); // get notify belonging to some user
         get("/notifyitem/:userid/after/:posttime", new NotifyItemQueryHandler(notifyItemSvc)); // get notify belonging to some user
         get("/notifyitem/unreadcount/:userid", new NotifyItemUnreadCountHandler(notifyItemSvc));
+        get("/notifyitem/latestreceivecount/:userid", new NotifyItemLatestReceiveCountHandler(notifyItemSvc));
         patch("/notifyitem/:userid/:itemid", new NotifyItemPatchHandler(notifyItemSvc)); 
         
         // log

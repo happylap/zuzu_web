@@ -24,6 +24,9 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 			+ " post_time, price, size, first_img_url, house_type, purpose_type, title, addr"
 			+ " FROM \"Notify_item\" WHERE user_id=:user_id order by post_time";
 	
+	static private String SQL_COUNT_OF_ITEMS_BY_USER_AFTER_NOTIFY_TIME = "SELECT count(item_id) FROM \"Notify_item\"" 
+			+ " WHERE user_id=:user_id AND notify_time>=:notify_time";
+	
 	static private String SQL_GET_ITEM_BY_USER_AFTER_POSTTIME = "SELECT item_id, user_id, criteria_id, is_read, notify_time, "
 			+ " post_time, price, size, first_img_url, house_type, purpose_type, title, addr"
 			+ " FROM \"Notify_item\" WHERE user_id=:user_id AND post_time>:post_time";
@@ -70,6 +73,17 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
         }
 	}
 
+	@Override
+	public int getCountOfItemsAfterNotifyTime(String userID, Date notifyTime) {
+		logger.info("NotifyItemDao.getCountOfItemsAfterNotifyTime: " + userID + ", " + notifyTime);
+		try (Connection conn = sql2o.open()) {
+			return conn.createQuery(SQL_COUNT_OF_ITEMS_BY_USER_AFTER_NOTIFY_TIME)
+					.addParameter("user_id", userID)
+                    .addParameter("notify_time", notifyTime)
+                    .executeScalar(Integer.class);
+        }
+	}
+	
 	@Override
 	public Optional<NotifyItem> getItem(String userID, String item_id) {
         try (Connection conn = sql2o.open()) {

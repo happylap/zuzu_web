@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.lap.zuzuweb.dao.LogDao;
 import com.lap.zuzuweb.dao.NotifyItemDao;
 import com.lap.zuzuweb.model.NotifyItem;
 
@@ -15,9 +16,11 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 	private static final Logger logger = LoggerFactory.getLogger(NotifyItemService.class);
 	
 	private NotifyItemDao dao = null;
+	private LogDao logDao = null;
 
-	public NotifyItemServiceImpl(NotifyItemDao dao) {
+	public NotifyItemServiceImpl(NotifyItemDao dao, LogDao logDao) {
 		this.dao = dao;
+		this.logDao = logDao;
 	}
 
 	@Override
@@ -72,5 +75,14 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 	@Override
 	public long getUnreadCount(String userID) {
 		return this.dao.getUnreadCount(userID);
+	}
+
+	@Override
+	public long getLatestReceiveCount(String userID) {
+		Optional<Date> latestNotifyTime = logDao.getLatestNotifyTime(userID);
+		if (latestNotifyTime.isPresent()) {
+			return this.dao.getCountOfItemsAfterNotifyTime(userID, latestNotifyTime.get());
+		} 
+		return 0;
 	}
 }

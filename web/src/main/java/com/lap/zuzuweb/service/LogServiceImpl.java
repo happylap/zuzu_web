@@ -21,7 +21,7 @@ public class LogServiceImpl implements LogService {
 		Log log = new Log();
 		log.setDevice_id(deviceID);
 		log.setUser_id(userID);
-		log.setLog_type(Log.Type.RECEIVE_NOTIFY_TIME);
+		log.setLog_type(Log.Type.RECEIVE_NOTIFY_TIME.toString());
 		log.setLog_comment("");
 		log.setLog_time(time);
 		this.dao.createLog(log);
@@ -32,7 +32,7 @@ public class LogServiceImpl implements LogService {
 		Log log = new Log();
 		log.setDevice_id(deviceID);
 		log.setUser_id(userID);
-		log.setLog_type(Log.Type.REGISTER_TIME);
+		log.setLog_type(Log.Type.REGISTER_TIME.toString());
 		log.setLog_comment("");
 		if (time == null) {
 			time = new Date();

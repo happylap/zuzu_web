@@ -12,6 +12,8 @@ public interface NotifyItemDao
 	
 	public List<NotifyItem> getItemsAfterPostTime(String userID, Date postTime);
 	
+	public int getCountOfItemsAfterNotifyTime(String userID, Date notifyTime);
+	
 	public boolean addItems(List<NotifyItem> items);
 	
 	public String updateItem(NotifyItem item);

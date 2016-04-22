@@ -20,4 +20,6 @@ public interface NotifyItemService {
 	public Optional<NotifyItem> getItem(String itemid, String userID);
 	
 	public long getUnreadCount(String userID);
+	
+	public long getLatestReceiveCount(String userID);
 }
