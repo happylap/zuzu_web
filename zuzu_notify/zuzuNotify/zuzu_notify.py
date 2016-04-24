@@ -57,9 +57,10 @@ class NotifyService(object):
         #
         self.endpoint_list = []
         #
-        self.conn_limit = 30
+        self.conn_limit = 20
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
-            self.test_limit = 10000
+            self.current_time_str = TimeUtils.get_Now().strftime("%Y%m%d_%H%M%S")
+            self.test_limit = 3000
             self.item_id_seq = 1
 
 
@@ -174,7 +175,7 @@ class NotifyService(object):
 
             if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
                 for item in notify_items:
-                    item["item_id"] = str(self.item_id_seq)
+                    item["item_id"] = self.current_time_str+"_"+str(self.item_id_seq)
                     self.item_id_seq = self.item_id_seq + 1
 
             is_save = await self.async_zuzu_web.saveNotifyItems(notify_items)
