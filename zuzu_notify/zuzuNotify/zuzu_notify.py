@@ -47,6 +47,11 @@ class Timer(object):
 class NotifyService(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+
+        self.logger .info("PRODUCT_MODE: "+ LocalConstant.PRODUCT_MODE)
+        self.logger .info("TEST_PERFORMANCE: "+ LocalConstant.TEST_PERFORMANCE)
+        self.logger .info("IS_LOCAL: "+ IS_LOCAL)
+
         self.json = JsonUtils.getNotifierJson()
         # notification message
         self.TITLE_LENGTH = 10
