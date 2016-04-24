@@ -112,6 +112,8 @@ class NotifyService(object):
             notifier_list = new_list
 
 
+        self.logger.info("notifier_list: " + str(notifier_list))
+
         if notifier_list is None or len(notifier_list) <=0:
             self.logger.info("no notifiers -> exit")
             raise SystemExit
