@@ -172,8 +172,8 @@ class AsyncZuzuWeb(object):
         value = last_notify_time_str
         await self.patch_replace(resource, path, value)
 
-    async def getUnreadNotifyItemNum(self, user_id):
-        resource  = "/notifyitem/unreadcount/"+user_id
+    async def getLatestreceivecount(self, user_id):
+        resource  = "/notifyitem/latestreceivecount/"+user_id
         response = await self.get(resource)
         js = await response.json()
 

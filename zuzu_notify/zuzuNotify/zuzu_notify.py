@@ -60,7 +60,7 @@ class NotifyService(object):
         self.conn_limit = 20
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             self.current_time_str = TimeUtils.get_Now().strftime("%Y%m%d_%H%M%S")
-            self.test_limit = 3000
+            self.test_limit = 10
             self.item_id_seq = 1
 
 
@@ -102,9 +102,9 @@ class NotifyService(object):
 
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             while(1):
+                count = count + 1
                 for n in notifier_list:
                     new_list.append(n)
-                    count = count + 1
                     if count >= self.test_limit:
                         break
                 if count >= self.test_limit:
@@ -203,7 +203,7 @@ class NotifyService(object):
 
     async def sendNotifications(self,notify_items, notifier, user_endpoint_list):
         self.logger.info("sendNotifications()...")
-        badge =  await self.async_zuzu_web.getUnreadNotifyItemNum(notifier.user_id)
+        badge =  await self.async_zuzu_web.getLatestreceivecount(notifier.user_id)
         alert = self.composeMessageBody(notify_items)
         msg = self.composeAPNSMessage(alert, badge)
         self.logger.info("start to send notification for user: " + notifier.user_id)
