@@ -245,7 +245,7 @@ class NotifyService(object):
         messageJSON = json.dumps(message,ensure_ascii=False)
         return messageJSON
 
-@profile
+#@profile
 def main():
 
     logname = LocalConstant.LOG_FOLDER+"/notifier"+"_%s.log" % datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
