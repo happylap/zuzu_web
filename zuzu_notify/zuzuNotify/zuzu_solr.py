@@ -48,6 +48,20 @@ class SolrClient(object):
         else:
             return None
 
+    def deleteOldItems(self, post_time):
+        query = "post_time:[ * TO " + post_time +" ]"
+        columns = ["id"]
+        rows = self._get_rows(query, filters=None)
+        if rows > 0:
+            r = self.solr.query(query=query, columns= columns, rows=rows)
+            docs = r.documents
+            if docs is not None:
+                for item in docs:
+                    self.solr.delete(item["id"])
+                    self.solr.commit()
+
+
+
     def add(self, item):
         self.solr.add(item)
 

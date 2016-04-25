@@ -41,6 +41,23 @@ class SNSClient(object):
     def getEnpoints(self):
         endpoint_list = []
         try:
+            paginator = self.client.get_paginator('list_endpoints_by_platform_application')
+            page_iterator = paginator.paginate(PlatformApplicationArn=LocalConstant.SNS_PLATFORM)
+            for page in page_iterator:
+                endpoints = page.get('Endpoints')
+                if endpoints is not None or len(endpoints) >0:
+                    for e in endpoints:
+                        arn = e.get('EndpointArn')
+                        enable = e.get('Attributes').get('Enabled')
+                        token = e.get('Attributes').get('Token')
+                        endpoint_list.append(SNS_Enpoint(arn,enable,token))
+        except:
+            self.logger.error("Fail to getEnpoints")
+        return endpoint_list
+
+    def getNextEnpoints(self, next_token):
+        endpoint_list = []
+        try:
             response = self.client.list_endpoints_by_platform_application(PlatformApplicationArn=LocalConstant.SNS_PLATFORM)
             endpoints = response.get('Endpoints')
             if endpoints is None or len(endpoints) <=0:

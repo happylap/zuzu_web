@@ -12,6 +12,7 @@ IS_LOCAL = 0
 if len(args) > 1 and args[1] == "IS_LOCAL":
     IS_LOCAL = 1
 
+
 if IS_LOCAL:
     from zuzuNotify import JsonUtils, TimeUtils, LocalConstant
     from zuzuNotify.zuzu_solr import SolrClient, AsyncSolrClient
@@ -46,6 +47,11 @@ class Timer(object):
 class NotifyService(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+
+        self.logger .info("PRODUCT_MODE: "+ str(LocalConstant.PRODUCT_MODE))
+        self.logger .info("TEST_PERFORMANCE: "+ str(LocalConstant.TEST_PERFORMANCE))
+        self.logger .info("IS_LOCAL: "+ str(IS_LOCAL))
+
         self.json = JsonUtils.getNotifierJson()
         # notification message
         self.TITLE_LENGTH = 10
@@ -58,7 +64,8 @@ class NotifyService(object):
         #
         self.conn_limit = 20
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
-            self.test_limit = 20000
+            self.current_time_str = TimeUtils.get_Now().strftime("%Y%m%d_%H%M%S")
+            self.test_limit = 10
             self.item_id_seq = 1
 
 
@@ -100,15 +107,17 @@ class NotifyService(object):
 
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             while(1):
+                count = count + 1
                 for n in notifier_list:
                     new_list.append(n)
-                    count = count + 1
                     if count >= self.test_limit:
                         break
                 if count >= self.test_limit:
                     break
             notifier_list = new_list
 
+
+        self.logger.info("notifier_list: " + str(notifier_list))
 
         if notifier_list is None or len(notifier_list) <=0:
             self.logger.info("no notifiers -> exit")
@@ -121,8 +130,8 @@ class NotifyService(object):
             loop.run_until_complete(self.notitfy(notifier_list))
             self.logger.info("close zuzuweb session")
             self.close(loop)
-        print("elasped time: %s s" % t.secs)
         self.logger.info("elasped time: %s s" % t.secs)
+        print("elasped time: %s s" % t.secs)
 
 
     def close(self, loop):
@@ -173,7 +182,7 @@ class NotifyService(object):
 
             if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
                 for item in notify_items:
-                    item["item_id"] = str(self.item_id_seq)
+                    item["item_id"] = self.current_time_str+"_"+str(self.item_id_seq)
                     self.item_id_seq = self.item_id_seq + 1
 
             is_save = await self.async_zuzu_web.saveNotifyItems(notify_items)
@@ -201,7 +210,7 @@ class NotifyService(object):
 
     async def sendNotifications(self,notify_items, notifier, user_endpoint_list):
         self.logger.info("sendNotifications()...")
-        badge =  await self.async_zuzu_web.getUnreadNotifyItemNum(notifier.user_id)
+        badge =  await self.async_zuzu_web.getLatestreceivecount(notifier.user_id)
         alert = self.composeMessageBody(notify_items)
         msg = self.composeAPNSMessage(alert, badge)
         self.logger.info("start to send notification for user: " + notifier.user_id)
@@ -268,7 +277,7 @@ def main():
         zuzu_single_process.removePIDfile()
         sys.exit()
     except:
-        logger.error("Unexpected error:", sys.exc_info())
+        logger.error("Unexpected error:"+str(sys.exc_info()))
         zuzu_single_process.removePIDfile()
 
 if __name__=="__main__":
