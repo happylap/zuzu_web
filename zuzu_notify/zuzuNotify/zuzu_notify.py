@@ -48,9 +48,9 @@ class NotifyService(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
-        self.logger .info("PRODUCT_MODE: "+ LocalConstant.PRODUCT_MODE)
-        self.logger .info("TEST_PERFORMANCE: "+ LocalConstant.TEST_PERFORMANCE)
-        self.logger .info("IS_LOCAL: "+ IS_LOCAL)
+        self.logger .info("PRODUCT_MODE: "+ str(LocalConstant.PRODUCT_MODE))
+        self.logger .info("TEST_PERFORMANCE: "+ str(LocalConstant.TEST_PERFORMANCE))
+        self.logger .info("IS_LOCAL: "+ str(IS_LOCAL))
 
         self.json = JsonUtils.getNotifierJson()
         # notification message
@@ -277,7 +277,7 @@ def main():
         zuzu_single_process.removePIDfile()
         sys.exit()
     except:
-        logger.error("Unexpected error:", sys.exc_info())
+        logger.error("Unexpected error:"+str(sys.exc_info()))
         zuzu_single_process.removePIDfile()
 
 if __name__=="__main__":
