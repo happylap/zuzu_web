@@ -51,6 +51,7 @@ import com.lap.zuzuweb.handler.purchase.PurchaseCreateHandler;
 import com.lap.zuzuweb.handler.purchase.PurchaseQueryHandler;
 import com.lap.zuzuweb.handler.purchase.PurchaseValidHandler;
 import com.lap.zuzuweb.handler.service.ServiceQueryHandler;
+import com.lap.zuzuweb.handler.system.DBInfoQueryHandler;
 import com.lap.zuzuweb.handler.user.UserCheckHandler;
 import com.lap.zuzuweb.handler.user.UserForgetPasswordHandler;
 import com.lap.zuzuweb.handler.user.UserLoginHandler;
@@ -66,6 +67,8 @@ import com.lap.zuzuweb.service.CriteriaService;
 import com.lap.zuzuweb.service.CriteriaServiceImpl;
 import com.lap.zuzuweb.service.DeviceService;
 import com.lap.zuzuweb.service.DeviceServiceImpl;
+import com.lap.zuzuweb.service.HikariPoolJmxService;
+import com.lap.zuzuweb.service.HikariPoolJmxServiceImpl;
 import com.lap.zuzuweb.service.LogService;
 import com.lap.zuzuweb.service.LogServiceImpl;
 import com.lap.zuzuweb.service.NotifyItemService;
@@ -89,6 +92,8 @@ public class App implements SparkApplication
 	
 	private static boolean enableAuth = true;
 	
+	public final static String DB_POOL_NAME = "zuzu_rental_pool";
+	
 	public void init() {
 		logger.info("App Initialization...");
 		logger.info("Authorization enabled: " + enableAuth);
@@ -110,7 +115,7 @@ public class App implements SparkApplication
     	LogService logSvc = new LogServiceImpl(logDao);
     	PurchaseService purchaseSvc = new PurchaseServiceImpl(purchaseDao, userDao, serviceDao);
     	AuthService authSvc = new AuthServiceImpl(userDao);
-    	
+    	HikariPoolJmxService dbpoolSvc = new HikariPoolJmxServiceImpl(DB_POOL_NAME);
     	
     	before((request, response) -> {
     		logger.info(String.format("Route Path: (%s) %s, From IP: %s", request.requestMethod(), request.uri().toString(), HttpUtils.getIpAddr(request)));
@@ -187,6 +192,8 @@ public class App implements SparkApplication
     	get("/public/user/password/forget/:email", new UserForgetPasswordHandler(authSvc));
     	post("/public/user/password/reset", new UserResetPasswordHandler(authSvc, userSvc));
     	get("/public/user/verify/:email/:verificationcode", new UserVerifyCodeHandler(authSvc));
+    	
+    	get("/public/db/info", new DBInfoQueryHandler(dbpoolSvc));
     	
     	
     	// cognito

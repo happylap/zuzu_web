@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.sql2o.Sql2o;
 import org.sql2o.quirks.PostgresQuirks;
 
+import com.lap.zuzuweb.App;
 import com.lap.zuzuweb.Secrets;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -35,6 +36,8 @@ public class Sql2OManager {
 			config.setMinimumIdle(20);
 			config.setMaximumPoolSize(100);
 			config.setConnectionTimeout(30000);
+			config.setPoolName(App.DB_POOL_NAME);
+			config.setRegisterMbeans(true);
 			
 			HikariDataSource ds = new HikariDataSource(config);
 			Sql2o sql2o = new Sql2o(ds, new PostgresQuirks());
