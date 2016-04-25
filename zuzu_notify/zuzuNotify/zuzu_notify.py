@@ -206,6 +206,8 @@ class NotifyService(object):
                     return e
                 elif e.enabled == True:
                     return e
+                else:
+                    self.logger.info(e.token + " is matched but not enabled")
         return None
 
     async def sendNotifications(self,notify_items, notifier, user_endpoint_list):
@@ -216,9 +218,9 @@ class NotifyService(object):
         self.logger.info("start to send notification for user: " + notifier.user_id)
 
         for endpoint in user_endpoint_list:
-            self.logger.info("use endpoint: " + str(endpoint) +" to send notification")
+            self.logger.info("use endpoint: " + str(endpoint.arn) +" to send notification")
             await self.async_sns_client.send(endpoint, msg, 'json')
-            self.logger.info("message sent to endpoint "+ str(endpoint))
+            self.logger.info("message sent to endpoint "+ str(endpoint.arn))
 
 
     def composeMessageBody(self, notify_items):
