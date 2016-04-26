@@ -28,6 +28,12 @@ public class AuthUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthUtils.class);
 	
+	private static CrunchifyInMemoryCache<String, Boolean> validTokenCache = new CrunchifyInMemoryCache<String, Boolean>(1800, 1800, 300);
+	
+	public static CrunchifyInMemoryCache<String, Boolean> getValidTokenCache() {
+		return validTokenCache;
+	}
+	
 	public static boolean isSuperTokenValid(String token) {
 		return StringUtils.equals(Secrets.SUPER_TOKEN, token);
 	}
@@ -72,9 +78,16 @@ public class AuthUtils {
 		return false;
 	}
 
+	
+	
 	public static boolean isGoogleTokenValid(String idTokenString) throws Exception {
 		if (StringUtils.isBlank(idTokenString)) {
 			return false;
+		}
+		
+		if (validTokenCache.get(idTokenString) != null && validTokenCache.get(idTokenString) == true) {
+			logger.info("Google token is valid in cache.");
+			return true;
 		}
 		
 		// Set up the HTTP transport and JSON factory
@@ -89,6 +102,8 @@ public class AuthUtils {
 			Payload payload = idToken.getPayload();
 
 			if (CollectionUtils.containsAny(payload.getAudienceAsList(), Arrays.asList(Secrets.GOOGLE_CLIENT_ID))) {
+				logger.info("Put valid Google token to cache.");
+				validTokenCache.put(idTokenString, true);
 				return true;
 			}
 
@@ -102,6 +117,11 @@ public class AuthUtils {
 	public static boolean isFacebookTokenValid(String token) throws Exception {
 		if (StringUtils.isBlank(token)) {
 			return false;
+		}
+		
+		if (validTokenCache.get(token) != null && validTokenCache.get(token) == true) {
+			logger.info("FB token is valid in cache.");
+			return true;
 		}
 		
 		String url = String.format("https://graph.facebook.com/debug_token?input_token=%s&access_token=%s", token,
@@ -133,6 +153,8 @@ public class AuthUtils {
 				}
 
 				if (StringUtils.equals(Secrets.FACEBOOK_APP_ID, _appId)) {
+					logger.info("Put valid FB token to cache.");
+					validTokenCache.put(token, true);
 					return true;
 				}
 			}

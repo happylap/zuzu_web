@@ -21,6 +21,7 @@ import com.lap.zuzuweb.exception.DataAccessException;
 import com.lap.zuzuweb.exception.UnauthorizedException;
 import com.lap.zuzuweb.handler.payload.CognitoTokenResultPayload;
 import com.lap.zuzuweb.model.User;
+import com.lap.zuzuweb.util.AuthUtils;
 import com.lap.zuzuweb.util.CommonUtils;
 import com.lap.zuzuweb.util.mail.Mail;
 import com.lap.zuzuweb.util.mail.MailSender;
@@ -154,8 +155,21 @@ public class AuthServiceImpl implements AuthService {
 		if (StringUtils.isBlank(zuzuToken)) {
 			return false;
 		}
+		
+		if (AuthUtils.getValidTokenCache().get(zuzuToken) != null && AuthUtils.getValidTokenCache().get(zuzuToken) == true) {
+			logger.info("Zuzu token is valid in cache.");
+			return true;
+		}
+		
 		Optional<User> existUser = this.userDao.getUserByToken(zuzuToken);
-		return existUser.isPresent();
+		
+		if (existUser.isPresent()) {
+			logger.info("Put valid Zuzu token to cache.");
+			AuthUtils.getValidTokenCache().put(zuzuToken, true);
+			return true;
+		}
+		
+		return false;
 	}
 	
 	@Override
