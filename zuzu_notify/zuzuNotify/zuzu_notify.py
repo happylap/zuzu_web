@@ -220,8 +220,6 @@ class NotifyService(object):
         for endpoint in user_endpoint_list:
             self.logger.info("use endpoint: " + str(endpoint.arn) +" to send notification")
             await self.async_sns_client.send(endpoint, msg, 'json')
-            self.logger.info("message sent to endpoint "+ str(endpoint.arn))
-
 
     def composeMessageBody(self, notify_items):
         item_size = len(notify_items)
