@@ -13,8 +13,8 @@ notifier.json
 
 #pytcharm IDE
 .idea/
-bin/
-include/
-lib/
+zuzu_notify/bin/
+zuzu_notify/include/
+zuzu_notify/lib/
 pip-selfcheck.json
 pyvenv.cfg
