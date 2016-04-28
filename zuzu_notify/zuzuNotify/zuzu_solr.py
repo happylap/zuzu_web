@@ -147,7 +147,7 @@ class AsyncSolrClient(object):
         else:
             self.logger.info("found "+ str(len(notify_items))+" new notify items for "+notifier.user_id)
 
-        self.logger.info("query criteria for "+notifier.user_id+": query=" + query["query"] + ", filters="+filters)
+        self.logger.info("query criteria for "+notifier.user_id+": query=" + q + ", filters="+ str(filters))
 
 
         latest_notify_time = None
