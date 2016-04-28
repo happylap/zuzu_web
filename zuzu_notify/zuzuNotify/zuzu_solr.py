@@ -138,12 +138,19 @@ class AsyncSolrClient(object):
         sort = ["price asc, post_time desc"]
         results = await self.query(query=q, filters=filters,columns=columns,sort=sort,start=0,rows=self.NOTIFY_ITEMS_LIMIT)
 
-        self.logger.info("get result for "+notifier.user_id)
+        self.logger.info("found notify_items for "+notifier.user_id)
+
         notify_items = results.docs
 
         if notify_items is None or len(notify_items) < 1:
+            self.logger.info("no new notify items for "+notifier.user_id)
             notifier.last_notify_time = self.current_notify_time
             return notify_items
+        else:
+            self.logger.info("found "+ len(notify_items )+" new notify items for "+notifier.user_id)
+
+        self.logger.info("query criteria for "+notifier.user_id+": query=" + query["query"] + ", filters="+filters)
+
 
         latest_notify_time = None
         for item in notify_items:
