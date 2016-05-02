@@ -1,3 +1,7 @@
+# Eclipse IDE
+web/target/
+
+# Java
 *.class
 
 *.log
