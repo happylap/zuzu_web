@@ -132,7 +132,7 @@ class NotifyService(object):
 
         with Timer() as t:
             loop = asyncio.get_event_loop()
-            self.async_sns_client = AsyncSNSClient(loop)
+            self.async_sns_client = AsyncSNSClient(loop, self.notify_error_stats)
             self.async_zuzu_web = AsyncZuzuWeb(loop)
             loop.run_until_complete(self.notitfy(notifier_list))
             self.logger.info("close zuzuweb session")
@@ -177,10 +177,13 @@ class NotifyService(object):
                         user_endpoint_list.append(endpoint)
                     else:
                         invalid_device.append(endpoint)
-
-                notify_items = await self.async_notify_solr.getNotifyItems(notifier)
-                if notify_items is None or len(notify_items) < 1:
-                    self.logger.info("no zuzuNotify items for user: " + notifier.user_id)
+                try:
+                    notify_items = await self.async_notify_solr.getNotifyItems(notifier)
+                    if notify_items is None or len(notify_items) < 1:
+                        self.logger.info("no zuzuNotify items for user: " + notifier.user_id)
+                        return
+                except:
+                    self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_QUERY_NOTIFY_ITEMS_EXCEPTION, user_id=notifier.user_id)
                     return
 
                 if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
@@ -228,7 +231,7 @@ class NotifyService(object):
 
         for endpoint in user_endpoint_list:
             self.logger.info("use endpoint: " + str(endpoint.arn) +" to send notification")
-            await self.async_sns_client.send(endpoint, msg, 'json')
+            await self.async_sns_client.send(notifier.user_id, endpoint, msg, 'json')
 
     def composeMessageBody(self, notify_items):
         item_size = len(notify_items)
@@ -276,8 +279,12 @@ def sendMail(start_time_str, end_time_str, notify_error_stats):
         error_notifiers = notify_error_stats.stats.get(key)
         if NOTIFY_ERROR_TYPE.ERROR_NO_DEVICES == key:
             error_message = "<br><br><b>"+seq_str+"No devices found to notify following users: </b>" + str(list(error_notifiers))
+        elif NOTIFY_ERROR_TYPE.ERROR_QUERY_NOTIFY_ITEMS_EXCEPTION == key:
+            error_message = "<br><br><b>"+seq_str+"Query notify items error for following users:  </b><br>" + str(list(error_notifiers))
         elif NOTIFY_ERROR_TYPE.ERROR_SAVE_NOTIFY_ITEMS == key:
             error_message = "<br><br><b>"+seq_str+"Saving notify items error for following users:  </b><br>" + str(list(error_notifiers))
+        elif NOTIFY_ERROR_TYPE.ERROR_SEND_NOTIFICATION == key:
+            error_message = "<br><br><b>"+seq_str+"Send notifications error for following users:  </b><br>" + str(list(error_notifiers))
         elif NOTIFY_ERROR_TYPE.ERROR_NOTIFY_EXCEPTION == key:
             error_message = "<br><br><b>"+seq_str+"Unknown error while notifying following users:  </b><br>" + str(list(error_notifiers))
         elif NOTIFY_ERROR_TYPE.ERROR_NO_NOTIFIER == key:

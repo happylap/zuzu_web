@@ -12,8 +12,10 @@ if len(args) > 1 and args[1] == "IS_LOCAL":
 
 if IS_LOCAL:
     from zuzuNotify import LocalConstant
+    from zuzuNotify.error_stats import NOTIFY_ERROR_TYPE
 else:
     import LocalConstant
+    from error_stats import NOTIFY_ERROR_TYPE
 
 class SNS_Enpoint(object):
     def __init__(self, endpoint_arn=None, enabled=None, token=None):
@@ -73,7 +75,8 @@ class SNSClient(object):
 
 class AsyncSNSClient(object):
 
-    def __init__(self, loop):
+    def __init__(self, loop, notify_error_stats):
+        self.notify_error_stats = notify_error_stats
         session = aiobotocore.get_session(loop=loop)
 
         self.async_client = session.create_client('sns', region_name=LocalConstant.AWS_REGION,
@@ -82,7 +85,7 @@ class AsyncSNSClient(object):
 
         self.logger = logging.getLogger(__name__)
 
-    async def send(self, endpoint, msg, msg_structure):
+    async def send(self, user_id, endpoint, msg, msg_structure):
         try:
             response = await self.async_client.publish(TargetArn=endpoint.arn, Message=msg, MessageStructure=msg_structure)
             self.logger.info(response)
@@ -90,8 +93,10 @@ class AsyncSNSClient(object):
                 self.logger.info("Notify successfully, endpoint: "  + str(endpoint.arn))
             else:
                 self.logger.error("Notify failed, endpoint: "  + str(endpoint.arn))
+                self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_SEND_NOTIFICATION, user_id = user_id)
         except:
             self.logger.error("Notify exception, endpoint: "  + str(endpoint.arn))
+            self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_SEND_NOTIFICATION, user_id = user_id)
 
     def close(self):
         self.async_client.close()
