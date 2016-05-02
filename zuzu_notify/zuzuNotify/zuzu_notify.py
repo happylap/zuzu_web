@@ -263,7 +263,7 @@ def sendMail(start_time_str, end_time_str, notify_error_stats):
     m_cc = LocalConstant.ZUZU_EMAIL_CC
     m_subject = '豬豬快租 ZuZu Notification Error'
 
-    m_body = ''
+    m_body = ""
 
     seq = 0
     for key in notify_error_stats.stats:
@@ -284,11 +284,11 @@ def sendMail(start_time_str, end_time_str, notify_error_stats):
         if error_message is not None:
             m_body = m_body + error_message
 
-    m_body_header = "Time: " + start_time_str + " - " + end_time_str
-    m_body_header = m_body_header + "<br>Totally "+str(seq)+ " kinds error found in Zuzu notification:"
-    m_body = m_body_header + m_body
-
-    MailSender().send(m_to, m_subject, m_body, m_cc)
+    if seq > 0:
+        m_body_header = "Time: " + start_time_str + " - " + end_time_str
+        m_body_header = m_body_header + "<br>Totally "+str(seq)+ " kinds error found in Zuzu notification:"
+        m_body = m_body_header + m_body
+        MailSender().send(m_to, m_subject, m_body, m_cc)
 
 #@profile
 def main():
