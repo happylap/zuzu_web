@@ -14,6 +14,7 @@ public class NotifierPayload {
 	private List<String> device_id;
 	private String criteria_id;
 	private String filters;
+	private boolean enabled;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
 	private Date last_notify_time;
 	

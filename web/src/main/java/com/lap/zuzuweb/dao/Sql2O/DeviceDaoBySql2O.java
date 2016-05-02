@@ -16,7 +16,8 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 	static private String SQL_GET_VALID_DEVICES = "SELECT d.device_id, d.user_id, d.register_time"
 			+ " FROM \"Device\" d, \"Criteria\" c, \"ZuzuService\" s"
 			+ " WHERE d.user_id = c.user_id AND c.user_id = s.user_id"
-			+ " AND c.enabled = true AND s.expire_time > now()"
+			// + " AND c.enabled = true AND s.expire_time > now()"
+			+ " AND s.expire_time > now()"
 			+ " ORDER BY d.user_id";
 	
 	static private String SQL_GET_DEVICE = "SELECT device_id, user_id, register_time"

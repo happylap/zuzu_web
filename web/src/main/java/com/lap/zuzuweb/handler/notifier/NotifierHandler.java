@@ -56,6 +56,7 @@ public class NotifierHandler extends AbstractRequestHandler<EmptyPayload>{
 				payload.setUser_id(userId);
 				payload.setCriteria_id(c.getCriteria_id());
 				payload.setFilters(c.getFilters().getValue());
+				payload.setEnabled(c.isEnabled());
 				payload.setLast_notify_time(c.getLast_notify_time());
 				if (deviceIdsGroup.containsKey(userId)) {
 					payload.setDevice_id(deviceIdsGroup.get(userId));

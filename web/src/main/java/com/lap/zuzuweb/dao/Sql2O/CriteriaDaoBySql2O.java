@@ -19,7 +19,8 @@ public class CriteriaDaoBySql2O extends AbstratcDaoBySql2O implements CriteriaDa
 	static private String SQL_GET_VALID_CRITERIA = "SELECT c.criteria_id, c.user_id, c.enabled, c.filters, c.last_notify_time" 
 			+ " FROM \"Criteria\" c, \"ZuzuService\" s" 
 			+ " WHERE c.user_id = s.user_id"
-			+ " AND c.enabled = true AND s.expire_time > now()"
+			// + " AND c.enabled = true AND s.expire_time > now()"
+			+ " AND s.expire_time > now()"
 			+ " ORDER BY c.user_id";
 	
 	static private String SQL_GET_CRITERIA_BY_USER = "SELECT criteria_id, user_id, enabled, last_notify_time, filters"
