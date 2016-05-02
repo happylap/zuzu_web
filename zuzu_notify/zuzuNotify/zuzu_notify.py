@@ -259,8 +259,8 @@ class NotifyService(object):
         return messageJSON
 
 def sendMail(start_time_str, end_time_str, notify_error_stats):
-    m_to = ['lapinctw@gmail.com']
-    m_cc = ['eechih@gmail.com', 'alight.lee@gmail.com', 'pikapai@gmail.com']
+    m_to = [LocalConstant.ZUZU_EMAIL_ADMIN]
+    m_cc = LocalConstant.ZUZU_EMAIL_CC
     m_subject = '豬豬快租 ZuZu Notification Error'
 
     m_body = ''
