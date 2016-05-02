@@ -83,21 +83,25 @@ class NotifyService(object):
         JsonUtils.updateNotifierJson(self.json)
 
     def prepareData(self):
-        post_time = self.json["last_post_time"]
-        self.logger.info("getNewItems after " + post_time)
-        zuzu_solr = SolrClient(LocalConstant.ZUZU_SOLR_URL)
-        new_items = zuzu_solr.getNewPostItems(post_time)
-        if new_items is None or len(new_items) <= 0:
-            return
+        try:
+            post_time = self.json["last_post_time"]
+            self.logger.info("getNewItems after " + post_time)
+            zuzu_solr = SolrClient(LocalConstant.ZUZU_SOLR_URL)
+            new_items = zuzu_solr.getNewPostItems(post_time)
+            if new_items is None or len(new_items) <= 0:
+                return
 
-        notify_solr = SolrClient(LocalConstant.NOTIFIER_SOLR_URL)
-        for item in new_items:
-            item.pop("_version_", None)
-            notify_solr.add(item)
-            self.json["last_post_time"] = item["post_time"]
-        notify_solr.commit()
-        self.updateLastPostTime()
-
+            notify_solr = SolrClient(LocalConstant.NOTIFIER_SOLR_URL)
+            for item in new_items:
+                item.pop("_version_", None)
+                notify_solr.add(item)
+                self.json["last_post_time"] = item["post_time"]
+            notify_solr.commit()
+            self.updateLastPostTime()
+        except:
+            self.logger.error("error occurs while preparing the data")
+            self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_PREPARE_DATA_EXCEPTION)
+            raise SystemExit
 
     def startNotify(self):
         self.endpoint_list = SNSClient().getEnpoints()
@@ -278,6 +282,8 @@ def sendMail(start_time_str, end_time_str, notify_error_stats):
             error_message = "<br><br><b>"+seq_str+"Unknown error while notifying following users:  </b><br>" + str(list(error_notifiers))
         elif NOTIFY_ERROR_TYPE.ERROR_NO_NOTIFIER == key:
             error_message = "<br><br><b>"+seq_str+"There is no users found for notifications </b>"
+        elif NOTIFY_ERROR_TYPE.ERROR_PREPARE_DATA_EXCEPTION == key:
+            error_message = "<br><br><b>"+seq_str+"Unknown error while preparing data for notification </b>"
         elif NOTIFY_ERROR_TYPE.ERROR_MAIN_EXCEPTION == key:
             error_message = "<br><br><b>"+seq_str+"Unknown error while prcessing the notify </b>"
 

@@ -7,8 +7,9 @@ class NOTIFY_ERROR_TYPE(object):
     ERROR_SAVE_NOTIFY_ITEMS, \
     ERROR_NOTIFY_EXCEPTION, \
     ERROR_NO_NOTIFIER, \
+    ERROR_PREPARE_DATA_EXCEPTION, \
     ERROR_MAIN_EXCEPTION, \
-    = range(5)
+    = range(6)
 
 class NotifyErrorStats(object):
     def __init__(self):
