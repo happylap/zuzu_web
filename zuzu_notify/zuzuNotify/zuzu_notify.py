@@ -53,9 +53,9 @@ class NotifyService(object):
         self.logger = logging.getLogger(__name__)
         self.notify_error_stats = notify_error_stats
 
-        self.logger .info("PRODUCT_MODE: "+ str(LocalConstant.PRODUCT_MODE))
-        self.logger .info("TEST_PERFORMANCE: "+ str(LocalConstant.TEST_PERFORMANCE))
-        self.logger .info("IS_LOCAL: "+ str(IS_LOCAL))
+        self.logger.info("PRODUCT_MODE: "+ str(LocalConstant.PRODUCT_MODE))
+        self.logger.info("TEST_PERFORMANCE: "+ str(LocalConstant.TEST_PERFORMANCE))
+        self.logger.info("IS_LOCAL: "+ str(IS_LOCAL))
 
         self.json = JsonUtils.getNotifierJson()
         # notification message
@@ -265,12 +265,30 @@ class NotifyService(object):
         messageJSON = json.dumps(message,ensure_ascii=False)
         return messageJSON
 
+def checkErrors(notify_error_stats):
+    logger = logging.getLogger(__name__)
+
+    for key in notify_error_stats.stats:
+        if NOTIFY_ERROR_TYPE.ERROR_QUERY_NOTIFY_ITEMS_EXCEPTION == key \
+            or NOTIFY_ERROR_TYPE.ERROR_SAVE_NOTIFY_ITEMS == key \
+            or NOTIFY_ERROR_TYPE.ERROR_PREPARE_DATA_EXCEPTION == key:
+            json = JsonUtils.getNotifierJson()
+            json["Stop"] = True
+            JsonUtils.updateNotifierJson(json)
+            logger.error("Stop notifiers until error is fixed and revocered !!!!!")
+            return
+
+
 def sendMail(start_time_str, end_time_str, notify_error_stats):
+    logger = logging.getLogger(__name__)
+
     m_to = [LocalConstant.ZUZU_EMAIL_ADMIN]
     m_cc = LocalConstant.ZUZU_EMAIL_CC
     m_subject = '豬豬快租 ZuZu Notification Error'
 
     m_body = ""
+
+    logger.info("error stats: " + str(notify_error_stats.stats))
 
     seq = 0
     for key in notify_error_stats.stats:
@@ -298,6 +316,7 @@ def sendMail(start_time_str, end_time_str, notify_error_stats):
             m_body = m_body + error_message
 
     if seq > 0:
+        logger.info("found errors, send mail.....")
         m_body_header = "Time: " + start_time_str + " - " + end_time_str
         m_body_header = m_body_header + "<br>Totally "+str(seq)+ " kinds error found in Zuzu notification:"
         m_body = m_body_header + m_body
@@ -315,22 +334,31 @@ def main():
                         datefmt='%H:%M:%S',
                         level=logging.INFO)
     logger = logging.getLogger(__name__)
+    json = JsonUtils.getNotifierJson()
+    is_stop = json.get("Stop")
 
     try:
-        notify_error_stats = NotifyErrorStats()
-        zuzu_single_process.scriptStarter('no-force')
+        if is_stop is not None and is_stop == True:
+            logger.error("Notifier cannot be launched because errors are still not fixed and recovered")
+        else:
+            notify_error_stats = NotifyErrorStats()
+            zuzu_single_process.scriptStarter('no-force')
 
-        notifier = NotifyService(notify_error_stats)
-        notifier.prepareData()
-        notifier.startNotify()
+            notifier = NotifyService(notify_error_stats)
+            notifier.prepareData()
+            notifier.startNotify()
     except SystemExit:
         logger.error("SystemExit exit exception due to errors")
     except:
         logger.error("Unexpected error in main:"+str(sys.exc_info()))
         notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_MAIN_EXCEPTION)
     finally:
-        end_time_str = TimeUtils.getTimeString(TimeUtils.get_Now(), TimeUtils.UTC_FORMT)
-        sendMail(start_time_str, end_time_str, notify_error_stats)
+        if is_stop is not None and is_stop == True:
+            pass
+        else:
+            end_time_str = TimeUtils.getTimeString(TimeUtils.get_Now(), TimeUtils.UTC_FORMT)
+            sendMail(start_time_str, end_time_str, notify_error_stats)
+            checkErrors(notify_error_stats)
         zuzu_single_process.removePIDfile()
 
 
