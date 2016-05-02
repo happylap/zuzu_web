@@ -126,9 +126,6 @@ class AsyncSolrClient(object):
 
         query_post_time = self.getNextQueryPostTime(notifier.last_notify_time)
 
-        if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
-            query_post_time = "2016-03-21T00:00:00Z"
-
         self.logger.info("query_post_time: " +str(query_post_time))
 
         q = query["query"]
@@ -147,7 +144,7 @@ class AsyncSolrClient(object):
         else:
             self.logger.info("found "+ str(len(notify_items))+" new notify items for "+notifier.user_id)
 
-        self.logger.info("query criteria for "+notifier.user_id+": query=" + query["query"] + ", filters="+filters)
+        self.logger.info("query criteria for "+notifier.user_id+": query=" + q + ", filters="+ str(filters))
 
 
         latest_notify_time = None
@@ -173,6 +170,9 @@ class AsyncSolrClient(object):
         return notify_items
 
     def getNextQueryPostTime(self, last_notify_time):
+        if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
+            return "2016-03-21T00:00:00Z"
+
         if last_notify_time is None:
             return TimeUtils.getOneHourAgoAsString(TimeUtils.UTC_FORMT)
         else:

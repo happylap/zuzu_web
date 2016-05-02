@@ -19,12 +19,16 @@ if IS_LOCAL:
     from zuzuNotify.zuzu_web import ZuzuWeb, AsyncZuzuWeb
     from zuzuNotify.zuzu_sns import SNSClient, AsyncSNSClient
     from zuzuNotify import zuzu_single_process
+    from zuzuNotify.error_stats import NotifyErrorStats, NOTIFY_ERROR_TYPE
+    from zuzuNotify.zuzu_mail import MailSender
 else:
     import JsonUtils, TimeUtils, LocalConstant
     from zuzu_solr import SolrClient, AsyncSolrClient
     from zuzu_web import ZuzuWeb, AsyncZuzuWeb
     from zuzu_sns import SNSClient, AsyncSNSClient
     import zuzu_single_process
+    from error_stats import NotifyErrorStats, NOTIFY_ERROR_TYPE
+    from zuzu_mail import MailSender
 
 
 class Timer(object):
@@ -45,12 +49,13 @@ class Timer(object):
 
 
 class NotifyService(object):
-    def __init__(self):
+    def __init__(self, notify_error_stats):
         self.logger = logging.getLogger(__name__)
+        self.notify_error_stats = notify_error_stats
 
-        self.logger .info("PRODUCT_MODE: "+ str(LocalConstant.PRODUCT_MODE))
-        self.logger .info("TEST_PERFORMANCE: "+ str(LocalConstant.TEST_PERFORMANCE))
-        self.logger .info("IS_LOCAL: "+ str(IS_LOCAL))
+        self.logger.info("PRODUCT_MODE: "+ str(LocalConstant.PRODUCT_MODE))
+        self.logger.info("TEST_PERFORMANCE: "+ str(LocalConstant.TEST_PERFORMANCE))
+        self.logger.info("IS_LOCAL: "+ str(IS_LOCAL))
 
         self.json = JsonUtils.getNotifierJson()
         # notification message
@@ -63,6 +68,7 @@ class NotifyService(object):
         self.endpoint_list = []
         #
         self.conn_limit = 20
+        self.logger .info("Connection limit: "+ str(self.conn_limit))
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             self.current_time_str = TimeUtils.get_Now().strftime("%Y%m%d_%H%M%S")
             self.test_limit = 10
@@ -77,14 +83,14 @@ class NotifyService(object):
         JsonUtils.updateNotifierJson(self.json)
 
     def prepareData(self):
-        post_time = self.json["last_post_time"]
-        self.logger.info("getNewItems after " + post_time)
-        zuzu_solr = SolrClient(LocalConstant.ZUZU_SOLR_URL)
-        new_items = zuzu_solr.getNewPostItems(post_time)
-        if new_items is None or len(new_items) <= 0:
-            return
-
         try:
+            post_time = self.json["last_post_time"]
+            self.logger.info("getNewItems after " + post_time)
+            zuzu_solr = SolrClient(LocalConstant.ZUZU_SOLR_URL)
+            new_items = zuzu_solr.getNewPostItems(post_time)
+            if new_items is None or len(new_items) <= 0:
+                return
+
             notify_solr = SolrClient(LocalConstant.NOTIFIER_SOLR_URL)
             for item in new_items:
                 item.pop("_version_", None)
@@ -93,8 +99,9 @@ class NotifyService(object):
             notify_solr.commit()
             self.updateLastPostTime()
         except:
-            self.logger.error("Fail to add items")
-
+            self.logger.error("error occurs while preparing the data")
+            self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_PREPARE_DATA_EXCEPTION)
+            raise SystemExit
 
     def startNotify(self):
         self.endpoint_list = SNSClient().getEnpoints()
@@ -103,7 +110,6 @@ class NotifyService(object):
 
         new_list = []
         count = 0
-
 
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             while(1):
@@ -120,12 +126,13 @@ class NotifyService(object):
         self.logger.info("notifier_list: " + str(notifier_list))
 
         if notifier_list is None or len(notifier_list) <=0:
-            self.logger.info("no notifiers -> exit")
+            self.logger.warn("no notifiers -> exit")
+            self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_NO_NOTIFIER)
             raise SystemExit
 
         with Timer() as t:
             loop = asyncio.get_event_loop()
-            self.async_sns_client = AsyncSNSClient(loop)
+            self.async_sns_client = AsyncSNSClient(loop, self.notify_error_stats)
             self.async_zuzu_web = AsyncZuzuWeb(loop)
             loop.run_until_complete(self.notitfy(notifier_list))
             self.logger.info("close zuzuweb session")
@@ -154,50 +161,50 @@ class NotifyService(object):
 
     async def doNotify(self, semaphore, notifier):
         with (await semaphore):
-            device_list = notifier.device_id
-            if device_list is None or len(device_list) <=0:
-                self.logger.error("no devices found for user: " + notifier.user_id)
-                return
+            try:
+                device_list = notifier.device_id
+                if device_list is None:
+                    self.logger.info("no devices found for user: " + notifier.user_id)
+                    device_list = []
 
-            device_list = notifier.device_id
-            self.logger.info("device list:" + str(device_list))
+                self.logger.info("device list:" + str(device_list))
 
-            user_endpoint_list = []
-            invalid_device =[]
-            for device in device_list:
-                endpoint = self.getEndpoints(device)
-                if endpoint is not None:
-                    user_endpoint_list.append(endpoint)
+                user_endpoint_list = []
+                invalid_device =[]
+                for device in device_list:
+                    endpoint = self.getEndpoints(device)
+                    if endpoint is not None:
+                        user_endpoint_list.append(endpoint)
+                    else:
+                        invalid_device.append(endpoint)
+                try:
+                    notify_items = await self.async_notify_solr.getNotifyItems(notifier)
+                    if notify_items is None or len(notify_items) < 1:
+                        self.logger.info("no zuzuNotify items for user: " + notifier.user_id)
+                        return
+                except:
+                    self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_QUERY_NOTIFY_ITEMS_EXCEPTION, user_id=notifier.user_id)
+                    return
+
+                if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
+                    for item in notify_items:
+                        item["item_id"] = self.current_time_str+"_"+str(self.item_id_seq)
+                        self.item_id_seq = self.item_id_seq + 1
+
+                is_save = await self.async_zuzu_web.saveNotifyItems(notify_items)
+                if is_save == False:
+                    self.logger.error("save zuzuNotify items error, user:"+notifier.user_id)
+                    self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_SAVE_NOTIFY_ITEMS, user_id=notifier.user_id)
                 else:
-                    invalid_device.append(endpoint)
-
-            if len(user_endpoint_list) <=0:
-                self.logger.error("no valid snsendpoint found for user: " + notifier.user_id)
-                return
-
-            notify_items = await self.async_notify_solr.getNotifyItems(notifier)
-            if notify_items is None or len(notify_items) < 1:
-                self.logger.info("no zuzuNotify items for user: " + notifier.user_id)
-                return
-
-            if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
-                for item in notify_items:
-                    item["item_id"] = self.current_time_str+"_"+str(self.item_id_seq)
-                    self.item_id_seq = self.item_id_seq + 1
-
-            is_save = await self.async_zuzu_web.saveNotifyItems(notify_items)
-            if is_save == False:
-                self.logger.error("save zuzuNotify items error, user:"+notifier.user_id)
-                return
-
-            await self.async_zuzu_web.updateNotifyTime(notifier)
-
-            await self.sendNotifications(notify_items, notifier, user_endpoint_list)
+                    await self.async_zuzu_web.updateNotifyTime(notifier)
+                    await self.sendNotifications(notify_items, notifier, user_endpoint_list)
+            except:
+                self.logger.error("Unexpected error in doNotify, notifier id: "+ notifier.user_id+", error: "+str(sys.exc_info()))
+                self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_NOTIFY_EXCEPTION, user_id=notifier.user_id)
 
         #for device in invalid_device:
             #await self.async_zuzu_web.deleteDevice(notifier.user_id, device)
 
-        return
 
     def getEndpoints(self, device_id):
         for e in self.endpoint_list:
@@ -216,10 +223,15 @@ class NotifyService(object):
         alert = self.composeMessageBody(notify_items)
         msg = self.composeAPNSMessage(alert, badge)
         self.logger.info("start to send notification for user: " + notifier.user_id)
+        self.logger.info("user_endpoint_list:" + str(user_endpoint_list))
+
+        if len(user_endpoint_list) <=0:
+            self.logger.error("no valid sns endpoints found for user: " + notifier.user_id)
+            self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_NO_DEVICES, user_id=notifier.user_id)
 
         for endpoint in user_endpoint_list:
             self.logger.info("use endpoint: " + str(endpoint.arn) +" to send notification")
-            await self.async_sns_client.send(endpoint, msg, 'json')
+            await self.async_sns_client.send(notifier.user_id, endpoint, msg, 'json')
 
     def composeMessageBody(self, notify_items):
         item_size = len(notify_items)
@@ -253,8 +265,66 @@ class NotifyService(object):
         messageJSON = json.dumps(message,ensure_ascii=False)
         return messageJSON
 
+def checkErrors(notify_error_stats):
+    logger = logging.getLogger(__name__)
+
+    for key in notify_error_stats.stats:
+        if NOTIFY_ERROR_TYPE.ERROR_QUERY_NOTIFY_ITEMS_EXCEPTION == key \
+            or NOTIFY_ERROR_TYPE.ERROR_SAVE_NOTIFY_ITEMS == key \
+            or NOTIFY_ERROR_TYPE.ERROR_PREPARE_DATA_EXCEPTION == key:
+            json = JsonUtils.getNotifierJson()
+            json["Stop"] = True
+            JsonUtils.updateNotifierJson(json)
+            logger.error("Stop notifiers until error is fixed and revocered !!!!!")
+            return
+
+
+def sendMail(start_time_str, end_time_str, notify_error_stats):
+    logger = logging.getLogger(__name__)
+
+    m_to = [LocalConstant.ZUZU_EMAIL_ADMIN]
+    m_cc = LocalConstant.ZUZU_EMAIL_CC
+    m_subject = '豬豬快租 ZuZu Notification Error'
+
+    m_body = ""
+
+    logger.info("error stats: " + str(notify_error_stats.stats))
+
+    seq = 0
+    for key in notify_error_stats.stats:
+        seq = seq + 1
+        seq_str = str(seq) + ". "
+        error_notifiers = notify_error_stats.stats.get(key)
+        if NOTIFY_ERROR_TYPE.ERROR_NO_DEVICES == key:
+            error_message = "<br><br><b>"+seq_str+"No devices found to notify following users: </b>" + str(list(error_notifiers))
+        elif NOTIFY_ERROR_TYPE.ERROR_QUERY_NOTIFY_ITEMS_EXCEPTION == key:
+            error_message = "<br><br><b>"+seq_str+"Query notify items error for following users:  </b><br>" + str(list(error_notifiers))
+        elif NOTIFY_ERROR_TYPE.ERROR_SAVE_NOTIFY_ITEMS == key:
+            error_message = "<br><br><b>"+seq_str+"Saving notify items error for following users:  </b><br>" + str(list(error_notifiers))
+        elif NOTIFY_ERROR_TYPE.ERROR_SEND_NOTIFICATION == key:
+            error_message = "<br><br><b>"+seq_str+"Send notifications error for following users:  </b><br>" + str(list(error_notifiers))
+        elif NOTIFY_ERROR_TYPE.ERROR_NOTIFY_EXCEPTION == key:
+            error_message = "<br><br><b>"+seq_str+"Unknown error while notifying following users:  </b><br>" + str(list(error_notifiers))
+        elif NOTIFY_ERROR_TYPE.ERROR_NO_NOTIFIER == key:
+            error_message = "<br><br><b>"+seq_str+"There is no users found for notifications </b>"
+        elif NOTIFY_ERROR_TYPE.ERROR_PREPARE_DATA_EXCEPTION == key:
+            error_message = "<br><br><b>"+seq_str+"Unknown error while preparing data for notification </b>"
+        elif NOTIFY_ERROR_TYPE.ERROR_MAIN_EXCEPTION == key:
+            error_message = "<br><br><b>"+seq_str+"Unknown error while prcessing the notify </b>"
+
+        if error_message is not None:
+            m_body = m_body + error_message
+
+    if seq > 0:
+        logger.info("found errors, send mail.....")
+        m_body_header = "Time: " + start_time_str + " - " + end_time_str
+        m_body_header = m_body_header + "<br>Totally "+str(seq)+ " kinds error found in Zuzu notification:"
+        m_body = m_body_header + m_body
+        MailSender().send(m_to, m_subject, m_body, m_cc)
+
 #@profile
 def main():
+    start_time_str = TimeUtils.getTimeString(TimeUtils.get_Now(), TimeUtils.UTC_FORMT)
 
     logname = LocalConstant.LOG_FOLDER+"/notifier"+"_%s.log" % datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
@@ -264,21 +334,33 @@ def main():
                         datefmt='%H:%M:%S',
                         level=logging.INFO)
     logger = logging.getLogger(__name__)
+    json = JsonUtils.getNotifierJson()
+    is_stop = json.get("Stop")
 
     try:
-        zuzu_single_process.scriptStarter('no-force')
+        if is_stop is not None and is_stop == True:
+            logger.error("Notifier cannot be launched because errors are still not fixed and recovered")
+        else:
+            notify_error_stats = NotifyErrorStats()
+            zuzu_single_process.scriptStarter('no-force')
 
-        notifier = NotifyService()
-        notifier.prepareData()
-        notifier.startNotify()
-        zuzu_single_process.removePIDfile()
+            notifier = NotifyService(notify_error_stats)
+            notifier.prepareData()
+            notifier.startNotify()
     except SystemExit:
-        logger.error("SystemExit exception!!")
-        zuzu_single_process.removePIDfile()
-        sys.exit()
+        logger.error("SystemExit exit exception due to errors")
     except:
-        logger.error("Unexpected error:"+str(sys.exc_info()))
+        logger.error("Unexpected error in main:"+str(sys.exc_info()))
+        notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_MAIN_EXCEPTION)
+    finally:
+        if is_stop is not None and is_stop == True:
+            pass
+        else:
+            end_time_str = TimeUtils.getTimeString(TimeUtils.get_Now(), TimeUtils.UTC_FORMT)
+            sendMail(start_time_str, end_time_str, notify_error_stats)
+            checkErrors(notify_error_stats)
         zuzu_single_process.removePIDfile()
+
 
 if __name__=="__main__":
     main()
