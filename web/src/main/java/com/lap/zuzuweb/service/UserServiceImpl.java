@@ -77,11 +77,14 @@ public class UserServiceImpl implements UserService {
 	public User registerRandomUser() throws DataAccessException {
 		logger.info("UserService.registerRandomUser");
 		try {
-			User randomUser = new User();
 			String randomId = CommonUtils.getRandomUUID();
+			String encryptionToken = Utilities.generateRandomString();
+		    
+			User randomUser = new User();
 			randomUser.setUser_id(randomId);
 			randomUser.setEmail(randomId);
 			randomUser.setProvider(Provider.NOLOGIN.toString());
+			randomUser.setZuzu_token(encryptionToken);
 			randomUser.setRegister_time(CommonUtils.getUTCNow());
 			randomUser.setUpdate_time(CommonUtils.getUTCNow());	
 			this.userDao.createUser(randomUser);

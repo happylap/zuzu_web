@@ -175,6 +175,13 @@ public class App implements SparkApplication
 		    				return;
 		    			}
 		    		}
+		    		
+		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.NOLOGIN.toString())) {
+		    			if (authSvc.isZuzuTokenValid(userToken)) {
+		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
+		    				return;
+		    			}
+		    		}
 	    		} catch (Exception e) {
     				logger.error(String.format("Valid %s Token Error: ", userProvider, e.getMessage()), e);
 	    			response.type("application/json");

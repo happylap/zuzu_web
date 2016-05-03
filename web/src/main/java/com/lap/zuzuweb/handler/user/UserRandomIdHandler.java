@@ -1,5 +1,6 @@
 package com.lap.zuzuweb.handler.user;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -28,13 +29,20 @@ public class UserRandomIdHandler extends AbstractRequestHandler<EmptyPayload> {
     {
     	logger.info("UserRandomIdHandler.processImpl enter:");
     	
+    	Answer answer;
+    	
     	try {
         	User randomUser = this.service.registerRandomUser();
-            return Answer.ok(randomUser.getUser_id());
+            Map<String, String> data = new HashMap<String, String>();
+            data.put("userId", randomUser.getUser_id());
+            data.put("zuzuToken", randomUser.getZuzu_token());
+            answer = Answer.ok(data);
     	} catch (DataAccessException e) {
             logger.info("Failed to get random userid", e);
-            return Answer.error("Failed to get random userid");
+            answer = Answer.error("Failed to get random userid");
         }
+    	
+    	return answer;
     }
 
 }
