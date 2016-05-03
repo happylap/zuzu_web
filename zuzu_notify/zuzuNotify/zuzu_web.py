@@ -24,6 +24,7 @@ class Notifier(object):
         self.device_id = data.get("device_id")
         self.last_notify_time = TimeUtils.convertTime(data.get("last_notify_time"), TimeUtils.UTC_FORMT)
         self.filters = data.get("filters")
+        self.notify_enabled = data.get("enabled")
 
 class ZuzuWeb(object):
     def __init__(self):
@@ -60,7 +61,6 @@ class ZuzuWeb(object):
             notifier = Notifier(data)
             result.append(notifier)
         return result
-
 
 
 class AsyncZuzuWeb(object):

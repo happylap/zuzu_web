@@ -162,21 +162,6 @@ class NotifyService(object):
     async def doNotify(self, semaphore, notifier):
         with (await semaphore):
             try:
-                device_list = notifier.device_id
-                if device_list is None:
-                    self.logger.info("no devices found for user: " + notifier.user_id)
-                    device_list = []
-
-                self.logger.info("device list:" + str(device_list))
-
-                user_endpoint_list = []
-                invalid_device =[]
-                for device in device_list:
-                    endpoint = self.getEndpoints(device)
-                    if endpoint is not None:
-                        user_endpoint_list.append(endpoint)
-                    else:
-                        invalid_device.append(endpoint)
                 try:
                     notify_items = await self.async_notify_solr.getNotifyItems(notifier)
                     if notify_items is None or len(notify_items) < 1:
@@ -197,14 +182,28 @@ class NotifyService(object):
                     self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_SAVE_NOTIFY_ITEMS, user_id=notifier.user_id)
                 else:
                     await self.async_zuzu_web.updateNotifyTime(notifier)
-                    await self.sendNotifications(notify_items, notifier, user_endpoint_list)
+                    self.logger.info("notify_enabled: " + str(notifier.notify_enabled))
+                    if notifier.notify_enabled == True:
+                        user_endpoint_list = self.get_user_endpoint_list(notifier)
+                        await self.sendNotifications(notify_items, notifier, user_endpoint_list)
+                    else:
+                        self.logger.info("Don't need to notify user: "+notifier.user_id)
             except:
                 self.logger.error("Unexpected error in doNotify, notifier id: "+ notifier.user_id+", error: "+str(sys.exc_info()))
                 self.notify_error_stats.add(error_type=NOTIFY_ERROR_TYPE.ERROR_NOTIFY_EXCEPTION, user_id=notifier.user_id)
 
-        #for device in invalid_device:
-            #await self.async_zuzu_web.deleteDevice(notifier.user_id, device)
-
+    def get_user_endpoint_list(self, notifier):
+        device_list = notifier.device_id
+        if device_list is None:
+            self.logger.info("no devices found for user: " + notifier.user_id)
+            device_list = []
+        self.logger.info("device list:" + str(device_list))
+        user_endpoint_list = []
+        for device in device_list:
+            endpoint = self.getEndpoints(device)
+            if endpoint is not None:
+                user_endpoint_list.append(endpoint)
+        return user_endpoint_list
 
     def getEndpoints(self, device_id):
         for e in self.endpoint_list:
