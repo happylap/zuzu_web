@@ -11,7 +11,6 @@ import com.lap.zuzuweb.common.Provider;
 import com.lap.zuzuweb.dao.ServiceDao;
 import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.exception.DataAccessException;
-import com.lap.zuzuweb.exception.UnauthorizedException;
 import com.lap.zuzuweb.model.Service;
 import com.lap.zuzuweb.model.User;
 import com.lap.zuzuweb.util.CommonUtils;
@@ -30,41 +29,19 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Optional<User> getUserByEmail(String email) {
-		logger.info("UserService.getUserByEmail:  + email");
+		logger.info("UserService.getUserByEmail: " + email);
 		return this.userDao.getUserByEmail(email);
 	}
 
 	@Override
 	public Optional<User> getUserById(String userID) {
-		logger.info("UserService.getUserById:  + userID");
+		logger.info("UserService.getUserById: " + userID);
 		return this.userDao.getUserById(userID);
-	}
-	
-	@Override
-	public void createUser(User user) throws DataAccessException {
-		logger.info("UserService.createUser:  + user");
-		
-		if (user == null) {
-			return;
-		}
-		
-		if (checkEmailExists(user.getEmail())) {
-            return;
-        }
-		
-		try {
-			user.setUser_id(CommonUtils.getRandomUUID());
-			user.setRegister_time(CommonUtils.getUTCNow());
-			user.setUpdate_time(CommonUtils.getUTCNow());	
-			this.userDao.createUser(user);
-		} catch(Exception e) {
-			throw new DataAccessException("Failed to create user: " + user.getEmail());
-		}
 	}
 
 	@Override
 	public void updateUser(User user) throws DataAccessException {
-		logger.info("UserService.updateUser:  + user");
+		logger.info("UserService.updateUser: " + user);
 		
 		if (user == null) {
 			return;
@@ -97,11 +74,42 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public User registerRandomUser() throws DataAccessException {
+		logger.info("UserService.registerRandomUser");
+		try {
+			User randomUser = new User();
+			String randomId = CommonUtils.getRandomUUID();
+			randomUser.setUser_id(randomId);
+			randomUser.setEmail(randomId);
+			randomUser.setProvider(Provider.NOLOGIN.toString());
+			randomUser.setRegister_time(CommonUtils.getUTCNow());
+			randomUser.setUpdate_time(CommonUtils.getUTCNow());	
+			this.userDao.createUser(randomUser);
+			return randomUser;
+		} catch(Exception e) {
+			throw new DataAccessException("Failed to create random user");
+		}
+	}
+	
+	@Override
 	public boolean registerUser(User user) throws DataAccessException {
 		if (checkEmailExists(user.getEmail())) {
             return false;
         }
-		this.createUser(user);
+		
+		String userID = user.getUser_id();
+	
+		if (userID != null) {
+			Optional<User> existUser = this.getUserById(userID);
+			if (!existUser.isPresent()) {
+				throw new DataAccessException("Couldn't find user: " + userID);
+	        }
+			this.userDao.linkUser(user);
+			
+		} else {
+			this.createUser(user);
+		}
+		
 		return true;
 	}
 	
@@ -119,6 +127,29 @@ public class UserServiceImpl implements UserService {
 		newUser.setProvider(Provider.ZUZU.toString());
 		this.createUser(newUser);
         
+		return true;
+	}
+	
+	@Override
+	public boolean registerUser(String email, String password, String userID) throws DataAccessException {
+		if (checkEmailExists(email)) {
+            return false;
+        }
+		
+		Optional<User> existUser = this.getUserById(userID);
+		
+		if (!existUser.isPresent()) {
+			throw new DataAccessException("Couldn't find user: " + userID);
+        }
+		
+		String hashedSaltedPassword = Utilities.getSaltedPassword(email, password);
+		
+		User user = existUser.get();
+		user.setEmail(email);
+		user.setHashed_password(hashedSaltedPassword);
+		user.setProvider(Provider.ZUZU.toString());
+		this.userDao.linkUser(user);
+		
 		return true;
 	}
 
@@ -148,12 +179,13 @@ public class UserServiceImpl implements UserService {
         String computedSignature = Utilities.sign(timestamp, user.getHashed_password());
         return Utilities.slowStringComparison(signature, computedSignature);
 	}
-	
+
+	@Override
 	public boolean checkEmailExists(String email) throws DataAccessException {
 		return this.userDao.getUserByEmail(email).isPresent();
 	}
 	
-	
+	@Override
 	public boolean regenerateZuzuToken(String userID) throws DataAccessException {
 		logger.info("Generating encryption zuzu token");
 		
@@ -172,5 +204,25 @@ public class UserServiceImpl implements UserService {
         return true;
 	}
 
+	private void createUser(User user) throws DataAccessException {
+		logger.info("UserService.createUser: " + user);
+		
+		if (user == null) {
+			return;
+		}
+		
+		if (checkEmailExists(user.getEmail())) {
+            return;
+        }
+		
+		try {
+			user.setUser_id(CommonUtils.getRandomUUID());
+			user.setRegister_time(CommonUtils.getUTCNow());
+			user.setUpdate_time(CommonUtils.getUTCNow());	
+			this.userDao.createUser(user);
+		} catch(Exception e) {
+			throw new DataAccessException("Failed to create user: " + user.getEmail());
+		}
+	}
 	
 }
