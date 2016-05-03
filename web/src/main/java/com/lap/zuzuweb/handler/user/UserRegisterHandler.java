@@ -51,16 +51,21 @@ public class UserRegisterHandler extends AbstractRequestHandler<UserRegisterPayl
             logger.info("Register user: " + email);
             boolean result = false;
             if (StringUtils.equalsIgnoreCase(provider, Provider.ZUZU.toString())) {
-            	result = service.registerUser(email, password);
+            	if (value.getUser_id() != null) {
+            		result = service.registerUser(email, password, value.getUser_id());
+            	} else {
+            		result = service.registerUser(email, password);
+            	}
             } else {
-            	User user = new User();
-        		user.setProvider(value.getProvider());
-        		user.setEmail(value.getEmail());
-        		user.setName(value.getName());
-        		user.setGender(value.getGender());
-        		user.setBirthday(value.getBirthday());
-        		user.setPicture_url(value.getPictureUrl());
-            	result = service.registerUser(user);
+            	User newUser = new User();
+            	newUser.setUser_id(value.getUser_id());
+        		newUser.setProvider(value.getProvider());
+        		newUser.setEmail(value.getEmail());
+        		newUser.setName(value.getName());
+        		newUser.setGender(value.getGender());
+        		newUser.setBirthday(value.getBirthday());
+        		newUser.setPicture_url(value.getPicture_url());
+            	result = service.registerUser(newUser);
             }
             
             if (!result) {
@@ -74,7 +79,7 @@ public class UserRegisterHandler extends AbstractRequestHandler<UserRegisterPayl
         
         logger.info(String.format("User [%s] registered successfully", email));
         
-        String userId = null;
+        String userId = null; 
         Optional<User> existUser = service.getUserByEmail(email);
         if (existUser.isPresent()) {
         	userId = existUser.get().getUser_id();

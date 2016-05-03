@@ -16,5 +16,7 @@ public interface UserDao
 	
 	public String updateUser(User user);
 	
+	public String linkUser(User user);
+	
 	public void deleteUserByIdAndEmail(String userID, String email);
 }

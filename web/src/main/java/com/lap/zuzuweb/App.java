@@ -56,6 +56,7 @@ import com.lap.zuzuweb.handler.user.UserCheckHandler;
 import com.lap.zuzuweb.handler.user.UserForgetPasswordHandler;
 import com.lap.zuzuweb.handler.user.UserLoginHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
+import com.lap.zuzuweb.handler.user.UserRandomIdHandler;
 import com.lap.zuzuweb.handler.user.UserRegisterHandler;
 import com.lap.zuzuweb.handler.user.UserRemoveHandler;
 import com.lap.zuzuweb.handler.user.UserResetPasswordHandler;
@@ -186,6 +187,7 @@ public class App implements SparkApplication
         });
     	
     	// public 
+    	get("/public/user/randomid", new UserRandomIdHandler(userSvc));
     	get("/public/user/check/:email", new UserCheckHandler(userSvc));
     	post("/public/user/register", new UserRegisterHandler(userSvc));
     	post("/public/user/login", new UserLoginHandler(authSvc, userSvc));
@@ -234,7 +236,7 @@ public class App implements SparkApplication
         patch("/log/:userid/:deviceid", new LogPatchHandler(logSvc));
         
         // purchase
-        post("/purchase", new PurchaseCreateHandler(purchaseSvc)); // add a purchase
+        post("/public/purchase", new PurchaseCreateHandler(purchaseSvc)); // add a purchase
         get("/purchase/:userid", new PurchaseQueryHandler(purchaseSvc)); // get a list of purchases belonging to some user
         get("/purchase/valid/:userid", new PurchaseValidHandler(purchaseSvc)); // get a list of purchases belonging to some user
         
