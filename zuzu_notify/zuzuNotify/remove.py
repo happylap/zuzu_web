@@ -30,7 +30,7 @@ def main():
 
     logger.info("remove old log files")
     file_list = []
-    compare = TimeUtils.get_Now() - datetime.timedelta(days=1) #7 days ago in UTC time
+    compare = TimeUtils.get_Now() - datetime.timedelta(days=7) #7 days ago in UTC time
     logger.info("compare:" + str(compare))
     log_files = glob.glob(LocalConstant.LOG_FOLDER+"*.log")
     file_list.extend(log_files)
