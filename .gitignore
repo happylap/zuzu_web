@@ -13,14 +13,12 @@ Secrets.java
 *.lock
 *.pyc
 LocalConstant.py
-notifier.json
 
 #pytcharm IDE
 .idea/
 zuzu_notify/bin/
 zuzu_notify/include/
 zuzu_notify/lib/
-zuzu_notify/notify.json
 pip-selfcheck.json
 pyvenv.cfg
 notify.json
