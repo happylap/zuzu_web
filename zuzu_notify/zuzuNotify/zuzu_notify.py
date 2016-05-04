@@ -89,6 +89,7 @@ class NotifyService(object):
             zuzu_solr = SolrClient(LocalConstant.ZUZU_SOLR_URL)
             new_items = zuzu_solr.getNewPostItems(post_time)
             if new_items is None or len(new_items) <= 0:
+                self.logger.info("No new items need to be put into notifier solr")
                 return
 
             notify_solr = SolrClient(LocalConstant.NOTIFIER_SOLR_URL)
@@ -122,8 +123,11 @@ class NotifyService(object):
                     break
             notifier_list = new_list
 
+        user_list = []
+        for notifier in notifier_list:
+            user_list.append(notifier.user_id)
 
-        self.logger.info("notifier_list: " + str(notifier_list))
+        self.logger.info("notifier_list: " + str(user_list))
 
         if notifier_list is None or len(notifier_list) <=0:
             self.logger.warn("no notifiers -> exit")
