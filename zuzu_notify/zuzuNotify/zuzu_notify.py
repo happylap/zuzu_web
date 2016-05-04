@@ -283,7 +283,10 @@ def sendMail(start_time_str, end_time_str, notify_error_stats):
 
     m_to = [LocalConstant.ZUZU_EMAIL_ADMIN]
     m_cc = LocalConstant.ZUZU_EMAIL_CC
-    m_subject = '豬豬快租 ZuZu Notification Error'
+    if LocalConstant.PRODUCT_MODE == True:
+        m_subject = '豬豬快租 ZuZu Notification Error'
+    else:
+        m_subject = '豬豬快租 ZuZu Notification Error (Development)'
 
     m_body = ""
 
