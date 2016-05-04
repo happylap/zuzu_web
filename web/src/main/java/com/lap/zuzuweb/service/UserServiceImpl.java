@@ -81,9 +81,9 @@ public class UserServiceImpl implements UserService {
 			String encryptionToken = Utilities.generateRandomString();
 		    
 			User randomUser = new User();
+			randomUser.setProvider(Provider.ZUZU_NOLOGIN.toString());
 			randomUser.setUser_id(randomId);
 			randomUser.setEmail(randomId);
-			randomUser.setProvider(Provider.NOLOGIN.toString());
 			randomUser.setZuzu_token(encryptionToken);
 			randomUser.setRegister_time(CommonUtils.getUTCNow());
 			randomUser.setUpdate_time(CommonUtils.getUTCNow());	

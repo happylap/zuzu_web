@@ -152,6 +152,10 @@ public class App implements SparkApplication
     			String userProvider = request.headers("UserProvider");
         		String userToken = request.headers("UserToken");
         		
+        		if (StringUtils.isBlank(userProvider)) {
+        			userProvider = Provider.ZUZU_NOLOGIN.toString();
+        		}
+        		
     			logger.debug(String.format("Valid %s Token: %s", userProvider, userToken)); 
 	    		
 	    		try {
@@ -167,7 +171,7 @@ public class App implements SparkApplication
 		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
 		    				return;
 		    			}
-		    		}
+		    		}		    		
 		    		
 		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.ZUZU.toString())) {
 		    			if (authSvc.isZuzuTokenValid(userToken)) {
@@ -176,12 +180,13 @@ public class App implements SparkApplication
 		    			}
 		    		}
 		    		
-		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.NOLOGIN.toString())) {
+		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.ZUZU_NOLOGIN.toString())) {
 		    			if (authSvc.isZuzuTokenValid(userToken)) {
 		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
 		    				return;
 		    			}
 		    		}
+		    		
 	    		} catch (Exception e) {
     				logger.error(String.format("Valid %s Token Error: ", userProvider, e.getMessage()), e);
 	    			response.type("application/json");
@@ -243,7 +248,7 @@ public class App implements SparkApplication
         patch("/log/:userid/:deviceid", new LogPatchHandler(logSvc));
         
         // purchase
-        post("/public/purchase", new PurchaseCreateHandler(purchaseSvc)); // add a purchase
+        post("/purchase", new PurchaseCreateHandler(purchaseSvc)); // add a purchase
         get("/purchase/:userid", new PurchaseQueryHandler(purchaseSvc)); // get a list of purchases belonging to some user
         get("/purchase/valid/:userid", new PurchaseValidHandler(purchaseSvc)); // get a list of purchases belonging to some user
         
