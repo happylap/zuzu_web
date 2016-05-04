@@ -53,9 +53,14 @@ class NotifyService(object):
         self.logger = logging.getLogger(__name__)
         self.notify_error_stats = notify_error_stats
 
-        self.logger.info("PRODUCT_MODE: "+ str(LocalConstant.PRODUCT_MODE))
-        self.logger.info("TEST_PERFORMANCE: "+ str(LocalConstant.TEST_PERFORMANCE))
+        self.logger.info("IS PRODUCT_MODE: "+ str(LocalConstant.PRODUCT_MODE))
+        self.logger.info("IS TEST_PERFORMANCE: "+ str(LocalConstant.TEST_PERFORMANCE))
         self.logger.info("IS_LOCAL: "+ str(IS_LOCAL))
+        self.logger.info("ZUZU_SOLR_URL: "+ LocalConstant.ZUZU_SOLR_URL)
+        self.logger.info("NOTIFIER_SOLR_URL: "+ LocalConstant.NOTIFIER_SOLR_URL)
+        self.logger.info("WEB_URL: "+ LocalConstant.WEB_URL)
+        self.logger.info("SNS_PLATFORM: "+ LocalConstant.SNS_PLATFORM)
+        self.logger.info("APNS_MSG_HEADR: "+ LocalConstant.APNS_MSG_HEADR)
 
         self.json = JsonUtils.getNotifierJson()
         # notification message
