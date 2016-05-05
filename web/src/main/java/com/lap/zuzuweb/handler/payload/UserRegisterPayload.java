@@ -3,6 +3,7 @@ package com.lap.zuzuweb.handler.payload;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lap.zuzuweb.common.Provider;
 import com.lap.zuzuweb.model.User;
 
 import lombok.Data;
@@ -22,7 +23,7 @@ public class UserRegisterPayload implements Validable {
 	
 	@Override
 	public boolean isValid() {
-		return this.getProvider() != null && this.getEmail() != null;
+		return /*this.getProvider() != null && */this.getEmail() != null;
 	}
 	
 	public User toUser() {
