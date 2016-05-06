@@ -54,6 +54,7 @@ import com.lap.zuzuweb.handler.service.ServiceQueryHandler;
 import com.lap.zuzuweb.handler.system.DBInfoQueryHandler;
 import com.lap.zuzuweb.handler.user.UserCheckHandler;
 import com.lap.zuzuweb.handler.user.UserForgetPasswordHandler;
+import com.lap.zuzuweb.handler.user.UserLoginBySocialTokenHandler;
 import com.lap.zuzuweb.handler.user.UserLoginHandler;
 import com.lap.zuzuweb.handler.user.UserQueryHandler;
 import com.lap.zuzuweb.handler.user.UserRandomIdHandler;
@@ -173,7 +174,7 @@ public class App implements SparkApplication
     	get("/public/user/check/:email", new UserCheckHandler(userSvc));
     	post("/public/user/register", new UserRegisterHandler(userSvc));
     	post("/public/user/login", new UserLoginHandler(authSvc, userSvc));
-    	post("/public/user/socialtoken/login", new UserLoginHandler(authSvc, userSvc));
+    	post("/public/user/socialtoken/login", new UserLoginBySocialTokenHandler(authSvc, userSvc));
     	get("/public/user/password/forget/:email", new UserForgetPasswordHandler(authSvc));
     	post("/public/user/password/reset", new UserResetPasswordHandler(authSvc, userSvc));
     	get("/public/user/verify/:email/:verificationcode", new UserVerifyCodeHandler(authSvc));
