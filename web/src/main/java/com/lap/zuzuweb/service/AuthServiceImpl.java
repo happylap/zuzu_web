@@ -15,7 +15,11 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.services.cognitoidentity.model.GetOpenIdTokenForDeveloperIdentityResult;
 import com.lap.zuzuweb.CognitoDeveloperIdentityManagement;
 import com.lap.zuzuweb.Configuration;
+import com.lap.zuzuweb.FacebookTokenManagement;
+import com.lap.zuzuweb.GoogleTokenManagement;
 import com.lap.zuzuweb.Utilities;
+import com.lap.zuzuweb.ZuzuTokenManagement;
+import com.lap.zuzuweb.common.Provider;
 import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.exception.DataAccessException;
 import com.lap.zuzuweb.exception.UnauthorizedException;
@@ -35,11 +39,17 @@ public class AuthServiceImpl implements AuthService {
 	private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
 	private final CognitoDeveloperIdentityManagement byoiManagement;
+	private final GoogleTokenManagement gtManagement;
+	private final FacebookTokenManagement ftManagement;
+	private final ZuzuTokenManagement ztManagement;
 	
 	private UserDao userDao;
 
 	public AuthServiceImpl(UserDao userDao) {
 		this.byoiManagement = new CognitoDeveloperIdentityManagement();
+		this.gtManagement = new GoogleTokenManagement();
+		this.ftManagement = new FacebookTokenManagement();
+		this.ztManagement = new ZuzuTokenManagement(userDao);
 		this.userDao = userDao;
 	}
 	
@@ -93,6 +103,66 @@ public class AuthServiceImpl implements AuthService {
 		openIdToken.setIdentityId(result.getIdentityId());
 		openIdToken.setToken(result.getToken());
 		return openIdToken;
+	}
+
+	@Override
+	public boolean validateToken(String provider, String accessToken) {
+		logger.info(String.format("validate %s token: %s", provider, accessToken));
+		
+		boolean isValid = false;
+		
+		if (StringUtils.equalsIgnoreCase(Provider.FB.toString(), provider)) {
+			isValid = ftManagement.isValid(accessToken);
+		}
+		
+		if (StringUtils.equalsIgnoreCase(Provider.GOOGLE.toString(), provider)) {
+			isValid = gtManagement.isValid(accessToken);
+		}
+		
+		if (StringUtils.equalsIgnoreCase(Provider.ZUZU.toString(), provider)) {
+			isValid = ztManagement.isValid(accessToken);
+		}
+		
+		if (StringUtils.equalsIgnoreCase(Provider.ZUZU_NOLOGIN.toString(), provider)) {
+			isValid = ztManagement.isValid(accessToken);
+		}
+		
+		return isValid;
+	}
+
+	@Override
+	public String validateLoginRequest(String provider, String accessToken) 
+			throws DataAccessException, UnauthorizedException {
+		// Validate accessToken
+		logger.info(String.format("Validate login provider [%s], accessToken [%s]", provider, accessToken));
+		
+		String email = null;
+		
+		if (StringUtils.equalsIgnoreCase(Provider.FB.toString(), provider)) {
+			email = ftManagement.isValid(accessToken) ? ftManagement.getEmail(accessToken) : null; 
+		}
+		
+		if (StringUtils.equalsIgnoreCase(Provider.GOOGLE.toString(), provider)) {
+			email = gtManagement.isValid(accessToken) ? gtManagement.getEmail(accessToken) : null;
+		}
+		
+		if (email == null) {
+			logger.warn("Failed to login");
+        	throw new UnauthorizedException("Failed to login");
+        }
+		
+		Optional<User> existUser = this.userDao.getUserByEmail(email);
+		
+		if (!existUser.isPresent()) {
+			logger.warn("Failed to find user by email: " + email);
+			throw new UnauthorizedException("Failed to find user by email: " + email);
+		}
+		
+		User user = existUser.get();
+		
+		this.regenerateZuzuToken(user.getUser_id());
+		
+		return user.getUser_id();
 	}
 	
 	@Override

@@ -78,7 +78,6 @@ import com.lap.zuzuweb.service.PurchaseService;
 import com.lap.zuzuweb.service.PurchaseServiceImpl;
 import com.lap.zuzuweb.service.UserService;
 import com.lap.zuzuweb.service.UserServiceImpl;
-import com.lap.zuzuweb.util.AuthUtils;
 import com.lap.zuzuweb.util.CommonUtils;
 import com.lap.zuzuweb.util.HttpUtils;
 
@@ -135,20 +134,21 @@ public class App implements SparkApplication
     			return;
     		}
     		
-    		//logger.debug("Header Authorization: " + request.headers("Authorization"));
+    		String authToken = request.headers("Authorization");
     		
-    		if (StringUtils.isEmpty(request.headers("Authorization"))) {
-    			logger.debug("Request Headers must includes Authorization parameter.");
+    		if (StringUtils.isBlank(authToken)) {
+    			logger.error("not found parameter [Authorization] in request header");
     		}
     		
-    		if (AuthUtils.isSuperTokenValid(request.headers("Authorization"))) {
-    			logger.debug("Valid Super Token: Pass");
+    		
+    		if (StringUtils.equals(Secrets.SUPER_TOKEN, authToken)) {
+    			logger.info("validate auth token is SUPER_TOKEN");
     			return;
     		}
     		
-    		if (AuthUtils.isBasicTokenValid(request.headers("Authorization"))) {
-    			logger.debug("Valid Basic Token: Pass");
-    		
+    		if (StringUtils.equals(Secrets.BASIC_TOKEN, authToken)) {
+    			logger.info("validate auth token is BASIC_TOKEN");
+    			
     			String userProvider = request.headers("UserProvider");
         		String userToken = request.headers("UserToken");
         		
@@ -156,42 +156,12 @@ public class App implements SparkApplication
         			userProvider = Provider.ZUZU_NOLOGIN.toString();
         		}
         		
-    			logger.debug(String.format("Valid %s Token: %s", userProvider, userToken)); 
-	    		
-	    		try {
-		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.FB.toString())) {
-		    			if (AuthUtils.isFacebookTokenValid(userToken)) {
-		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
-		    				return;
-		    			}
-		    		}
-		    		
-		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.GOOGLE.toString())) {
-		    			if (AuthUtils.isGoogleTokenValid(userToken)) {
-		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
-		    				return;
-		    			}
-		    		}		    		
-		    		
-		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.ZUZU.toString())) {
-		    			if (authSvc.isZuzuTokenValid(userToken)) {
-		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
-		    				return;
-		    			}
-		    		}
-		    		
-		    		if (StringUtils.equalsIgnoreCase(userProvider, Provider.ZUZU_NOLOGIN.toString())) {
-		    			if (authSvc.isZuzuTokenValid(userToken)) {
-		    				logger.info(String.format("Valid %s Token: %s", userProvider, "Pass"));
-		    				return;
-		    			}
-		    		}
-		    		
-	    		} catch (Exception e) {
-    				logger.error(String.format("Valid %s Token Error: ", userProvider, e.getMessage()), e);
-	    			response.type("application/json");
-	    			halt(403, CommonUtils.toJson(Answer.forbidden(e.getMessage())));
-	    		}
+    			if (authSvc.validateToken(userProvider, userToken)) {
+    				logger.info(String.format("validate %s token: %s", userProvider, "true"));
+    				return;
+    			} else {
+    				logger.info(String.format("validate %s token: %s", userProvider, "false"));
+    			}
     		}
     		
     		response.type("application/json");
@@ -203,6 +173,7 @@ public class App implements SparkApplication
     	get("/public/user/check/:email", new UserCheckHandler(userSvc));
     	post("/public/user/register", new UserRegisterHandler(userSvc));
     	post("/public/user/login", new UserLoginHandler(authSvc, userSvc));
+    	post("/public/user/socialtoken/login", new UserLoginHandler(authSvc, userSvc));
     	get("/public/user/password/forget/:email", new UserForgetPasswordHandler(authSvc));
     	post("/public/user/password/reset", new UserResetPasswordHandler(authSvc, userSvc));
     	get("/public/user/verify/:email/:verificationcode", new UserVerifyCodeHandler(authSvc));

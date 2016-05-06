@@ -118,6 +118,11 @@
 			<version>${google-api.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.restfb</groupId>
+			<artifactId>restfb</artifactId>
+			<version>1.23.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-cognitoidentity</artifactId>
 			<version>1.9.12</version>
