@@ -183,7 +183,7 @@ public class App implements SparkApplication
     	
     	
     	// cognito
-    	post("/cognito/token", new CognitoTokenHandler(authSvc));
+    	post("/public/cognito/token", new CognitoTokenHandler(authSvc));
     	
     	// user
         get("/user/:userid", new UserQueryHandler(userSvc)); //get user by user id

@@ -19,7 +19,7 @@ public class CognitoTokenRequestPayload implements Validable {
     @Override
 	public boolean isValid() {
     	
-    	// start
+    	// start (2015/05/09, note: 以後要改成在前端計算 signature)
 		StringBuilder stringToSign = new StringBuilder();
 		stringToSign.append(timestamp);
 		if (logins != null && logins.containsKey(Configuration.DEVELOPER_PROVIDER_NAME)) {
