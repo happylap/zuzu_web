@@ -332,6 +332,7 @@ def sendMail(start_time_str, end_time_str, notify_error_stats):
         m_body_header = m_body_header + "<br>Totally "+str(seq)+ " kinds error found in Zuzu notification:"
         m_body = m_body_header + m_body
         MailSender().send(m_to, m_subject, m_body, m_cc)
+        logger.info("send mail done!")
 
 #@profile
 def main():
@@ -348,13 +349,13 @@ def main():
     json = JsonUtils.getNotifierJson()
     is_stop = json.get("Stop")
 
+    notify_error_stats = NotifyErrorStats()
+
     try:
         if is_stop is not None and is_stop == True:
             logger.error("Notifier cannot be launched because errors are still not fixed and recovered")
         else:
-            notify_error_stats = NotifyErrorStats()
             zuzu_single_process.scriptStarter('no-force')
-
             notifier = NotifyService(notify_error_stats)
             notifier.prepareData()
             notifier.startNotify()
