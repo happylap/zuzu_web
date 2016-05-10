@@ -283,14 +283,14 @@ def checkErrors(notify_error_stats):
             json = JsonUtils.getNotifierJson()
             json["Stop"] = True
             JsonUtils.updateNotifierJson(json)
-            logger.error("Stop notifiers until error is fixed and revocered !!!!!")
+            logger.error("Stop notifiers until error is fixed and recovered !!!!!")
             return
 
 
 def sendMail(start_time_str, end_time_str, notify_error_stats):
     logger = logging.getLogger(__name__)
 
-    m_to = [LocalConstant.ZUZU_EMAIL_ADMIN]
+    m_to = LocalConstant.ZUZU_EMAIL_ADMIN
     m_cc = LocalConstant.ZUZU_EMAIL_CC
     if LocalConstant.PRODUCT_MODE == True:
         m_subject = '豬豬快租 ZuZu Notification Error'
