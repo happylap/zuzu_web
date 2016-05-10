@@ -273,7 +273,7 @@ class NotifyService(object):
         messageJSON = json.dumps(message,ensure_ascii=False)
         return messageJSON
 
-def checkErrors(notify_error_stats):
+def check_fatal_errors(notify_error_stats):
     logger = logging.getLogger(__name__)
 
     for key in notify_error_stats.stats:
@@ -284,18 +284,29 @@ def checkErrors(notify_error_stats):
             json["Stop"] = True
             JsonUtils.updateNotifierJson(json)
             logger.error("Stop notifiers until error is fixed and recovered !!!!!")
-            return
+            return True
 
+    return False
 
-def sendMail(start_time_str, end_time_str, notify_error_stats):
+def send_fatal_error_mail():
+    m_to = LocalConstant.ZUZU_EMAIL_ADMIN
+    m_cc = LocalConstant.ZUZU_EMAIL_CC
+    m_subject = '豬豬快租通知服務因為嚴重錯誤停止，請立即修復!!!'
+    if LocalConstant.PRODUCT_MODE == False:
+        m_subject += ' (Development)'
+    m_body = ""
+    MailSender().send(m_to, m_subject, m_body, m_cc)
+
+def send_mail(start_time_str, end_time_str, notify_error_stats):
     logger = logging.getLogger(__name__)
 
     m_to = LocalConstant.ZUZU_EMAIL_ADMIN
     m_cc = LocalConstant.ZUZU_EMAIL_CC
-    if LocalConstant.PRODUCT_MODE == True:
-        m_subject = '豬豬快租 ZuZu Notification Error'
-    else:
-        m_subject = '豬豬快租 ZuZu Notification Error (Development)'
+
+    m_subject = '豬豬快租 ZuZu Notification Error'
+
+    if LocalConstant.PRODUCT_MODE == False:
+        m_subject += ' (Development)'
 
     m_body = ""
 
@@ -354,6 +365,7 @@ def main():
     try:
         if is_stop is not None and is_stop == True:
             logger.error("Notifier cannot be launched because errors are still not fixed and recovered")
+            send_fatal_error_mail()
         else:
             zuzu_single_process.scriptStarter('no-force')
             notifier = NotifyService(notify_error_stats)
@@ -369,8 +381,10 @@ def main():
             pass
         else:
             end_time_str = TimeUtils.getTimeString(TimeUtils.get_Now(), TimeUtils.UTC_FORMT)
-            sendMail(start_time_str, end_time_str, notify_error_stats)
-            checkErrors(notify_error_stats)
+            send_mail(start_time_str, end_time_str, notify_error_stats)
+            is_fatal_error = check_fatal_errors(notify_error_stats)
+            if is_fatal_error:
+                send_fatal_error_mail()
         zuzu_single_process.removePIDfile()
 
 
