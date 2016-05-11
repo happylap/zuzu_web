@@ -326,7 +326,7 @@ def send_mail(start_time_str, end_time_str, notify_error_stats):
         elif NOTIFY_ERROR_TYPE.ERROR_QUERY_NOTIFY_ITEMS_EXCEPTION == key:
             error_message = "<br><br><b>"+seq_str+"Query notify items error for following users:  </b><br>" + str(list(error_notifiers))
         elif NOTIFY_ERROR_TYPE.ERROR_ZUZU_WEB_EXCEPTION == key:
-            error_message = "<br><br><b>"+seq_str+"Exception while sending request to Web:  </b><br>" + str(list(error_notifiers))
+            error_message = "<br><br><b>"+seq_str+"Exception while sending request to Web </b><br>"
         elif NOTIFY_ERROR_TYPE.ERROR_SAVE_NOTIFY_ITEMS == key:
             error_message = "<br><br><b>"+seq_str+"Saving notify items error for following users:  </b><br>" + str(list(error_notifiers))
         elif NOTIFY_ERROR_TYPE.ERROR_SEND_NOTIFICATION == key:
