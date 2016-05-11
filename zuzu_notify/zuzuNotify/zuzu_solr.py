@@ -88,7 +88,7 @@ class AsyncSolrClient(object):
             self.NOTIFY_INTERVAL_HOURS = 1
             self.NOTIFY_ITEMS_LIMIT = 10
 
-        self.current_query_post_tiem = TimeUtils.getHoursAgo(dt=self.current_notify_time, hours= self.NOTIFY_INTERVAL_HOURS)
+        self.current_query_post_time = TimeUtils.getHoursAgo(dt=self.current_notify_time, hours= self.NOTIFY_INTERVAL_HOURS)
 
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             self.price_seq = 0
@@ -176,8 +176,8 @@ class AsyncSolrClient(object):
         if last_notify_time is None:
             return TimeUtils.getOneHourAgoAsString(TimeUtils.UTC_FORMT)
         else:
-            if last_notify_time < self.current_query_post_tiem:
-                time_string = TimeUtils.getTimeString(self.current_query_post_tiem, TimeUtils.UTC_FORMT)
+            if last_notify_time < self.current_query_post_time:
+                time_string = TimeUtils.getTimeString(self.current_query_post_time, TimeUtils.UTC_FORMT)
                 return time_string
             else:
                 time_string = TimeUtils.getTimeString(last_notify_time, TimeUtils.UTC_FORMT)
