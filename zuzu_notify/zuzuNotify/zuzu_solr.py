@@ -69,7 +69,6 @@ class SolrClient(object):
 
 
 class AsyncSolrClient(object):
-
     def __init__(self, solr_url):
         self.solr_url = solr_url
         self.solr = aiosolr.Solr(self.solr_url)
