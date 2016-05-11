@@ -1,14 +1,24 @@
 # encoding: utf-8
 
+import sys
 import time
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-import LocalConstant
+args = sys.argv
+IS_LOCAL = 0
+if len(args) > 1 and args[1] == "IS_LOCAL":
+    IS_LOCAL = 1
+
+
+if IS_LOCAL:
+    from notify import constants
+else:
+    import constants
 
 class MailSender:
-    def __init__(self, user=LocalConstant.ZUZU_EMAIL_USER, password=LocalConstant.ZUZU_EMAIL_PASSWD,
+    def __init__(self, user=constants.ZUZU_EMAIL_USER, password=constants.ZUZU_EMAIL_PASSWD,
                  host='smtp.gmail.com', port='587', encoding="utf-8"):
         self.user = user
         self.host = host

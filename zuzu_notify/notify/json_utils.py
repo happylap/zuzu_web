@@ -13,26 +13,28 @@ UTF8_ENCODE ="utf-8"
 
 FILE_NOTIFIER_JSON = "notify.json"
 
-def loadsJSONStr(s, encode=None):
+def load_json_str(s, encode=None):
     if encode is None:
         return json.loads(s)
     return json.loads(s, encode)
 
-def loadJSON(filePath):
+def load_json_file(filePath):
     with open(filePath, "r") as jsonFile:
         jsStr = jsonFile.read()
         js = json.loads(jsStr)
         jsonFile.close()
         return js
 
-def updateJSON(filePath, data):
+def update_json_file(filePath, data):
     with open(filePath, "w+") as jsonFile:
         jsonFile.write(json.dumps(data))
         jsonFile.close() 
 
-def getNotifierJson():
-    return loadJSON(FILE_NOTIFIER_JSON)
+def get_notify_json():
+    return load_json_file(FILE_NOTIFIER_JSON)
 
-def updateNotifierJson(data):
-    updateJSON(FILE_NOTIFIER_JSON, data)
+def update_notify_json(data):
+    update_json_file(FILE_NOTIFIER_JSON, data)
+
+
 

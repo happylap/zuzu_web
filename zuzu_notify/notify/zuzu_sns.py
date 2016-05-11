@@ -11,10 +11,10 @@ if len(args) > 1 and args[1] == "IS_LOCAL":
     IS_LOCAL = 1
 
 if IS_LOCAL:
-    from zuzuNotify import LocalConstant
-    from zuzuNotify.error_stats import NOTIFY_ERROR_TYPE
+    from notify import constants
+    from notify.error_stats import NOTIFY_ERROR_TYPE
 else:
-    import LocalConstant
+    import constants
     from error_stats import NOTIFY_ERROR_TYPE
 
 class SNS_Enpoint(object):
@@ -34,9 +34,9 @@ class SNSClient(object):
     def __init__(self):
         self.client = boto3.client(
             'sns',
-            aws_access_key_id=LocalConstant.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=LocalConstant.AWS_SECRET_ACCESS_KEY,
-            region_name = LocalConstant.AWS_REGION
+            aws_access_key_id=constants.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=constants.AWS_SECRET_ACCESS_KEY,
+            region_name = constants.AWS_REGION
         )
         self.logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class SNSClient(object):
         endpoint_list = []
         try:
             paginator = self.client.get_paginator('list_endpoints_by_platform_application')
-            page_iterator = paginator.paginate(PlatformApplicationArn=LocalConstant.SNS_PLATFORM)
+            page_iterator = paginator.paginate(PlatformApplicationArn=constants.SNS_PLATFORM)
             for page in page_iterator:
                 endpoints = page.get('Endpoints')
                 if endpoints is not None or len(endpoints) >0:
@@ -60,7 +60,7 @@ class SNSClient(object):
     def getNextEnpoints(self, next_token):
         endpoint_list = []
         try:
-            response = self.client.list_endpoints_by_platform_application(PlatformApplicationArn=LocalConstant.SNS_PLATFORM)
+            response = self.client.list_endpoints_by_platform_application(PlatformApplicationArn=constants.SNS_PLATFORM)
             endpoints = response.get('Endpoints')
             if endpoints is None or len(endpoints) <=0:
                 return endpoint_list
@@ -79,9 +79,9 @@ class AsyncSNSClient(object):
         self.notify_error_stats = notify_error_stats
         session = aiobotocore.get_session(loop=loop)
 
-        self.async_client = session.create_client('sns', region_name=LocalConstant.AWS_REGION,
-                            aws_secret_access_key=LocalConstant.AWS_SECRET_ACCESS_KEY,
-                            aws_access_key_id=LocalConstant.AWS_ACCESS_KEY_ID)
+        self.async_client = session.create_client('sns', region_name=constants.AWS_REGION,
+                                                  aws_secret_access_key=constants.AWS_SECRET_ACCESS_KEY,
+                                                  aws_access_key_id=constants.AWS_ACCESS_KEY_ID)
 
         self.logger = logging.getLogger(__name__)
 

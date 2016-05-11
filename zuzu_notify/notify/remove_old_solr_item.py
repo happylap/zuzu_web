@@ -10,8 +10,8 @@ if len(args) > 1 and args[1] == "IS_LOCAL":
 
 
 if IS_LOCAL:
-    from zuzuNotify import LocalConstant, TimeUtils
-    from zuzuNotify.zuzu_solr import SolrClient
+    from notify import constants, timeutils
+    from notify.zuzu_solr import SolrClient
 else:
     import LocalConstant, TimeUtils
     from zuzu_solr import SolrClient
@@ -19,8 +19,8 @@ else:
 
 def main():
     post_time = datetime.datetime.utcnow() - datetime.timedelta(days=7)
-    notify_solr = SolrClient(LocalConstant.NOTIFIER_SOLR_URL)
-    notify_solr.deleteOldItems(TimeUtils.getTimeString(post_time, TimeUtils.UTC_FORMT))
+    notify_solr = SolrClient(constants.NOTIFIER_SOLR_URL)
+    notify_solr.delete_old_items(timeutils.get_time_str(post_time, timeutils.UTC_FORMT))
 
 
 if __name__=="__main__":
