@@ -79,7 +79,7 @@ class AsyncSolrClient(object):
         self.nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
 
         self.current_notify_time = TimeUtils.get_Now()
-        self.logger.info("current zuzuNotify time: " + TimeUtils.getTimeString(self.current_notify_time, TimeUtils.UTC_FORMT))
+        self.logger.info("current zuzu notify time: " + TimeUtils.getTimeString(self.current_notify_time, TimeUtils.UTC_FORMT))
 
         if self.current_notify_time.hour == 0:
             self.NOTIFY_INTERVAL_HOURS = 8
@@ -89,6 +89,8 @@ class AsyncSolrClient(object):
             self.NOTIFY_ITEMS_LIMIT = 10
 
         self.current_query_post_time = TimeUtils.getHoursAgo(dt=self.current_notify_time, hours= self.NOTIFY_INTERVAL_HOURS)
+
+        self.logger.info("current query post time: " + TimeUtils.getTimeString(self.current_query_post_time, TimeUtils.UTC_FORMT))
 
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             self.price_seq = 0
@@ -124,9 +126,7 @@ class AsyncSolrClient(object):
 
         query = self.getQuery(notifier)
 
-        query_post_time = self.getNextQueryPostTime(notifier.last_notify_time)
-
-        self.logger.info("query_post_time: " +str(query_post_time))
+        query_post_time = self.getNextQueryPostTime(notifier)
 
         q = query["query"]
         filters = query["filters"]
@@ -169,18 +169,28 @@ class AsyncSolrClient(object):
 
         return notify_items
 
-    def getNextQueryPostTime(self, last_notify_time):
+    def getNextQueryPostTime(self, notifier):
+        last_notify_time = notifier.last_notify_time
         if LocalConstant.PRODUCT_MODE == False and LocalConstant.TEST_PERFORMANCE == True:
             return "2016-03-21T00:00:00Z"
 
+        self.logger.info("getNextQueryPostTime for user:" + notifier.user_id)
+
         if last_notify_time is None:
+            self.logger.info("last_notify_time is None")
             return TimeUtils.getOneHourAgoAsString(TimeUtils.UTC_FORMT)
         else:
+            self.logger.info("last_notify_time is :" + TimeUtils.getTimeString(last_notify_time, TimeUtils.UTC_FORMT))
+
             if last_notify_time < self.current_query_post_time:
+                self.logger.info("current_query_post_time is closer, using current_query_post_time")
                 time_string = TimeUtils.getTimeString(self.current_query_post_time, TimeUtils.UTC_FORMT)
+                self.logger.info("next query post time is: "+ time_string)
                 return time_string
             else:
+                self.logger.info("last_notify_time is closer, using last_notify_time")
                 time_string = TimeUtils.getTimeString(last_notify_time, TimeUtils.UTC_FORMT)
+                self.logger.info("next query post time is: "+ time_string)
                 return TimeUtils.plusOneSecondAsString(time_string, TimeUtils.UTC_FORMT)
 
     def getQuery(self, notifier):
