@@ -29,7 +29,7 @@ class NotifyErrorStats(object):
             error_notifiers = self.stats.get(error_type)
             if error_notifiers is None:
                 error_notifiers = set()
-            if not user_id:
+            if user_id:
                 error_notifiers.add(user_id)
             self.stats[error_type] = error_notifiers
         else:
