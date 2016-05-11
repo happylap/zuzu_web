@@ -29,6 +29,8 @@ class MailSender:
 
     def send(self, to=None, subject=None, contents=None, cc=None):
         """ Use this to send an email with gmail"""
+        if subject is not None and constants.PRODUCT_MODE == False:
+            subject += ' (Development)'
         addresses = self._resolve_addresses(to, cc)
         if not addresses['recipients']:
             return {}

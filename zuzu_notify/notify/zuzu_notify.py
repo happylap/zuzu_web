@@ -296,8 +296,6 @@ def send_fatal_error_mail():
     m_to = constants.ZUZU_EMAIL_ADMIN
     m_cc = constants.ZUZU_EMAIL_CC
     m_subject = '豬豬快租通知服務因為嚴重錯誤停止，請立即修復!!!'
-    if constants.PRODUCT_MODE == False:
-        m_subject += ' (Development)'
     m_body = ""
     MailSender().send(m_to, m_subject, m_body, m_cc)
 
@@ -308,10 +306,6 @@ def send_mail(start_time_str, end_time_str, notify_error_stats):
     m_cc = constants.ZUZU_EMAIL_CC
 
     m_subject = '豬豬快租 ZuZu Notification Error'
-
-    if constants.PRODUCT_MODE == False:
-        m_subject += ' (Development)'
-
     m_body = ""
 
     logger.info("error stats: " + str(notify_error_stats.stats))
