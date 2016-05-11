@@ -112,7 +112,7 @@ class NotifyService(object):
     def startNotify(self):
         self.endpoint_list = SNSClient().getEnpoints()
 
-        notifier_list = ZuzuWeb().get_notifier_list()
+        notifier_list = ZuzuWeb(self.notify_error_stats).get_notifier_list()
 
         new_list = []
         count = 0
@@ -142,7 +142,7 @@ class NotifyService(object):
         with Timer() as t:
             loop = asyncio.get_event_loop()
             self.async_sns_client = AsyncSNSClient(loop, self.notify_error_stats)
-            self.async_zuzu_web = AsyncZuzuWeb(loop)
+            self.async_zuzu_web = AsyncZuzuWeb(loop, self.notify_error_stats)
             loop.run_until_complete(self.notitfy(notifier_list))
             self.logger.info("close zuzuweb session")
             self.close(loop)
@@ -338,7 +338,7 @@ def send_mail(start_time_str, end_time_str, notify_error_stats):
         elif NOTIFY_ERROR_TYPE.ERROR_PREPARE_DATA_EXCEPTION == key:
             error_message = "<br><br><b>"+seq_str+"Unknown error while preparing data for notification </b>"
         elif NOTIFY_ERROR_TYPE.ERROR_MAIN_EXCEPTION == key:
-            error_message = "<br><br><b>"+seq_str+"Unknown error while prcessing the notify </b>"
+            error_message = "<br><br><b>"+seq_str+"Unknown error while in notify main function </b>"
 
         if error_message is not None:
             m_body = m_body + error_message
