@@ -61,7 +61,6 @@ class SolrClient(object):
                     self.solr.commit()
 
 
-
     def add(self, item):
         self.solr.add(item)
 
@@ -79,6 +78,7 @@ class AsyncSolrClient(object):
         self.nearby_fileds = ["nearby_train", "nearby_mrt", "nearby_bus", "nearby_thsr"]
 
         self.current_notify_time = TimeUtils.get_Now()
+        self.current_notify_time = self.current_notify_time.replace(second=0, minute=0)
         self.logger.info("current zuzu notify time: " + TimeUtils.getTimeString(self.current_notify_time, TimeUtils.UTC_FORMT))
 
         if self.current_notify_time.hour == 0:
@@ -88,6 +88,8 @@ class AsyncSolrClient(object):
             self.NOTIFY_INTERVAL_HOURS = 1
             self.NOTIFY_ITEMS_LIMIT = 10
 
+        self.logger.info("NOTIFY_INTERVAL_HOURS: " + str(self.NOTIFY_INTERVAL_HOURS))
+        self.logger.info("NOTIFY_ITEMS_LIMIT: " + str(self.NOTIFY_ITEMS_LIMIT))
         self.current_query_post_time = TimeUtils.getHoursAgo(dt=self.current_notify_time, hours= self.NOTIFY_INTERVAL_HOURS)
 
         self.logger.info("current query post time: " + TimeUtils.getTimeString(self.current_query_post_time, TimeUtils.UTC_FORMT))
@@ -178,7 +180,9 @@ class AsyncSolrClient(object):
 
         if last_notify_time is None:
             self.logger.info("last_notify_time is None")
-            return TimeUtils.getOneHourAgoAsString(TimeUtils.UTC_FORMT)
+            time_string = TimeUtils.getOneHourAgoAsString(TimeUtils.UTC_FORMT)
+            self.logger.info("next query post time is: "+ time_string)
+            return time_string
         else:
             self.logger.info("last_notify_time is :" + TimeUtils.getTimeString(last_notify_time, TimeUtils.UTC_FORMT))
 
