@@ -112,7 +112,7 @@ public class App implements SparkApplication
     	UserService userSvc = new UserServiceImpl(userDao, serviceDao);
     	DeviceService deviceSvc = new DeviceServiceImpl(deviceDao);
     	CriteriaService criteriaSvc = new CriteriaServiceImpl(criteriaDao);
-    	NotifyItemService notifyItemSvc = new NotifyItemServiceImpl(notifyItemDao, logDao);
+    	NotifyItemService notifyItemSvc = new NotifyItemServiceImpl(notifyItemDao, logDao, userDao);
     	LogService logSvc = new LogServiceImpl(logDao);
     	PurchaseService purchaseSvc = new PurchaseServiceImpl(purchaseDao, userDao, serviceDao);
     	AuthService authSvc = new AuthServiceImpl(userDao);

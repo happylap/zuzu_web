@@ -14,8 +14,10 @@ import org.sql2o.Sql2oException;
 
 import com.lap.zuzuweb.dao.LogDao;
 import com.lap.zuzuweb.dao.NotifyItemDao;
+import com.lap.zuzuweb.dao.UserDao;
 import com.lap.zuzuweb.handler.payload.NotifyItemErrorMessagePayload;
 import com.lap.zuzuweb.model.NotifyItem;
+import com.lap.zuzuweb.model.User;
 
 public class NotifyItemServiceImpl implements NotifyItemService {
 
@@ -23,10 +25,12 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 	
 	private NotifyItemDao dao = null;
 	private LogDao logDao = null;
+	private UserDao userDao = null;
 
-	public NotifyItemServiceImpl(NotifyItemDao dao, LogDao logDao) {
+	public NotifyItemServiceImpl(NotifyItemDao dao, LogDao logDao, UserDao userDao) {
 		this.dao = dao;
 		this.logDao = logDao;
+		this.userDao = userDao;
 	}
 
 	@Override
@@ -134,7 +138,16 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 		Optional<Date> latestNotifyTime = logDao.getLatestNotifyTime(userID);
 		if (latestNotifyTime.isPresent()) {
 			return this.dao.getCountOfItemsAfterNotifyTime(userID, latestNotifyTime.get());
-		} 
+		}
+		
+		Optional<User> existUser = this.userDao.getUserById(userID);
+		if (existUser.isPresent()) {
+			User user = existUser.get();
+			if (user.getRegister_time() != null) {
+				return this.dao.getCountOfItemsAfterNotifyTime(user.getUser_id(), user.getRegister_time());
+			}
+		}
+		
 		return 0;
 	}
 }
