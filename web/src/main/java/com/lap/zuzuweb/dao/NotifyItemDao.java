@@ -14,6 +14,8 @@ public interface NotifyItemDao
 	
 	public int getCountOfItemsAfterNotifyTime(String userID, Date notifyTime);
 	
+	public boolean addItem(NotifyItem toAddItem);
+	
 	public boolean addItems(List<NotifyItem> items);
 	
 	public String updateItem(NotifyItem item);
@@ -21,4 +23,6 @@ public interface NotifyItemDao
 	public Optional<NotifyItem> getItem(String userID, String itemid);
 	
 	public long getUnreadCount(String userID);
+	
+	public void purgeOldItems(String userID, int retainItemCount);
 }

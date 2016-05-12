@@ -100,7 +100,30 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
             }
         }
 	}
-
+	
+	@Override
+	public boolean addItem(NotifyItem toAddItem) {
+		try (Connection conn = sql2o.beginTransaction()) {
+			conn.createQuery(SQL_CREATE_ITEM)
+	    		.addParameter("item_id", toAddItem.getItem_id())
+	    		.addParameter("user_id", toAddItem.getUser_id())
+	    		.addParameter("criteria_id", toAddItem.getCriteria_id())
+	    		.addParameter("is_read", toAddItem.is_read())
+	            .addParameter("notify_time", toAddItem.getNotify_time())
+	            .addParameter("post_time", toAddItem.getPost_time())
+	            .addParameter("price", toAddItem.getPrice())
+	            .addParameter("size", toAddItem.getSize())
+	            .addParameter("first_img_url", toAddItem.getFirst_img_url())
+	            .addParameter("house_type", toAddItem.getHouse_type())
+	            .addParameter("purpose_type", toAddItem.getPurpose_type())
+	            .addParameter("title", toAddItem.getTitle())
+	            .addParameter("addr", toAddItem.getAddr())
+	            .executeUpdate();
+			conn.commit();
+            return true;
+		}
+	}
+	
 	@Override
 	public boolean addItems(List<NotifyItem> toAddItems) {
         try (Connection conn = sql2o.beginTransaction()) {
@@ -187,4 +210,28 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
     		return count;
         }
 	}
+	
+	@Override
+	public void purgeOldItems(String userID, int retainItemCount) {
+		try (Connection conn = sql2o.beginTransaction()) {
+    		List<NotifyItem> existedItems = conn.createQuery(SQL_GET_ITEM_BY_USER_ORDER_BY_POST_TIME)
+                    .addParameter("user_id", userID)
+                    .executeAndFetch(NotifyItem.class);
+    		
+    		if (CollectionUtils.isNotEmpty(existedItems)) {
+        		int toRemoveCount = Math.max(existedItems.size(), retainItemCount) - retainItemCount;
+        		
+        		for (int i=0; i<toRemoveCount; i++) {
+        			NotifyItem toRemvoeItem = existedItems.get(i);
+        			conn.createQuery(SQL_REMOVE_ITEM)
+	        			.addParameter("item_id", toRemvoeItem.getItem_id())
+	            		.addParameter("user_id", toRemvoeItem.getUser_id())
+	                    .executeUpdate();       		
+        		}
+    		}
+        	
+            conn.commit();
+        }
+	}
+	
 }

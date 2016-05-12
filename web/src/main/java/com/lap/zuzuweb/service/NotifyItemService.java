@@ -2,8 +2,10 @@ package com.lap.zuzuweb.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import com.lap.zuzuweb.handler.payload.NotifyItemErrorMessagePayload;
 import com.lap.zuzuweb.model.NotifyItem;
 
 public interface NotifyItemService {
@@ -13,6 +15,8 @@ public interface NotifyItemService {
 
 	public boolean addItems(List<NotifyItem> items);
 
+	public Map<String, Object> addItemsForFaultTolerance(List<NotifyItem> items);	
+	
 	public String updateItem(NotifyItem item);
 
 	public void setRead(String itemid, String userID, boolean read);

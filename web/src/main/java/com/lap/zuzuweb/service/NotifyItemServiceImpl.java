@@ -1,14 +1,20 @@
 package com.lap.zuzuweb.service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sql2o.Sql2oException;
 
 import com.lap.zuzuweb.dao.LogDao;
 import com.lap.zuzuweb.dao.NotifyItemDao;
+import com.lap.zuzuweb.handler.payload.NotifyItemErrorMessagePayload;
 import com.lap.zuzuweb.model.NotifyItem;
 
 public class NotifyItemServiceImpl implements NotifyItemService {
@@ -47,6 +53,52 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 		}
 
 		return this.dao.addItems(items);
+	}
+
+	
+	class NotifyItemErrorMessage {
+		private String item_id;
+		private String user_id;
+		private String message;
+	}
+	
+	@Override
+	public Map<String, Object> addItemsForFaultTolerance(List<NotifyItem> items) {
+		
+		List<NotifyItemErrorMessagePayload> failures = new ArrayList<NotifyItemErrorMessagePayload>();
+		int success = 0;
+		
+		if (CollectionUtils.isNotEmpty(items)) {
+			for (NotifyItem item : items) {
+				try {
+					item.setNotify_time(new Date());
+					item.set_read(false);
+					this.dao.addItem(item);
+					success++;
+				} catch (Sql2oException e) {
+					logger.error(e.getMessage());
+					
+					NotifyItemErrorMessagePayload failure = new NotifyItemErrorMessagePayload();
+					failure.setItem_id(item.getItem_id());
+					failure.setUser_id(item.getUser_id());
+					failure.setMessage(e.getMessage());
+					failures.add(failure);
+				}
+			}
+			
+			try {
+				String userID = items.get(0).getUser_id();
+				int retainItemCount = 200;
+				this.dao.purgeOldItems(userID, retainItemCount);
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("success", success);
+		result.put("failures", failures);
+		return result;
 	}
 
 	@Override
