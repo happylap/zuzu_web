@@ -14,7 +14,7 @@ temp_dir = tempfile.mkdtemp()
 pid_file = temp_dir + '/zuzu_notify_pid.txt'
 # This method checks if file pid_file exists.
 #  If it was found, depends of mode - exit, or kill process which PID is stored in file.
-def scriptStarter(mode = 'force'):
+def script_starter(mode ='force'):
     '''
         if mode  = force - kill runing script and run new one
         if mode != force - run script only if it's not already running
@@ -43,7 +43,7 @@ def kill(pid):
 # Delete pid-file befor script finish.
 # Dont forget to run this method at the end of the script
 # If you use PyQt call it in overloaded closeEvent()
-def removePIDfile():
+def remove_pid_file():
     logger.info('deleting pidfile')
     try:
         os.remove(pid_file)

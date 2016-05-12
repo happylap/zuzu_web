@@ -12,14 +12,14 @@ if len(args) > 1 and args[1] == "IS_LOCAL":
 
 
 if IS_LOCAL:
-    from zuzuNotify import LocalConstant, TimeUtils
+    from notify import constants, timeutils
 else:
-    import LocalConstant, TimeUtils
+    import constants, timeutils
 
 
 def main():
-    now_str = TimeUtils.getTimeString(TimeUtils.get_Now(), TimeUtils.UTC_FORMT)
-    logname = LocalConstant.LOG_FOLDER+"remove"+"_%s.log" % now_str
+    now_str = timeutils.get_time_str(timeutils.get_now(), timeutils.UTC_FORMT)
+    logname = constants.LOG_FOLDER + "remove" + "_%s.log" % now_str
     logging.basicConfig(filename=logname,
                 filemode='wb',
                 format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
@@ -30,9 +30,9 @@ def main():
 
     logger.info("remove old log files")
     file_list = []
-    compare = TimeUtils.get_Now() - datetime.timedelta(days=7) #7 days ago in UTC time
+    compare = timeutils.get_now() - datetime.timedelta(days=7) #7 days ago in UTC time
     logger.info("compare:" + str(compare))
-    log_files = glob.glob(LocalConstant.LOG_FOLDER+"*.log")
+    log_files = glob.glob(constants.LOG_FOLDER + "*.log")
     file_list.extend(log_files)
 
     if len(file_list) <=0:

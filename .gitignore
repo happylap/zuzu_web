@@ -23,3 +23,4 @@ zuzu_notify/lib/
 pip-selfcheck.json
 pyvenv.cfg
 notify.json
+secrets.py
