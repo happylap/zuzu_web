@@ -8,6 +8,7 @@ import org.sql2o.Connection;
 import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.dao.DeviceDao;
 import com.lap.zuzuweb.model.Device;
+import com.lap.zuzuweb.util.CommonUtils;
 
 public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 {
@@ -27,8 +28,14 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 	static private String SQL_GET_DEVICE = "SELECT device_id, user_id, register_time"
 			+ " FROM \"Device\" WHERE user_id=:user_id AND device_id=:device_id";
 	
-	static private String SQL_CREATE_DEVICE = "INSERT INTO \"Device\"(device_id, user_id, register_time)"
-			+ " VALUES (:device_id, :user_id, :register_time)";
+	static private String SQL_GET_DEVICE_BY_DEVICE_ID = "SELECT device_id, user_id, register_time"
+			+ " FROM \"Device\" WHERE device_id=:device_id";
+	
+	static private String SQL_CREATE_DEVICE = "INSERT INTO \"Device\"(device_id, user_id, register_time, update_time)"
+			+ " VALUES (:device_id, :user_id, :register_time, :update_time)";
+	
+	static private String SQL_UPDATE_DEVICE = "UPDATE \"Device\" SET user_id=:user_id, update_time=:update_time"
+			+ " WHERE device_id=:device_id";
 	
 	static private String SQL_REMOVE_DEVICE = "DELETE FROM \"Device\" WHERE user_id=:user_id AND device_id=:device_id";
 	
@@ -76,8 +83,28 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
                 throw new RuntimeException();
             }
         }
-        
+	}
 
+	@Override
+	public Optional<Device> getDevice(String deviceID) {
+		logger.entering("getDevice", "{deviceID: %s}", deviceID);
+		
+		Optional<Device> device = Optional.empty();
+		
+        try (Connection conn = sql2o.open()) {
+            List<Device> devices = conn.createQuery(SQL_GET_DEVICE_BY_DEVICE_ID)
+                    .addParameter("device_id", deviceID)
+                    .executeAndFetch(Device.class);
+            
+            if (devices.size() == 1) {
+                device = Optional.of(devices.get(0));
+            } else {
+                throw new RuntimeException();
+            }
+        }
+        
+        logger.exit("getDevice", "%s", device);
+        return device;
 	}
 
 	@Override
@@ -90,6 +117,22 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
             		.addParameter("device_id", device.getDevice_id())
             		.addParameter("user_id", device.getUser_id())
                     .addParameter("register_time", device.getRegister_time())
+                    .addParameter("update_time", CommonUtils.getUTCNow())
+                    .executeUpdate();
+            conn.commit();
+            return device.getDevice_id();
+        }
+	}
+	
+	@Override
+	public String updateDevice(Device device) {
+		logger.entering("updateDevice", "{device: %s}", device);
+		
+        try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(SQL_UPDATE_DEVICE)
+            		.addParameter("user_id", device.getUser_id())
+                    .addParameter("update_time", CommonUtils.getUTCNow())
+            		.addParameter("device_id", device.getDevice_id())
                     .executeUpdate();
             conn.commit();
             return device.getDevice_id();

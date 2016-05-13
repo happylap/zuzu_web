@@ -40,6 +40,17 @@ public class DeviceServiceImpl implements DeviceService
 		device.setRegister_time(CommonUtils.getUTCNow());
 		return this.dao.createDevice(device);
 	}
+
+	@Override
+	public String createOrUpdateDevice(Device device) {
+		Optional<Device> existDevice = this.dao.getDevice(device.getDevice_id());
+        if (existDevice.isPresent()) {
+            return this.dao.updateDevice(device);
+        } else {
+        	device.setRegister_time(CommonUtils.getUTCNow());
+        	return this.dao.createDevice(device);
+        }
+	}
 	
 	@Override
 	public String deleteDevice(String userId, String deviceId) {

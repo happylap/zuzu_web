@@ -22,7 +22,7 @@ public class DeviceCreateHandler extends AbstractRequestHandler<DeviceCreatePayl
 	protected Answer processImpl(DeviceCreatePayload value, Map<String, String> urlParams) {
 		logger.entering("processImpl", "{value: %s, urlParams: %s}", value, urlParams);
 		
-        String deviceId = service.createDevice(value);
+        String deviceId = service.createOrUpdateDevice(value);
         return Answer.ok(deviceId);
 	}
 
