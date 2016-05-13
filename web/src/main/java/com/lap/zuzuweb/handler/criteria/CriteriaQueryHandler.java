@@ -3,6 +3,7 @@ package com.lap.zuzuweb.handler.criteria;
 import java.util.Map;
 import java.util.Optional;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
@@ -11,6 +12,8 @@ import com.lap.zuzuweb.service.CriteriaService;
 
 public class CriteriaQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(CriteriaQueryHandler.class);
+	
 	private CriteriaService service = null;
 
 	public CriteriaQueryHandler(CriteriaService service) {
@@ -20,6 +23,7 @@ public class CriteriaQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
+		logger.entering("processImpl", "{value: %s, urlParams: %s}", value, urlParams);
 		
 		if (urlParams.containsKey(":userid")) {
 			String userId = urlParams.get(":userid");

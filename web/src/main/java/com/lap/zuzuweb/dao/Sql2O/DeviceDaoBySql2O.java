@@ -5,11 +5,15 @@ import java.util.Optional;
 
 import org.sql2o.Connection;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.dao.DeviceDao;
 import com.lap.zuzuweb.model.Device;
 
 public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 {
+
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(DeviceDaoBySql2O.class);
+	
 	static private String SQL_GET_DEVICES_BY_USER = "SELECT device_id, user_id, register_time"
 			+ " FROM \"Device\" WHERE user_id=:user_id";
 	
@@ -33,6 +37,8 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 	@Override
 	public List<Device> getDevices(String userID)
 	{
+		logger.entering("getDevices", "{userID: %s}", userID);
+		
         try (Connection conn = sql2o.open()) {
             List<Device> devices = conn.createQuery(SQL_GET_DEVICES_BY_USER)
                     .addParameter("user_id", userID)
@@ -42,6 +48,8 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 	}
 
 	public List<Device> getValidDevice() {
+		logger.entering("getValidDevice");
+		
 		try (Connection conn = sql2o.open()) {
             List<Device> devices = conn.createQuery(SQL_GET_VALID_DEVICES)
                     .executeAndFetch(Device.class);
@@ -52,6 +60,8 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 	@Override
 	public Optional<Device> getDevice(String userID, String deviceID)
 	{
+		logger.entering("getDevice", "{userID: %s, deviceID: %s}", userID, deviceID);
+		
         try (Connection conn = sql2o.open()) {
             List<Device> devices = conn.createQuery(SQL_GET_DEVICE)
                     .addParameter("user_id", userID)
@@ -72,6 +82,9 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 
 	@Override
 	public String createDevice(Device device) {
+
+		logger.entering("createDevice", "{device: %s}", device);
+		
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_CREATE_DEVICE)
             		.addParameter("device_id", device.getDevice_id())
@@ -85,6 +98,8 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 	
 	@Override
 	public String deleteDevice(String userId, String deviceId) {
+		logger.entering("deleteDevice", "{userID: %s, deviceID: %s}", userId, deviceId);
+		
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_REMOVE_DEVICE)
     				.addParameter("user_id", userId)
@@ -97,13 +112,15 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 
 	@Override
 	public boolean deleteDevicesByUser(String userId) {
-	       try (Connection conn = sql2o.beginTransaction()) {
-	            conn.createQuery(SQL_REMOVE_DEVICE_BY_USER)
-	            		.addParameter("user_id", userId)
-	                    .executeUpdate();
-	            conn.commit();
-	            return true;
-	        }
+		logger.entering("deleteDevicesByUser", "{userID: %s}", userId);
+		
+        try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(SQL_REMOVE_DEVICE_BY_USER)
+            		.addParameter("user_id", userId)
+                    .executeUpdate();
+            conn.commit();
+            return true;
+        }
 	}
 
 }

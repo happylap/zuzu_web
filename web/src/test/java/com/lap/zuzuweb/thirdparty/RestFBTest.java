@@ -120,7 +120,7 @@ public class RestFBTest {
 			// }
 
 			FacebookTokenManagement ftm = new FacebookTokenManagement();
-			email = ftm.getEmail(accessToken);
+			email = ftm.getEmailByToken(accessToken);
 			
 		} else if (StringUtils.equals(Provider.GOOGLE.toString(), provider)) {
 			/*
@@ -141,7 +141,7 @@ public class RestFBTest {
 			*/
 			
 			GoogleTokenManagement gtm = new GoogleTokenManagement();
-			email = gtm.getEmail(accessToken);
+			email = gtm.getEmailByToken(accessToken);
 		}
 		
 		System.out.println("email: "+ email);

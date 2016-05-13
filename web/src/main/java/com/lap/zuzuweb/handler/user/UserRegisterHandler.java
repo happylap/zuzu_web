@@ -4,10 +4,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.lap.zuzuweb.Utilities;
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.common.Provider;
 import com.lap.zuzuweb.exception.DataAccessException;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
@@ -19,7 +18,7 @@ import com.lap.zuzuweb.service.UserService;
 
 public class UserRegisterHandler extends AbstractRequestHandler<UserRegisterPayload> {
 	
-	private static final Logger logger = LoggerFactory.getLogger(UserRegisterHandler.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(UserRegisterHandler.class);
 	
 	private UserService service = null;
 	
@@ -30,25 +29,25 @@ public class UserRegisterHandler extends AbstractRequestHandler<UserRegisterPayl
 	
     @Override
     protected Answer processImpl(UserRegisterPayload value, Map<String, String> urlParams) {
+    	logger.entering("processImpl", "{value: %s, urlParams: %s}", value, urlParams);
+    	
     	String provider = value.getProvider();
     	String email = value.getEmail();
     	String password = value.getPassword();
     	
-    	logger.info("Validate email and password");
+    	//logger.info("Validate email and password");
     	
     	if (!Utilities.isValidEmail(email)) {
-            logger.warn(String.format("Invalid parameters: email [%s]", email));
+            logger.error("Invalid parameters: email [%s]", email);
             return Answer.bad_request(String.format("Invalid parameters: email [%s]", email));
         }
     	
     	if (StringUtils.equalsIgnoreCase(provider, Provider.ZUZU.toString()) && !Utilities.isValidPassword(password)) {
-            logger.warn("Invalid parameters: password");
+            logger.error("Invalid parameters: password");
             return Answer.bad_request("Invalid parameters: password");
     	}
     	
         try {
-        	
-            logger.info("Register user: " + email);
             boolean result = false;
             if (StringUtils.equalsIgnoreCase(provider, Provider.ZUZU.toString())) {
             	if (value.getUser_id() != null) {
@@ -69,11 +68,11 @@ public class UserRegisterHandler extends AbstractRequestHandler<UserRegisterPayl
             }
             
             if (!result) {
-                logger.warn(String.format("Duplicate registration [%s]", email));
+                logger.error("Duplicate registration [%s]", email);
                 return Answer.not_acceptable(String.format("Duplicate registration [%s]", email));
             }
         } catch (DataAccessException e) {
-            logger.info(String.format("Failed to register user [%s]", email), e);
+            logger.error("Failed to register user", e);
             return Answer.error(String.format("Failed to register user [%s]", email));
         }
         

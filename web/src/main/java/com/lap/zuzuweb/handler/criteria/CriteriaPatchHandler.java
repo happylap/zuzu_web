@@ -5,11 +5,10 @@ import java.util.Date;
 import java.util.Map;
 
 import org.postgresql.util.PGobject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.AbstractRequestArrayHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.PatchPayload;
@@ -19,7 +18,7 @@ import com.lap.zuzuweb.util.CommonUtils;
 
 public class CriteriaPatchHandler extends AbstractRequestArrayHandler 
 {
-	private static final Logger logger = LoggerFactory.getLogger(CriteriaPatchHandler.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(CriteriaPatchHandler.class);
 	
 	private CriteriaService service = null;
 
@@ -29,6 +28,8 @@ public class CriteriaPatchHandler extends AbstractRequestArrayHandler
 
 	@Override
 	protected Answer processImpl(Validable[] values, Map<String, String> urlParams) {
+		logger.entering("processImpl");
+		
 		try {
 			PatchPayload[] patches = (PatchPayload[]) values;
 			for (PatchPayload patch : patches) {
@@ -47,7 +48,7 @@ public class CriteriaPatchHandler extends AbstractRequestArrayHandler
 
 	private void handleReplace(Map<String, String> urlParams, String path, String value) 
 	{	
-		logger.info("CriteriaPatchHandler.handleReplace: path: " + path + ", value: " + value);
+		logger.entering("handleReplace", "{urlParams: %s, path: %s, value: %s}", urlParams, path, value);
 		
 		if (!urlParams.containsKey(":userid") || !urlParams.containsKey(":criteriaid")) {
 			throw new IllegalArgumentException();

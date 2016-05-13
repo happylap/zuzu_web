@@ -3,10 +3,9 @@ package com.lap.zuzuweb.service;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.lap.zuzuweb.Utilities;
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.common.Provider;
 import com.lap.zuzuweb.dao.ServiceDao;
 import com.lap.zuzuweb.dao.UserDao;
@@ -17,8 +16,8 @@ import com.lap.zuzuweb.util.CommonUtils;
 
 public class UserServiceImpl implements UserService {
 
-	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(UserServiceImpl.class);
+	
 	private UserDao userDao = null;
 	private ServiceDao serviceDao = null;
 
@@ -29,19 +28,21 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Optional<User> getUserByEmail(String email) {
-		logger.info("UserService.getUserByEmail: " + email);
+		logger.entering("getUserByEmail", "{email: %s}", email);
+		
 		return this.userDao.getUserByEmail(email);
 	}
 
 	@Override
 	public Optional<User> getUserById(String userID) {
-		logger.info("UserService.getUserById: " + userID);
+		logger.entering("getUserById", "{userID: %s}", userID);
+		
 		return this.userDao.getUserById(userID);
 	}
 
 	@Override
 	public void updateUser(User user) throws DataAccessException {
-		logger.info("UserService.updateUser: " + user);
+		logger.entering("updateUser", "{user: %s}", user);
 		
 		if (user == null) {
 			return;
@@ -62,6 +63,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void deleteUser(String userId, String email) {
+		logger.entering("deleteUser", "{userId: %s, email: %s}", userId, email);
+		
 		if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(email)) {
 			throw new RuntimeException("Missing required field");
 		}
@@ -70,12 +73,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Optional<Service> getService(String userID) {
+		logger.entering("getService", "{userID: %s}", userID);
+		
 		return this.serviceDao.getService(userID);
 	}
 
 	@Override
 	public User registerRandomUser() throws DataAccessException {
-		logger.info("UserService.registerRandomUser");
+		logger.entering("registerRandomUser");
+		
 		try {
 			String randomId = CommonUtils.getRandomUUID();
 			String encryptionToken = Utilities.generateRandomString();
@@ -96,6 +102,8 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public boolean registerUser(User user) throws DataAccessException {
+		logger.entering("registerUser", "{user: %s}", user);
+		
 		if (checkEmailExists(user.getEmail())) {
             return false;
         }
@@ -118,6 +126,8 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public boolean registerUser(String email, String password) throws DataAccessException {
+		logger.entering("registerUser", "{email: %s, password: ****}", email);
+		
 		if (checkEmailExists(email)) {
             return false;
         }
@@ -135,6 +145,8 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public boolean registerUser(String email, String password, String userID) throws DataAccessException {
+		logger.entering("registerUser", "{email: %s, password: ****, userID: %s}", email, userID);
+		
 		if (checkEmailExists(email)) {
             return false;
         }
@@ -158,6 +170,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean authenticateUser(String email, String password) throws DataAccessException {
+		logger.entering("authenticateUser", "{email: %s, password: ****}", email);
+		
 		Optional<User> existUser = this.userDao.getUserByEmail(email);
         if (existUser == null) {
             return false;
@@ -172,6 +186,8 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public boolean authenticateUserSignature(String email, String timestamp, String signature) throws DataAccessException {
+		logger.entering("authenticateUserSignature", "{email: %s, timestamp: ****, signature: ****}", email);
+		
 		Optional<User> existUser = this.userDao.getUserByEmail(email);
         if (existUser == null) {
             return false;
@@ -185,12 +201,14 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean checkEmailExists(String email) throws DataAccessException {
+		logger.entering("checkEmailExists", "{email: %s}", email);
+		
 		return this.userDao.getUserByEmail(email).isPresent();
 	}
 	
 	@Override
 	public boolean regenerateZuzuToken(String userID) throws DataAccessException {
-		logger.info("Generating encryption zuzu token");
+		logger.entering("regenerateZuzuToken", "{userID: %s}", userID);
 		
 		Optional<User> existUser = this.userDao.getUserById(userID);
 		if (!existUser.isPresent()) {
@@ -208,7 +226,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private void createUser(User user) throws DataAccessException {
-		logger.info("UserService.createUser: " + user);
+		logger.entering("createUser", "{user: %s}", user);
 		
 		if (user == null) {
 			return;

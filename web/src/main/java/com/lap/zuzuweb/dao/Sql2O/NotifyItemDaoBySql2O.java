@@ -5,16 +5,15 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sql2o.Connection;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.dao.NotifyItemDao;
 import com.lap.zuzuweb.model.NotifyItem;
 
 public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyItemDao{
 
-	private static final Logger logger = LoggerFactory.getLogger(NotifyItemDaoBySql2O.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(NotifyItemDaoBySql2O.class);
 	
 	static private String SQL_GET_ITEM_BY_USER = "SELECT item_id, user_id, criteria_id, is_read, notify_time, "
 			+ " post_time, price, size, first_img_url, house_type, purpose_type, title, addr"
@@ -52,18 +51,21 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 	
 	@Override
 	public List<NotifyItem> getItems(String userID) {
-		logger.info("NotifyItemDao.getItems: " + userID);
+		logger.entering("getItems", "{userId: %s}", userID);
+		
         try (Connection conn = sql2o.open()) {
             List<NotifyItem> items = conn.createQuery(SQL_GET_ITEM_BY_USER)
                     .addParameter("user_id", userID)
                     .executeAndFetch(NotifyItem.class);
+            
             return items;
         }
 	}
 
 	@Override
 	public List<NotifyItem> getItemsAfterPostTime(String userID, Date postTime) {
-		logger.info("NotifyItemDao.getItemsAfterPostTime: " + userID + ", " + postTime);
+		logger.entering("getItemsAfterPostTime", "{userId: %s, postTime: %s}", userID, postTime);
+		
 		try (Connection conn = sql2o.open()) {
             List<NotifyItem> items = conn.createQuery(SQL_GET_ITEM_BY_USER_AFTER_POSTTIME)
                     .addParameter("user_id", userID)
@@ -75,7 +77,8 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 
 	@Override
 	public int getCountOfItemsAfterNotifyTime(String userID, Date notifyTime) {
-		logger.info("NotifyItemDao.getCountOfItemsAfterNotifyTime: " + userID + ", " + notifyTime);
+		logger.entering("getCountOfItemsAfterNotifyTime", "{userId: %s, notifyTime: %s}", userID, notifyTime);
+		
 		try (Connection conn = sql2o.open()) {
 			return conn.createQuery(SQL_COUNT_OF_ITEMS_BY_USER_AFTER_NOTIFY_TIME)
 					.addParameter("user_id", userID)
@@ -86,6 +89,8 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 	
 	@Override
 	public Optional<NotifyItem> getItem(String userID, String item_id) {
+		logger.entering("getItem", "{userId: %s, item_id: %s}", userID, item_id);
+		
         try (Connection conn = sql2o.open()) {
             List<NotifyItem> item = conn.createQuery(SQL_GET_SINGLE_ITEM)
                     .addParameter("user_id", userID)
@@ -103,6 +108,8 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 	
 	@Override
 	public boolean addItem(NotifyItem toAddItem) {
+		logger.entering("addItem", "{toAddItem: %s}", toAddItem);
+		
 		try (Connection conn = sql2o.beginTransaction()) {
 			conn.createQuery(SQL_CREATE_ITEM)
 	    		.addParameter("item_id", toAddItem.getItem_id())
@@ -126,6 +133,8 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 	
 	@Override
 	public boolean addItems(List<NotifyItem> toAddItems) {
+		logger.entering("addItems", "{toAddItems: %s}", toAddItems);
+		
         try (Connection conn = sql2o.beginTransaction()) {
         	
         	if (CollectionUtils.isNotEmpty(toAddItems)) {
@@ -176,6 +185,8 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 
 	@Override
 	public String updateItem(NotifyItem item) {
+		logger.entering("updateItem", "{item: %s}", item);
+		
         try (Connection conn = sql2o.beginTransaction()) {
         	
             conn.createQuery(SQL_UPDATE_ITEM)
@@ -200,6 +211,8 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 
 	@Override
 	public long getUnreadCount(String userID) {
+		logger.entering("getUnreadCount", "{userID: %s}", userID);
+		
 		try (Connection conn = sql2o.open()) {
 			Long count = 0L;
 			
@@ -213,6 +226,8 @@ public class NotifyItemDaoBySql2O extends AbstratcDaoBySql2O implements NotifyIt
 	
 	@Override
 	public void purgeOldItems(String userID, int retainItemCount) {
+		logger.entering("purgeOldItems", "{userID: %s, retainItemCount: %s}", userID, retainItemCount);
+		
 		try (Connection conn = sql2o.beginTransaction()) {
     		List<NotifyItem> existedItems = conn.createQuery(SQL_GET_ITEM_BY_USER_ORDER_BY_POST_TIME)
                     .addParameter("user_id", userID)

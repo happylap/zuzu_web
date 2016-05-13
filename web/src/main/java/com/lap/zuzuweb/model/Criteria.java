@@ -3,16 +3,15 @@ package com.lap.zuzuweb.model;
 import java.util.Date;
 
 import org.postgresql.util.PGobject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lap.zuzuweb.ZuzuLogger;
 
 import lombok.Data;
 
 @Data
 public class Criteria {
-	private static final Logger logger = LoggerFactory.getLogger(Criteria.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(Criteria.class);
 	
 	public Criteria() {
 		this.filters = new PGobject();

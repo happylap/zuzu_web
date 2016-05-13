@@ -1,18 +1,17 @@
 package com.lap.zuzuweb.dao.Sql2O;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sql2o.Sql2o;
 import org.sql2o.quirks.PostgresQuirks;
 
 import com.lap.zuzuweb.App;
 import com.lap.zuzuweb.Secrets;
+import com.lap.zuzuweb.ZuzuLogger;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class Sql2OManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(Sql2OManager.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(Sql2OManager.class);
 	
 	static private Sql2o instance = null;
 
@@ -24,7 +23,8 @@ public class Sql2OManager {
 	}
 	
 	static private Sql2o createSql2O() {
-		logger.info("Create a Sql2O instance...");
+		logger.entering("createSql2O");
+		
 		try {
 			HikariConfig config = new HikariConfig();
 			config.setJdbcUrl("jdbc:postgresql://" + Secrets.DB_HOST + ":" + Secrets.DB_PORT + "/" + Secrets.DB_NAME);
@@ -42,11 +42,11 @@ public class Sql2OManager {
 			HikariDataSource ds = new HikariDataSource(config);
 			Sql2o sql2o = new Sql2o(ds, new PostgresQuirks());
 			
-			logger.info("Create a Sql2O instance successful.");
+			logger.exit("createSql2O", "Create a Sql2O instance successful.");
 			return sql2o;
 			
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}

@@ -9,14 +9,12 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.lap.zuzuweb.util.CommonUtils;
 
 public class Utilities {
 
-	private static final Logger logger = LoggerFactory.getLogger(Utilities.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(Utilities.class);
 	
 	private static SecureRandom RANDOM = new SecureRandom();
     static {
@@ -24,16 +22,21 @@ public class Utilities {
     }
     
 	public static String sign(String content, String key) {
+		logger.entering("sign", "content: %s, key: %s", content, key);
+		
+		String result = null;
         try {
             byte[] data = content.getBytes(Constants.ENCODING_FORMAT);
             Mac mac = Mac.getInstance(Constants.SIGNATURE_METHOD);
             mac.init(new SecretKeySpec(key.getBytes(Constants.ENCODING_FORMAT), Constants.SIGNATURE_METHOD));
             char[] signature = Hex.encodeHex(mac.doFinal(data));
-            return new String(signature);
+            result = new String(signature);
         } catch (Exception e) {
         	logger.error("Exception during sign", e);
         }
-        return null;
+        
+        logger.exit("sign", result);
+        return result;
     }
 	
 

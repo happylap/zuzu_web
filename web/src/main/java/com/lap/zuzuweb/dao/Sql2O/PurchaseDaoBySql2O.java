@@ -3,10 +3,9 @@ package com.lap.zuzuweb.dao.Sql2O;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sql2o.Connection;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.dao.PurchaseDao;
 import com.lap.zuzuweb.model.Purchase;
 import com.lap.zuzuweb.model.User;
@@ -14,7 +13,7 @@ import com.lap.zuzuweb.util.CommonUtils;
 
 public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDao {
 
-	private static final Logger logger = LoggerFactory.getLogger(PurchaseDaoBySql2O.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(PurchaseDaoBySql2O.class);
 	
 	static private String SQL_GET_PURCHASE = "SELECT purchase_id, user_id, store, product_id, product_title, product_locale_id, product_price, purchase_time, transaction_id, is_valid" 
 			+ " FROM \"ZuzuPurchase\" " 
@@ -32,6 +31,8 @@ public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDa
 	
 	@Override
 	public Optional<Purchase> getPurchaseByTransactionId(String transactionId, String store) {
+		logger.entering("getPurchaseByTransactionId", "{transactionId: %s, store: %s}", transactionId, store);
+		
 		try (Connection conn = sql2o.open()) {
 			Purchase purchase = conn.createQuery(SQL_GET_PURCHASE_BY_TRANSACTION_ID)
 	                .addParameter("transaction_id", transactionId)
@@ -43,6 +44,8 @@ public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDa
 	
 	@Override
 	public List<Purchase> getPurchase(String userID) {
+		logger.entering("getPurchase", "{userID: %s}", userID);
+		
 		try (Connection conn = sql2o.open()) {
             return conn.createQuery(SQL_GET_PURCHASE)
                     .addParameter("user_id", userID)
@@ -52,14 +55,11 @@ public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDa
 
 	@Override
 	public String createPurchase(Purchase purchase) {
-		logger.debug("createPurchase enter:");
+		logger.entering("createPurchase", "{purchase: %s}", purchase);
 		
 		purchase.setPurchase_id(CommonUtils.getRandomUUID());
 		
-		logger.info("purchase: " + purchase);
-		
 		try (Connection conn = sql2o.beginTransaction()) {
-			logger.debug("createPurchase beginTransaction:");
 			
 			conn.createQuery(SQL_CREATE_PURCHASE)
 					.addParameter("purchase_id", purchase.getPurchase_id())
@@ -76,22 +76,19 @@ public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDa
 			
 			conn.commit();
 			
-			logger.debug("createPurchase exit.");
+			logger.exit("createPurchase", purchase.getPurchase_id());
 			return purchase.getPurchase_id();
 		}
 	}
 
 	@Override
 	public String createPurchase(Purchase purchase, User user) {
-		logger.debug("createPurchase enter:");
+
+		logger.entering("createPurchase", "{purchase: %s, user: %s}", purchase, user);
 		
 		purchase.setPurchase_id(CommonUtils.getRandomUUID());
 		
-		logger.info("purchase: " + purchase);
-		logger.info("user: " + user);
-		
 		try (Connection conn = sql2o.beginTransaction()) {
-			logger.debug("createPurchase beginTransaction:");
 			
 			conn.createQuery(SQL_CREATE_PURCHASE)
 					.addParameter("purchase_id", purchase.getPurchase_id())
@@ -112,8 +109,8 @@ public class PurchaseDaoBySql2O extends AbstratcDaoBySql2O implements PurchaseDa
 		            .executeUpdate();
 			
 			conn.commit();
-			
-			logger.debug("createPurchase exit.");
+
+			logger.exit("createPurchase", purchase.getPurchase_id());
 			return purchase.getPurchase_id();
 		}
 	}

@@ -1,8 +1,6 @@
 package com.lap.zuzuweb;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
@@ -15,7 +13,7 @@ import com.lap.zuzuweb.util.CrunchifyInMemoryCache;
 
 public class GoogleTokenManagement {
 
-	private static final Logger logger = LoggerFactory.getLogger(FacebookTokenManagement.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(GoogleTokenManagement.class);
 
 	private CrunchifyInMemoryCache<String, Boolean> cache = new CrunchifyInMemoryCache<String, Boolean>(1800, 1800, 300);
 	
@@ -36,7 +34,9 @@ public class GoogleTokenManagement {
 				.build();
 	}
 
-	public GoogleIdToken getTokenInfo(String accessToken) {
+	private GoogleIdToken getGoogleIdToken(String accessToken) {
+		logger.entering("getGoogleIdToken", "{accessToken: %s}", StringUtils.abbreviateMiddle(accessToken, "...", 15));
+		
 		try {
 			return idv.verify(accessToken);
 		} catch (Exception e) {
@@ -45,37 +45,45 @@ public class GoogleTokenManagement {
 		return null;
 	}
 
-	public boolean isValid(String accessToken) {
+	private boolean isValid(String accessToken) {
+		logger.entering("isValid", "{accessToken: %s}", StringUtils.abbreviateMiddle(accessToken, "...", 15));
+		
 		if (StringUtils.isBlank(accessToken)) {
 			return false;
 		}
-		return this.getTokenInfo(accessToken) != null;
+		return this.getGoogleIdToken(accessToken) != null;
 	}
 	
 	public boolean isValid(String accessToken, boolean useCache) {	
+		logger.entering("isValid", "{accessToken: %s, useCache: %s}", StringUtils.abbreviateMiddle(accessToken, "...", 15), useCache);
+		
 		if (useCache && cache.get(accessToken) != null) {
-			logger.info("found valid google token in cache.");
+			logger.info("Found token in cache:: %s", StringUtils.abbreviateMiddle(accessToken, "...", 15));
 			return true;
 		}
 		
 		boolean isValid = this.isValid(accessToken);
 		
 		if (useCache && isValid) {
-			logger.info("put valid google token to cache.");
+			logger.info("Put token to cache:: %s", StringUtils.abbreviateMiddle(accessToken, "...", 15));
 			cache.put(accessToken, isValid);
 		}
 		
 		return isValid;
 	}
-
-	public Payload getUserInfo(String accessToken) {
-		GoogleIdToken tokenInfo = this.getTokenInfo(accessToken);
+	
+	private Payload getSocialUserByToken(String accessToken) {
+		logger.entering("getSocialUserByToken", "{accessToken: %s}", StringUtils.abbreviateMiddle(accessToken, "...", 15));
+		
+		GoogleIdToken tokenInfo = this.getGoogleIdToken(accessToken);
 
 		return tokenInfo != null ? tokenInfo.getPayload() : null;
 	}
 
-	public String getEmail(String accessToken) {
-		Payload payload = this.getUserInfo(accessToken);
+	public String getEmailByToken(String accessToken) {
+		logger.entering("getEmailByToken", "{accessToken: %s}", StringUtils.abbreviateMiddle(accessToken, "...", 15));
+		
+		Payload payload = this.getSocialUserByToken(accessToken);
 		return payload != null ? payload.getEmail() : null;
 	}
 

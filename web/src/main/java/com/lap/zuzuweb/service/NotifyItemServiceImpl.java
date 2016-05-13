@@ -8,10 +8,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sql2o.Sql2oException;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.dao.LogDao;
 import com.lap.zuzuweb.dao.NotifyItemDao;
 import com.lap.zuzuweb.dao.UserDao;
@@ -21,7 +20,8 @@ import com.lap.zuzuweb.model.User;
 
 public class NotifyItemServiceImpl implements NotifyItemService {
 
-	private static final Logger logger = LoggerFactory.getLogger(NotifyItemService.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(NotifyItemService.class);
+	
 	
 	private NotifyItemDao dao = null;
 	private LogDao logDao = null;
@@ -35,18 +35,22 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 
 	@Override
 	public List<NotifyItem> getItems(String userID) {
-		logger.info("NotifyItemService.getItems: " + userID);
+		logger.entering("getItems", "{userID: %s}", userID);
+		
 		return this.dao.getItems(userID);
 	}
 
 	@Override
 	public List<NotifyItem> getItemsAfterPostTime(String userID, Date postTime) {
-		logger.info("NotifyItemService.getItemsAfterPostTime: " + userID + ", " + postTime);
+		logger.entering("getItemsAfterPostTime", "{userID: %s, postTime: %s}", userID, postTime);
+		
 		return this.dao.getItemsAfterPostTime(userID, postTime);
 	}
 
 	@Override
 	public boolean addItems(List<NotifyItem> items) {
+		logger.entering("addItems", "{items: %s}", items);
+		
 		if (items.isEmpty()) {
 			return true;
 		}
@@ -58,16 +62,10 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 
 		return this.dao.addItems(items);
 	}
-
-	
-	class NotifyItemErrorMessage {
-		private String item_id;
-		private String user_id;
-		private String message;
-	}
 	
 	@Override
 	public Map<String, Object> addItemsForFaultTolerance(List<NotifyItem> items) {
+		logger.entering("addItemsForFaultTolerance", "{items: %s}", items);
 		
 		List<NotifyItemErrorMessagePayload> failures = new ArrayList<NotifyItemErrorMessagePayload>();
 		int success = 0;
@@ -107,11 +105,15 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 
 	@Override
 	public String updateItem(NotifyItem item) {
+		logger.entering("updateItem", "{item: %s}", item);
+		
 		return this.dao.updateItem(item);
 	}
 
 	@Override
 	public void setRead(String itemid, String userID, boolean is_read) {
+		logger.entering("setRead", "{itemid: %s, userID: %s, is_read: %s}", itemid, userID, is_read);
+		
 		Optional<NotifyItem> existItem = this.getItem(itemid, userID);
 		if (existItem.isPresent()) {
 			NotifyItem item = existItem.get();
@@ -125,16 +127,22 @@ public class NotifyItemServiceImpl implements NotifyItemService {
 
 	@Override
 	public Optional<NotifyItem> getItem(String itemid, String userID) {
+		logger.entering("getItem", "{itemid: %s, userID: %s}", itemid, userID);
+		
 		return this.dao.getItem(userID, itemid);
 	}
 	
 	@Override
 	public long getUnreadCount(String userID) {
+		logger.entering("getUnreadCount", "{userID: %s}", userID);
+		
 		return this.dao.getUnreadCount(userID);
 	}
 
 	@Override
 	public long getLatestReceiveCount(String userID) {
+		logger.entering("getLatestReceiveCount", "{userID: %s}", userID);
+		
 		Optional<Date> latestNotifyTime = logDao.getLatestNotifyTime(userID);
 		if (latestNotifyTime.isPresent()) {
 			return this.dao.getCountOfItemsAfterNotifyTime(userID, latestNotifyTime.get());

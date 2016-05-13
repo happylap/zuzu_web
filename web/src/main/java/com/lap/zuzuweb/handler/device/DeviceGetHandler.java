@@ -3,6 +3,7 @@ package com.lap.zuzuweb.handler.device;
 import java.util.Map;
 import java.util.Optional;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
@@ -11,6 +12,8 @@ import com.lap.zuzuweb.service.DeviceService;
 
 public class DeviceGetHandler extends AbstractRequestHandler<EmptyPayload>{
 
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(DeviceGetHandler.class);
+	
 	private DeviceService service = null;
 	
 	public DeviceGetHandler(DeviceService service) {
@@ -20,7 +23,8 @@ public class DeviceGetHandler extends AbstractRequestHandler<EmptyPayload>{
 	
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
-    	
+		logger.entering("processImpl", "{value: %s, urlParams: %s}", value, urlParams);
+		
 		if (!urlParams.containsKey(":userid") || !urlParams.containsKey(":deviceid")) {
 			return Answer.bad_request();
 		}

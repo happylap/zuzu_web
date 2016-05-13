@@ -3,10 +3,9 @@ package com.lap.zuzuweb.handler;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
 import com.lap.zuzuweb.handler.payload.Validable;
 import com.lap.zuzuweb.util.CommonUtils;
@@ -17,7 +16,7 @@ import spark.Route;
 
 public abstract class AbstractRequestHandler<V extends Validable> implements RequestHandler<V>, Route {
 
-	private static final Logger logger = LoggerFactory.getLogger(AbstractRequestHandler.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(AbstractRequestHandler.class);
 	
 	private Class<V> valueClass;
 
@@ -27,7 +26,7 @@ public abstract class AbstractRequestHandler<V extends Validable> implements Req
 
 	public final Answer process(V value, Map<String, String> urlParams) {
 		if (value != null && !value.isValid()) {
-			throw new RuntimeException("HTTP BAD REQUEST");
+			return Answer.bad_request();
 		} else {
 			return processImpl(value, urlParams);
 		}
@@ -54,11 +53,9 @@ public abstract class AbstractRequestHandler<V extends Validable> implements Req
 		
 		response.status(200);
         response.type("application/json");
-        String json = CommonUtils.toJson(answer);
+        response.body(CommonUtils.toJson(answer));
         
-        logger.info(String.format("Route Path: (%s) %s, Answer: %s", request.requestMethod(), request.uri().toString(), StringUtils.abbreviate(json, 1024)));
-        
-		return json;
+		return response.body();
 	}
 
 }

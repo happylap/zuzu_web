@@ -7,16 +7,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lap.zuzuweb.Secrets;
+import com.lap.zuzuweb.ZuzuLogger;
 
 public class AuthUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(AuthUtils.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(AuthUtils.class);
 	
 	private static CrunchifyInMemoryCache<String, Boolean> validTokenCache = new CrunchifyInMemoryCache<String, Boolean>(1800, 1800, 300);
 	
@@ -25,14 +24,20 @@ public class AuthUtils {
 	}
 	
 	public static boolean isSuperTokenValid(String token) {
+		logger.entering("isSuperTokenValid");
+		
 		return StringUtils.equals(Secrets.SUPER_TOKEN, token);
 	}
 
 	public static boolean isBasicTokenValid(String token) {
+		logger.entering("isBasicTokenValid");
+	
 		return StringUtils.equals(Secrets.BASIC_TOKEN, token);
 	}
 	
 	public static boolean isPurchaseReceiptValid(InputStream purchaseReceipt) throws Exception {
+		logger.entering("isPurchaseReceiptValid");
+		
 		String url_prod = "https://buy.itunes.apple.com/verifyReceipt";
 		String url_sandbox = "https://sandbox.itunes.apple.com/verifyReceipt";
 

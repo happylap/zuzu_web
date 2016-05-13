@@ -5,11 +5,14 @@ import java.util.Optional;
 
 import org.sql2o.Connection;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.dao.LogDao;
 import com.lap.zuzuweb.model.Log;
 
 public class LogDaoBySql2O extends AbstratcDaoBySql2O implements LogDao
 {
+
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(LogDaoBySql2O.class);
 	
 	static private String SQL_CREATE_LOG = "INSERT INTO \"ZuzuLog\"(device_id, user_id, log_type, log_comment, log_time) "
 			+ " VALUES (:device_id, :user_id, :log_type, :log_comment, :log_time)";
@@ -19,6 +22,8 @@ public class LogDaoBySql2O extends AbstratcDaoBySql2O implements LogDao
 
 	@Override
 	public String createLog(Log log) {
+		logger.entering("createLog", "{log: %s}", log);
+		
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(SQL_CREATE_LOG)
             		.addParameter("device_id", log.getDevice_id())
@@ -34,6 +39,8 @@ public class LogDaoBySql2O extends AbstratcDaoBySql2O implements LogDao
 	
 	@Override
 	public Optional<Date> getLatestNotifyTime(String userId) {
+		logger.entering("getLatestNotifyTime", "{userId: %s}", userId);
+		
 		try (Connection conn = sql2o.open()) {
             Log firstLog = conn.createQuery(SQL_QUERY_LOG_BY_USERID_AND_TYPE)
                     .addParameter("user_id", userId)

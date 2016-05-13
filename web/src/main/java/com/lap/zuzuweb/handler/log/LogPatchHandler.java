@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.AbstractRequestArrayHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.PatchPayload;
@@ -13,6 +14,8 @@ import com.lap.zuzuweb.service.LogService;
 import com.lap.zuzuweb.util.CommonUtils;
 
 public class LogPatchHandler extends AbstractRequestArrayHandler {
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(LogPatchHandler.class);
+
 	private LogService service = null;
 
 	public LogPatchHandler(LogService service) {
@@ -21,6 +24,8 @@ public class LogPatchHandler extends AbstractRequestArrayHandler {
 
 	@Override
 	protected Answer processImpl(Validable[] values, Map<String, String> urlParams) {
+		logger.entering("processImpl");
+		
 		try {
 			PatchPayload[] patches = (PatchPayload[]) values;
 			for (PatchPayload patch : patches) {
@@ -38,6 +43,8 @@ public class LogPatchHandler extends AbstractRequestArrayHandler {
 	}
 
 	private void handleAdd(Map<String, String> urlParams, String path, String value) {
+
+		logger.entering("handleReplace", "{urlParams: %s, path: %s, value: %s}", urlParams, path, value);
 		
 		if (!urlParams.containsKey(":userid") || !urlParams.containsKey(":deviceid")) {
 			throw new IllegalArgumentException();

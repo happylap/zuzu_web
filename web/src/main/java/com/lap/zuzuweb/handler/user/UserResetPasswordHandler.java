@@ -1,19 +1,12 @@
 package com.lap.zuzuweb.handler.user;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lap.zuzuweb.Utilities;
-import com.lap.zuzuweb.common.Provider;
-import com.lap.zuzuweb.exception.DataAccessException;
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
-import com.lap.zuzuweb.handler.payload.UserLoginPayload;
 import com.lap.zuzuweb.handler.payload.UserResetPasswordPayload;
 import com.lap.zuzuweb.model.User;
 import com.lap.zuzuweb.service.AuthService;
@@ -22,7 +15,7 @@ import com.lap.zuzuweb.service.UserService;
 
 public class UserResetPasswordHandler extends AbstractRequestHandler<UserResetPasswordPayload> {
 	
-	private static final Logger logger = LoggerFactory.getLogger(UserResetPasswordHandler.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(UserResetPasswordHandler.class);
 	
 	private AuthService service = null;
 
@@ -37,6 +30,7 @@ public class UserResetPasswordHandler extends AbstractRequestHandler<UserResetPa
 	
     @Override
     protected Answer processImpl(UserResetPasswordPayload value, Map<String, String> urlParams) {
+    	logger.entering("processImpl", "{value: %s, urlParams: %s}", value, urlParams);
     	
     	String email = value.getEmail();
     	String password = value.getPassword();

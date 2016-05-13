@@ -2,9 +2,6 @@ package com.lap.zuzuweb;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentityClient;
@@ -13,7 +10,7 @@ import com.amazonaws.services.cognitoidentity.model.GetOpenIdTokenForDeveloperId
 
 public class CognitoDeveloperIdentityManagement {
 
-	private static final Logger logger = LoggerFactory.getLogger(CognitoDeveloperIdentityManagement.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(CognitoDeveloperIdentityManagement.class);
 
 	AmazonCognitoIdentityClient cib;
 
@@ -25,6 +22,9 @@ public class CognitoDeveloperIdentityManagement {
 
 	public GetOpenIdTokenForDeveloperIdentityResult getOpenIdTokenFromCognito(Map<String, String> logins,
 			String identityId) throws Exception {
+		
+		logger.entering("getOpenIdTokenFromCognito", "{logins: %s, identityId: %s}", logins, identityId);
+		
 		if (Configuration.IDENTITY_POOL_ID == null) {
 			return null;
 		}

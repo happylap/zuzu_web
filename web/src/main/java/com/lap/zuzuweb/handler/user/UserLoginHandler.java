@@ -4,9 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.UserLoginPayload;
@@ -17,7 +15,7 @@ import com.lap.zuzuweb.service.UserService;
 
 public class UserLoginHandler extends AbstractRequestHandler<UserLoginPayload> {
 	
-	private static final Logger logger = LoggerFactory.getLogger(UserLoginHandler.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(UserLoginHandler.class);
 	
 	private AuthService service = null;
 
@@ -31,6 +29,7 @@ public class UserLoginHandler extends AbstractRequestHandler<UserLoginPayload> {
 	
     @Override
     protected Answer processImpl(UserLoginPayload value, Map<String, String> urlParams) {
+    	logger.entering("processImpl", "{value: %s, urlParams: %s}", value, urlParams);
     	
     	Answer answer;
     	
@@ -62,7 +61,7 @@ public class UserLoginHandler extends AbstractRequestHandler<UserLoginPayload> {
             answer = Answer.ok(data);
             
         } catch (Exception e) {
-            logger.error("Failed to access data", e);
+            logger.error(e.getMessage());
             answer = Answer.error(e.getMessage());
         }
 

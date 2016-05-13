@@ -3,6 +3,7 @@ package com.lap.zuzuweb.handler.system;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
@@ -10,6 +11,8 @@ import com.lap.zuzuweb.service.HikariPoolJmxService;
 
 public class DBInfoQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(DBInfoQueryHandler.class);
+	
 	private HikariPoolJmxService service = null;
 
 	public DBInfoQueryHandler(HikariPoolJmxService service) {
@@ -19,6 +22,8 @@ public class DBInfoQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 
 	@Override
 	protected Answer processImpl(EmptyPayload value, Map<String, String> urlParams) {
+		logger.entering("processImpl", "{value: %s, urlParams: %s}", value, urlParams);
+		
 		try {
 			Map<String, String> info = new LinkedHashMap<String, String>();
 			info.put("activeConnections", "" + service.getActiveConnections());

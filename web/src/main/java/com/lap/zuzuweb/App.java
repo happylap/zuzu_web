@@ -1,6 +1,7 @@
 package com.lap.zuzuweb;
 
 import static spark.Spark.before;
+import static spark.Spark.after;
 import static spark.Spark.delete;
 import static spark.Spark.get;
 import static spark.Spark.halt;
@@ -9,8 +10,6 @@ import static spark.Spark.post;
 import static spark.Spark.put;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.lap.zuzuweb.common.Provider;
 import com.lap.zuzuweb.dao.CriteriaDao;
@@ -89,7 +88,7 @@ import spark.servlet.SparkApplication;
 
 public class App implements SparkApplication
 {
-	private static final Logger logger = LoggerFactory.getLogger(App.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(App.class);
 	
 	private static boolean enableAuth = true;
 	
@@ -118,20 +117,19 @@ public class App implements SparkApplication
     	AuthService authSvc = new AuthServiceImpl(userDao);
     	HikariPoolJmxService dbpoolSvc = new HikariPoolJmxServiceImpl(DB_POOL_NAME);
     	
+    	after((request, response) -> {
+    		logger.exit("route", "[%s %s] Answer: %s", request.requestMethod(), request.uri().toString(), StringUtils.abbreviateMiddle(response.body(), "\n    ...\n", 512));
+    	});
+    	
     	before((request, response) -> {
-    		logger.info(String.format("Route Path: (%s) %s, From IP: %s", request.requestMethod(), request.uri().toString(), HttpUtils.getIpAddr(request)));
+    		logger.entering("route", "[%s %s] from %s", request.requestMethod(), request.uri().toString(), HttpUtils.getIpAddr(request));
     		
     		// discharge
     		if (StringUtils.equalsIgnoreCase(request.uri().toString(), "/alive")) {
-    			logger.debug("Discharge");
     			return;
     		}
+    		// discharge
     		if (StringUtils.startsWith(request.uri().toString(), "/public")) {
-    			logger.debug("Discharge");
-    			return;
-    		}
-    		
-    		if (!enableAuth) {
     			return;
     		}
     		
@@ -141,14 +139,13 @@ public class App implements SparkApplication
     			logger.error("not found parameter [Authorization] in request header");
     		}
     		
-    		
     		if (StringUtils.equals(Secrets.SUPER_TOKEN, authToken)) {
-    			logger.info("validate auth token is SUPER_TOKEN");
+    			logger.info("Validate super_token is successful.");
     			return;
     		}
     		
     		if (StringUtils.equals(Secrets.BASIC_TOKEN, authToken)) {
-    			logger.info("validate auth token is BASIC_TOKEN");
+    			logger.info("Validate basic_token is successful.");
     			
     			String userProvider = request.headers("UserProvider");
         		String userToken = request.headers("UserToken");
@@ -158,10 +155,7 @@ public class App implements SparkApplication
         		}
         		
     			if (authSvc.validateToken(userProvider, userToken)) {
-    				logger.info(String.format("validate %s token: %s", userProvider, "true"));
     				return;
-    			} else {
-    				logger.info(String.format("validate %s token: %s", userProvider, "false"));
     			}
     		}
     		

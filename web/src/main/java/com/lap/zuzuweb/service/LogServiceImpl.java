@@ -2,11 +2,14 @@ package com.lap.zuzuweb.service;
 
 import java.util.Date;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.dao.LogDao;
 import com.lap.zuzuweb.model.Log;
 
 public class LogServiceImpl implements LogService {
 
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(LogServiceImpl.class);
+	
 	private LogDao dao = null;
 
 	public LogServiceImpl(LogDao dao) {
@@ -15,6 +18,8 @@ public class LogServiceImpl implements LogService {
 
 	@Override
 	public void setReceiveNotifyTime(String deviceID, String userID, Date time) {
+		logger.entering("setReceiveNotifyTime", "{deviceID: %s, userID: %s, time: %s}", deviceID, userID, time);
+		
 		if (time == null) {
 			return;
 		}
@@ -29,6 +34,8 @@ public class LogServiceImpl implements LogService {
 
 	@Override
 	public void setRegisterTime(String deviceID, String userID, Date time) {
+		logger.entering("setRegisterTime", "{deviceID: %s, userID: %s, time: %s}", deviceID, userID, time);
+		
 		Log log = new Log();
 		log.setDevice_id(deviceID);
 		log.setUser_id(userID);

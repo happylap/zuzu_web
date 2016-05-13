@@ -6,9 +6,8 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.model.ProductEnum;
 import com.lap.zuzuweb.model.Purchase;
@@ -21,7 +20,7 @@ import spark.Route;
 
 public class PurchaseCreateHandler implements Route {
 
-	private static final Logger logger = LoggerFactory.getLogger(PurchaseCreateHandler.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(PurchaseCreateHandler.class);
 	
 	private PurchaseService service = null;
 
@@ -31,7 +30,9 @@ public class PurchaseCreateHandler implements Route {
 	
 	@Override
     public Object handle(Request request, Response response) throws Exception {
-		logger.debug("handle enter:");
+		logger.entering("handle", "{request: %s, response: %s}", request, response);
+		
+		logger.entering();
 		
 		Answer answer = null;
 		

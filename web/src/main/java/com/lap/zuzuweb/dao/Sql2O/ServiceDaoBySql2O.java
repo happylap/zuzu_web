@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sql2o.Connection;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.dao.ServiceDao;
 import com.lap.zuzuweb.model.Purchase;
 import com.lap.zuzuweb.model.Service;
@@ -20,8 +21,8 @@ import com.lap.zuzuweb.util.CommonUtils;
  *
  */
 public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao {
-	
-	private static final Logger logger = LoggerFactory.getLogger(ServiceDaoBySql2O.class);
+
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(ServiceDaoBySql2O.class);
 
 	static private String SQL_GET_SERVICE_BY_USER = "SELECT user_id, start_time, expire_time, update_time"
 			+ " FROM \"ZuzuService\" WHERE user_id=:user_id";
@@ -41,25 +42,27 @@ public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao 
 	 */
 	@Override
 	public Optional<Service> getService(String userID) {
+		logger.entering("getService", "{userID: %s}", userID);
+		
+		Optional<Service> existService = null;
+		
 		try (Connection conn = sql2o.open()) {
 			List<Service> service = conn.createQuery(SQL_GET_SERVICE_BY_USER)
 					.addParameter("user_id", userID)
 					.executeAndFetch(Service.class);
 			if (service.size() == 0) {
-				return Optional.empty();
+				existService = Optional.empty();
 			} else if (service.size() >= 1) {
-				return Optional.of(service.get(0));
-			} else {
-				throw new RuntimeException();
+				existService = Optional.of(service.get(0));
 			}
 		}
+		
+		logger.exit("getService", "%s", existService);
+		return existService;
 	}
 	
 	public String createService(Service service, List<Purchase> purchases) {
-		logger.debug("createService enter:");
-		
-		logger.info("createService: " + service);
-		logger.info("createService: " + purchases);
+		logger.entering("createService", "{service: %s, purchases: %s}", service, purchases);
 		
 		try (Connection conn = sql2o.beginTransaction()) {
 			if (service.getUpdate_time() == null) {
@@ -81,17 +84,14 @@ public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao 
             }
             
             conn.commit();
-
-			logger.debug("createService exit.");
+            
+			logger.exit("createService", service.getUser_id());
             return service.getUser_id();
         }
 	}
 	
 	public String updateService(Service service, List<Purchase> purchases) {
-		logger.debug("updateService enter:");
-		
-		logger.info("updateService: " + service);
-		logger.info("updateService: " + purchases);
+		logger.entering("updateService", "{service: %s, purchases: %s}", service, purchases);
 		
 		try (Connection conn = sql2o.beginTransaction()) {
 			if (service.getUpdate_time() == null) {
@@ -114,7 +114,7 @@ public class ServiceDaoBySql2O extends AbstratcDaoBySql2O implements ServiceDao 
             
             conn.commit();
 
-			logger.debug("updateService exit.");
+			logger.exit("updateService", service.getUser_id());
             return service.getUser_id();
         }
 	}

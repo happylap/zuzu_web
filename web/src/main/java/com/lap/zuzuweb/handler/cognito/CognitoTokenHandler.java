@@ -3,10 +3,9 @@ package com.lap.zuzuweb.handler.cognito;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.lap.zuzuweb.Configuration;
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.CognitoTokenRequestPayload;
@@ -15,7 +14,7 @@ import com.lap.zuzuweb.service.AuthService;
 
 public class CognitoTokenHandler extends AbstractRequestHandler<CognitoTokenRequestPayload> {
 
-	private static final Logger logger = LoggerFactory.getLogger(CognitoTokenHandler.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(CognitoTokenHandler.class);
 
 	private AuthService service = null;
 
@@ -26,9 +25,9 @@ public class CognitoTokenHandler extends AbstractRequestHandler<CognitoTokenRequ
 
 	@Override
 	protected Answer processImpl(CognitoTokenRequestPayload value, Map<String, String> urlParams) {
-
+		logger.entering("processImpl", "{value: %s, urlParams: %s}", value, urlParams);
+		
 		try {
-			logger.info("Validate parameters");
 			String userId = value.getUserId();
 			String signature = value.getSignature();
 			String timestamp = value.getTimestamp();

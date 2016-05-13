@@ -3,6 +3,7 @@ package com.lap.zuzuweb.handler.user;
 import java.util.Map;
 import java.util.Optional;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.EmptyPayload;
@@ -12,6 +13,8 @@ import com.lap.zuzuweb.service.UserService;
 
 public class UserQueryHandler extends AbstractRequestHandler<EmptyPayload> {
 
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(UserQueryHandler.class);
+	
 	private UserService service = null;
 	
 	public UserQueryHandler(UserService service) {
@@ -22,6 +25,8 @@ public class UserQueryHandler extends AbstractRequestHandler<EmptyPayload> {
     @Override
     protected Answer processImpl(EmptyPayload value, Map<String,String> urlParams)
     {
+    	logger.entering("processImpl", "{value: %s, urlParams: %s}", value, urlParams);
+    	
     	Optional<User> existUser = Optional.empty();
     	
     	if (urlParams.containsKey(":userid")) {

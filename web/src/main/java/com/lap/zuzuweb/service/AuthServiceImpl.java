@@ -9,14 +9,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.cognitoidentity.model.GetOpenIdTokenForDeveloperIdentityResult;
 import com.lap.zuzuweb.CognitoDeveloperIdentityManagement;
 import com.lap.zuzuweb.Configuration;
 import com.lap.zuzuweb.FacebookTokenManagement;
 import com.lap.zuzuweb.GoogleTokenManagement;
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.Utilities;
 import com.lap.zuzuweb.ZuzuTokenManagement;
 import com.lap.zuzuweb.common.Provider;
@@ -36,7 +35,7 @@ import com.lap.zuzuweb.util.mail.MailSender;
  */
 public class AuthServiceImpl implements AuthService {
 
-	private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(AuthServiceImpl.class);
 
 	private final CognitoDeveloperIdentityManagement byoiManagement;
 	private final GoogleTokenManagement gtManagement;
@@ -56,6 +55,8 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	public boolean validateSignature(String stringToSign, String key, String targetSignature) {
+		logger.entering("validateSignature", "{stringToSign: %s, key: %s, targetSignature: %s}", stringToSign, key, targetSignature);
+		
 		String computedSignature = Utilities.sign(stringToSign, key);
 		return Utilities.slowStringComparison(targetSignature, computedSignature);
 	}
@@ -64,7 +65,8 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public void validateTokenRequest(String userId, String signature, String stringToSign)
 			throws DataAccessException, UnauthorizedException {
-
+		logger.entering("validateTokenRequest", "{userId: %s, signature: %s, stringToSign: %s}", userId, signature, stringToSign);
+		
 		Optional<User> existUser = this.userDao.getUserById(userId);
 		if (!existUser.isPresent()) {
 			throw new UnauthorizedException("Couldn't find user: " + userId);
@@ -76,13 +78,16 @@ public class AuthServiceImpl implements AuthService {
 			logger.info("String to sign: " + stringToSign);
 			throw new UnauthorizedException("Invalid signature: " + signature);
 		}
-		logger.info("Signature matched!!!");
+		
+		logger.exit("validateTokenRequest", "Signature matched!!!");
 	}
 	
 
 	@Override
 	public CognitoTokenResultPayload getCognitoToken(String userId, Map<String, String> logins, String identityId) throws Exception {
 
+		logger.entering("getCognitoToken", "{userId: %s, logins: %s, identityId: %s}", userId, logins, identityId);
+		
 		Optional<User> existUser = this.userDao.getUserById(userId);
 		if (!existUser.isPresent()) {
 			throw new UnauthorizedException("Couldn't find user: " + userId);
@@ -102,29 +107,37 @@ public class AuthServiceImpl implements AuthService {
 		CognitoTokenResultPayload openIdToken = new CognitoTokenResultPayload();
 		openIdToken.setIdentityId(result.getIdentityId());
 		openIdToken.setToken(result.getToken());
+		
+		logger.exit("getCognitoToken", "%s", openIdToken);
 		return openIdToken;
 	}
 
 	@Override
 	public boolean validateToken(String provider, String accessToken) {
-		logger.info(String.format("validate %s token: %s", provider, accessToken));
+		logger.entering("validateToken", "{provider: %s, accessToken: %s}", provider, StringUtils.abbreviateMiddle(accessToken, "...", 15));
 		
 		boolean isValid = false;
 		
 		if (StringUtils.equalsIgnoreCase(Provider.FB.toString(), provider)) {
-			isValid = ftManagement.isValid(accessToken);
+			isValid = ftManagement.isValid(accessToken, true);
 		}
 		
 		if (StringUtils.equalsIgnoreCase(Provider.GOOGLE.toString(), provider)) {
-			isValid = gtManagement.isValid(accessToken);
+			isValid = gtManagement.isValid(accessToken, true);
 		}
 		
 		if (StringUtils.equalsIgnoreCase(Provider.ZUZU.toString(), provider)) {
-			isValid = ztManagement.isValid(accessToken);
+			isValid = ztManagement.isValid(accessToken, true);
 		}
 		
 		if (StringUtils.equalsIgnoreCase(Provider.ZUZU_NOLOGIN.toString(), provider)) {
-			isValid = ztManagement.isValid(accessToken);
+			isValid = ztManagement.isValid(accessToken, true);
+		}
+		
+		if (isValid) {
+			logger.exit("validateToken", "%s", isValid);
+		} else {
+			logger.exit("validateToken", "%s (%s)", isValid, accessToken);
 		}
 		
 		return isValid;
@@ -133,28 +146,27 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public String validateLoginRequest(String provider, String accessToken) 
 			throws DataAccessException, UnauthorizedException {
-		// Validate accessToken
-		logger.info(String.format("Validate login provider [%s], accessToken [%s]", provider, accessToken));
+		logger.entering("validateLoginRequest", "{provider: %s, accessToken: %s}", provider, StringUtils.abbreviateMiddle(accessToken, "...", 15));
 		
 		String email = null;
 		
 		if (StringUtils.equalsIgnoreCase(Provider.FB.toString(), provider)) {
-			email = ftManagement.isValid(accessToken) ? ftManagement.getEmail(accessToken) : null; 
+			email = ftManagement.getEmailByToken(accessToken); 
 		}
 		
 		if (StringUtils.equalsIgnoreCase(Provider.GOOGLE.toString(), provider)) {
-			email = gtManagement.isValid(accessToken) ? gtManagement.getEmail(accessToken) : null;
+			email = gtManagement.getEmailByToken(accessToken);
 		}
 		
 		if (email == null) {
-			logger.warn("Failed to login");
+			logger.exit("validateLoginRequest", "failure (%s)", accessToken);
         	throw new UnauthorizedException("Failed to login");
         }
 		
 		Optional<User> existUser = this.userDao.getUserByEmail(email);
 		
 		if (!existUser.isPresent()) {
-			logger.warn("Failed to find user by email: " + email);
+			logger.exit("validateLoginRequest", "Failed to find user by email: %s", email);
 			throw new UnauthorizedException("Failed to find user by email: " + email);
 		}
 		
@@ -162,39 +174,41 @@ public class AuthServiceImpl implements AuthService {
 		
 		this.regenerateZuzuToken(user.getUser_id());
 		
+		logger.exit("validateLoginRequest", user.getUser_id());
 		return user.getUser_id();
 	}
 	
 	@Override
 	public void validateLoginRequest(String email, String signature, String timestamp)
 			throws DataAccessException, UnauthorizedException {
+		logger.entering("validateLoginRequest", "{email: %s, signature: %s, timestamp: %s}", email, signature, timestamp);
 		
 		// Validate signature
-		logger.info("Validate signature: " + signature);
 		Optional<User> existUser = this.userDao.getUserByEmail(email);
 		if (!existUser.isPresent()) {
-			throw new UnauthorizedException("Couldn't find user by email: " + email);
+			logger.exit("validateLoginRequest", "Failed to find user by email: %s", email);
+			throw new UnauthorizedException("Failed to find user by email: " + email);
 		}
 		
 		User user = existUser.get();
 		
 		if (!validateSignature(user.getHashed_password(), timestamp, signature)) {
+			logger.exit("validateLoginRequest", "Invalid signature: %s", signature);
 			throw new UnauthorizedException("Invalid signature: " + signature);
 		}
-
-		logger.info("Signature matched!!!");
-
+		
 		this.regenerateZuzuToken(user.getUser_id());
 		
-		logger.info("ZuzuToken registered successfully!!!");
+		logger.exit("validateLoginRequest", "Successful.");
 	}
 	
 	private boolean regenerateZuzuToken(String userID) throws DataAccessException {
-		logger.info("Generating encryption zuzu token");
+		logger.entering("regenerateZuzuToken", "{userID: %s}", userID);
 		
 		Optional<User> existUser = this.userDao.getUserById(userID);
 		if (!existUser.isPresent()) {
-			throw new DataAccessException("Couldn't find user: " + userID);
+			logger.exit("regenerateZuzuToken", "Failed to find user by userId: %s", userID);
+			throw new DataAccessException("Failed to find user by userId: " + userID);
 	    }
 	    
 	    User user = existUser.get();
@@ -204,24 +218,30 @@ public class AuthServiceImpl implements AuthService {
 	    
 	    this.userDao.updateUser(user);
 	    
+		logger.exit("regenerateZuzuToken", "true");
 	    return true;
 	}
 
 	@Override
 	public String getZuzuToken(String email) throws DataAccessException, UnauthorizedException {
+		logger.entering("getZuzuToken", "{email: %s}", email);
+		
 		Optional<User> existUser = this.userDao.getUserByEmail(email);
         if (!existUser.isPresent()) {
-        	throw new UnauthorizedException("Couldn't find user by email: " + email);
+			logger.exit("getZuzuToken", "Failed to find user by email: %s", email);
+			throw new UnauthorizedException("Failed to find user by email: " + email);
         }
         
         User user = existUser.get();
-        
-        logger.info("Responding with encrypted key for email : " + email);
+
+		logger.exit("getZuzuToken", "Responding with encrypted key for email: %s", email);
         return user.getZuzu_token();
 	}
 
 	@Override
 	public boolean isZuzuTokenValid(String zuzuToken) {
+		logger.entering("isZuzuTokenValid", "{zuzuToken: %s}", zuzuToken);
+		
 		if (StringUtils.isBlank(zuzuToken)) {
 			return false;
 		}
@@ -244,6 +264,8 @@ public class AuthServiceImpl implements AuthService {
 	
 	@Override
 	public void forgotPassword(String email) throws Exception {
+		logger.entering("forgotPassword", "{email: %s}", email);
+		
 		Optional<User> existUser = this.userDao.getUserByEmail(email);
 		if (existUser.isPresent()) {
 			String verificationCode = Utilities.generateRandomNumber(4);
@@ -267,10 +289,13 @@ public class AuthServiceImpl implements AuthService {
 			mail.addMailTo(email);
 			MailSender.sendEmail(mail);
 		}
+		logger.exit("forgotPassword");
 	}
 	
 	@Override
 	public boolean isVerificationCodeValid(String email, String verificationCode) {
+		logger.entering("isVerificationCodeValid", "{email: %s, verificationCode: %s}", email, verificationCode);
+		
 		if (StringUtils.isBlank(email) || StringUtils.isBlank(verificationCode)) {
 			logger.warn(String.format("Bad paramters email [%s], verificationCode [%s]", email, verificationCode));
 			return false;
@@ -304,6 +329,7 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	public boolean resetPassword(String email, String password) {
+		logger.entering("resetPassword", "{email: %s, password: ****}", email);
 		
 		Optional<User> existUser = this.userDao.getUserByEmail(email);
         if (existUser.isPresent()) {

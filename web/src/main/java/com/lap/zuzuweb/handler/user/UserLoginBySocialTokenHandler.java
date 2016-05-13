@@ -4,9 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.UserLoginBySocialTokenPayload;
@@ -16,7 +14,7 @@ import com.lap.zuzuweb.service.UserService;
 
 public class UserLoginBySocialTokenHandler extends AbstractRequestHandler<UserLoginBySocialTokenPayload> {
 
-	private static final Logger logger = LoggerFactory.getLogger(UserLoginBySocialTokenHandler.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(UserLoginBySocialTokenHandler.class);
 
 	private AuthService service = null;
 
@@ -30,20 +28,15 @@ public class UserLoginBySocialTokenHandler extends AbstractRequestHandler<UserLo
 
 	@Override
     protected Answer processImpl(UserLoginBySocialTokenPayload value, Map<String, String> urlParams) {
-    	
+		logger.entering("processImpl", "{value: %s, urlParams: %s}", value, urlParams);
+		
     	Answer answer;
     	
     	try {
-            logger.info("Validate parameters");
             String provider = value.getProvider();
             String accessToken = value.getAccess_token();
             
-            logger.info(String.format("login with provider [%s], accessToken [%s]", provider, accessToken));
-            
-            logger.info("Validate request");
             String userId = service.validateLoginRequest(provider, accessToken);
-            
-            logger.info("Get user for userId: " + userId);
             
             Optional<User> existUser = this.userSvc.getUserById(userId);
             
@@ -60,7 +53,7 @@ public class UserLoginBySocialTokenHandler extends AbstractRequestHandler<UserLo
             answer = Answer.ok(data);
             
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             answer = Answer.error(e.getMessage());
         }
     	

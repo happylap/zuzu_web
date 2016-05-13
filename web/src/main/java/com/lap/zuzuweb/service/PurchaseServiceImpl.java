@@ -15,11 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.dao.PurchaseDao;
 import com.lap.zuzuweb.dao.ServiceDao;
 import com.lap.zuzuweb.dao.UserDao;
@@ -31,8 +30,8 @@ import com.lap.zuzuweb.util.CommonUtils;
 import com.lap.zuzuweb.util.HttpUtils;
 
 public class PurchaseServiceImpl implements PurchaseService{
-	
-	private static final Logger logger = LoggerFactory.getLogger(PurchaseServiceImpl.class);
+
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(PurchaseServiceImpl.class);
 	
 	private PurchaseDao purchaseDao = null;
 	private UserDao userDao = null;
@@ -47,12 +46,14 @@ public class PurchaseServiceImpl implements PurchaseService{
 	
 	@Override
 	public List<Purchase> getPurchase(String userID) {
+		logger.entering("getPurchase", "{userID: %s}", userID);
+		
 		return this.purchaseDao.getPurchase(userID);
 	}
 
 	@Override
 	public String purchaseForFree(Purchase purchase) {
-		logger.debug("purchaseForFree enter:");
+		logger.entering("purchaseForFree", "{purchase: %s}", purchase);
 		
 		// 免費活動截止日 2016-06-30T23:59:59Z
 		Date deadline = null;
@@ -112,7 +113,7 @@ public class PurchaseServiceImpl implements PurchaseService{
 
 	@Override
 	public String purchase(Purchase purchase, InputStream purchase_receipt) {
-		logger.debug("purchase enter:");
+		logger.entering("purchase", "{purchase: %s, purchase_receipt: ****}", purchase);
 		
 		if (StringUtils.isEmpty(purchase.getUser_id())) {
 			throw new IllegalArgumentException("Missing required field: user_id");
@@ -170,6 +171,8 @@ public class PurchaseServiceImpl implements PurchaseService{
 	
 	@Deprecated
 	public void verify(String userID) {
+		logger.entering("verify");
+		
 		try {
 			List<Purchase> purchases = this.purchaseDao.getPurchase(userID);
 			if (CollectionUtils.isEmpty(purchases)) {
@@ -283,9 +286,7 @@ public class PurchaseServiceImpl implements PurchaseService{
 
 	@Override
 	public void processService(String userID) {
-		logger.info("processService enter:");
-		
-		logger.info("userID: " + userID);
+		logger.entering("processService", "{userID: %s}", userID);
 		
 		List<Purchase> purchases = this.purchaseDao.getPurchase(userID);
 		if (CollectionUtils.isEmpty(purchases)) {
@@ -366,6 +367,8 @@ public class PurchaseServiceImpl implements PurchaseService{
 	}
 	
 	private Date calStartTime(Date origStartTime, Date origExpireTime) {
+		logger.entering("calStartTime", "{origStartTime: %s, origExpireTime: %s}", origStartTime, origExpireTime);
+		
 		Date newStartTime = null;
 		
 		if (origStartTime != null) {
@@ -383,7 +386,7 @@ public class PurchaseServiceImpl implements PurchaseService{
 	}
 	
 	private Date calExpireTime(Date origExpireTime, int toaddDays) {
-		logger.info("calExpireTime enter:");
+		logger.entering("calExpireTime", "{origExpireTime: %s, toaddDays: %s}", origExpireTime, toaddDays);
 		
 		Date baseTime = null;
 		if (origExpireTime != null && origExpireTime.after(CommonUtils.getUTCNow())) {
@@ -401,7 +404,7 @@ public class PurchaseServiceImpl implements PurchaseService{
 	}
 
 	private List<String> getTransactionIdsFormReceipt(String userID) {
-		logger.info("getTransactionIdsFormReceipt enter:");
+		logger.entering("getTransactionIdsFormReceipt", "{userID: %s}", userID);
 		
 		List<String> emptyCollection = new ArrayList<String>();
 		
@@ -471,14 +474,14 @@ public class PurchaseServiceImpl implements PurchaseService{
 	}
 	
 	private String verifyReceipt(InputStream purchaseReceipt) {
-		logger.info("verifyReceipt enter:");
+		logger.entering("verifyReceipt", "{purchaseReceipt: %s}", purchaseReceipt);
 		
 		String url_prod = "https://buy.itunes.apple.com/verifyReceipt";
 		String url_sandbox = "https://sandbox.itunes.apple.com/verifyReceipt";
 		String jsonString = null;
 		
 		try {
-			logger.info(String.format("Verify Receipt URL: %s", url_prod));
+			logger.info("Verify Receipt URL: %s", url_prod);
 			StringEntity se = new StringEntity(IOUtils.toString(purchaseReceipt));
 			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 			jsonString = HttpUtils.post(url_prod, se);
@@ -491,7 +494,7 @@ public class PurchaseServiceImpl implements PurchaseService{
 				// This receipt is from the test environment, but it was sent to the
 				// production environment for verification.
 				if (jsonNode_status != null && jsonNode_status.intValue() == 21007) {
-					logger.info(String.format("Verify Receipt URL: %s", url_sandbox));
+					logger.info("Verify Receipt URL: %s", url_sandbox);
 					jsonString = HttpUtils.post(url_sandbox, se);
 				}
 			}
@@ -499,8 +502,7 @@ public class PurchaseServiceImpl implements PurchaseService{
 			logger.error(String.format("Verify Receipt Error: %s", e.getMessage()), e);
 		}
 
-		logger.info(String.format("Verify Receipt Result Status: %s", StringUtils.abbreviate(jsonString, 1024)));
-		logger.info("verifyReceipt exit.");
+		logger.exit("Verify Receipt Result Status: %s", jsonString);
 		return jsonString;
 	}
 }

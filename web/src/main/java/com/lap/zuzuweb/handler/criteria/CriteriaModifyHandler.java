@@ -2,6 +2,7 @@ package com.lap.zuzuweb.handler.criteria;
 
 import java.util.Map;
 
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.handler.AbstractRequestHandler;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.payload.CriteriaUpdatePayload;
@@ -9,14 +10,18 @@ import com.lap.zuzuweb.service.CriteriaService;
 
 public class CriteriaModifyHandler extends AbstractRequestHandler<CriteriaUpdatePayload>{
 
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(CriteriaModifyHandler.class);
+	
 	private CriteriaService service = null;
 	
 	public CriteriaModifyHandler(CriteriaService service) {
         super(CriteriaUpdatePayload.class);
         this.service = service;
     }
+	
 	@Override
 	protected Answer processImpl(CriteriaUpdatePayload value, Map<String, String> urlParams) {
+		logger.entering("processImpl", "{value: %s, urlParams: %s}", value, urlParams);
 		
 		if (!urlParams.containsKey(":userid") || !urlParams.containsKey(":criteriaid")) {
 			return Answer.bad_request();

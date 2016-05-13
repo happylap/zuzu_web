@@ -2,21 +2,20 @@ package com.lap.zuzuweb.util.mail;
 
 import java.util.List;
 import java.util.Properties;
+
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeMessage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lap.zuzuweb.Secrets;
+import com.lap.zuzuweb.ZuzuLogger;
 import com.lap.zuzuweb.util.CommonUtils;
 
 public class MailSender 
 {
-	private static final Logger logger = LoggerFactory.getLogger(MailSender.class);
+	private static final ZuzuLogger logger = ZuzuLogger.getLogger(MailSender.class);
 		
 	private static Properties mailServerProperties;
 	private static Session getMailSession;
@@ -39,6 +38,7 @@ public class MailSender
 	}
  	
 	public static void sendEmail(Mail mail) throws MessagingException {
+		logger.entering("sendEmail", "%s", mail);
 		
 		// Step1
 		mailServerProperties = System.getProperties();
@@ -51,11 +51,11 @@ public class MailSender
 		generateMailMessage = new MimeMessage(getMailSession);
 		
 		generateMailMessage.setSubject(mail.subject);
-		logger.info("mail subject: " + mail.subject);
+		//logger.info("mail subject: " + mail.subject);
 		//generateMailMessage.setContent(mail.body, mail.contentType);
 		generateMailMessage.setContent(mail.body, mail.contentType);
-		logger.info("mail body: " + mail.body);
-		logger.info("mail contentType: " + mail.contentType);
+		//logger.info("mail body: " + mail.body);
+		//logger.info("mail contentType: " + mail.contentType);
 		List<Receipient>receipients = mail.getRecipientList();
 		
 		for(Receipient r: receipients)
@@ -71,8 +71,9 @@ public class MailSender
 		// if you have 2FA enabled then provide App Specific Password
 		Transport transport = getMailSession.getTransport("smtp");
 		transport.connect("smtp.gmail.com", Secrets.ZUZU_EMAIL, Secrets.ZUZU_PWD);
-		logger.info("ZUZU_EMAIL: " + Secrets.ZUZU_EMAIL);
+		logger.info("sender: " + Secrets.ZUZU_EMAIL);
 		transport.sendMessage(generateMailMessage, generateMailMessage.getAllRecipients());
 		transport.close();
+		logger.exit("sendEmail", "Successful.");
 	}
 }
