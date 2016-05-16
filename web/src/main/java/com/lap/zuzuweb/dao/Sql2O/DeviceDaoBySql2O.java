@@ -89,14 +89,17 @@ public class DeviceDaoBySql2O extends AbstratcDaoBySql2O implements DeviceDao
 	public Optional<Device> getDevice(String deviceID) {
 		logger.entering("getDevice", "{deviceID: %s}", deviceID);
 		
-		Optional<Device> device = Optional.empty();
+		Optional<Device> device = null;
 		
         try (Connection conn = sql2o.open()) {
             List<Device> devices = conn.createQuery(SQL_GET_DEVICE_BY_DEVICE_ID)
                     .addParameter("device_id", deviceID)
                     .executeAndFetch(Device.class);
             
-            if (devices.size() == 1) {
+            if (devices.size() == 0) {
+            	device = Optional.empty();
+            }
+            else if (devices.size() == 1) {
                 device = Optional.of(devices.get(0));
             } else {
                 throw new RuntimeException();
