@@ -160,7 +160,10 @@ public class App implements SparkApplication
     		}
     		
     		response.type("application/json");
-			halt(403, CommonUtils.toJson(Answer.forbidden()));
+    		response.body(CommonUtils.toJson(Answer.forbidden()));
+    		
+    		logger.exit("route", "[%s %s] Answer: %s", request.requestMethod(), request.uri().toString(), StringUtils.abbreviateMiddle(response.body(), "\n    ...\n", 512));
+			halt(403, response.body());
         });
     	
     	// public 
