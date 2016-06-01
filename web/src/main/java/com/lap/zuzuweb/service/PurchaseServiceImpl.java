@@ -55,16 +55,37 @@ public class PurchaseServiceImpl implements PurchaseService{
 	public String purchaseForFree(Purchase purchase) {
 		logger.entering("purchaseForFree", "{purchase: %s}", purchase);
 		
-		// 免費活動截止日 2016-06-30T23:59:59Z
-		Date deadline = null;
-		try {
-			deadline = CommonUtils.getUTCDateFromString("2016-06-30T23:59:59Z");
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+		ProductEnum product = ProductEnum.getEnum(purchase.getProduct_id());
+		if (product.isNeedVerifyReceipt()) {
+			throw new IllegalArgumentException("RadarFree product already exists");
 		}
 		
-		if (CommonUtils.getUTCNow().after(deadline)) {
-			throw new RuntimeException("15天的租屋雷達服務禮包，兌換時間已截止。 (dealine: " + CommonUtils.getUTCStringFromDate(deadline) + ")");
+		// 開始日
+		Date startdate = null;
+		// 截止日
+		Date deadline = null;
+	
+		try {
+			if (product == ProductEnum.RADARFREE1) {
+				// 15天的免費服務禮包(即日起至2016-06-30 23:59:59截止)
+				deadline = CommonUtils.getUTCDateFromString("2016-06-30T23:59:59Z");
+			} else if (product == ProductEnum.RADARFREE2) {
+				// 7天的免費服務禮包(自2016-07-01 00:00:00起，無限期)
+				startdate = CommonUtils.getUTCDateFromString("2016-07-01T00:00:00Z");
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			throw new RuntimeException(e);
+		}
+		
+		if (startdate != null && CommonUtils.getUTCNow().before(startdate)) {
+			String msg = String.format("%d天的租屋雷達服務禮包，兌換時間尚未開始。 (startdate: %s)", product.getStandardDays(), CommonUtils.getUTCStringFromDate(startdate));
+			throw new RuntimeException(msg);
+		}
+		
+		if (deadline != null && CommonUtils.getUTCNow().after(deadline)) {
+			String msg = String.format("%d天的租屋雷達服務禮包，兌換時間已截止。 (dealine: %s)", product.getStandardDays(), CommonUtils.getUTCStringFromDate(deadline));
+			throw new RuntimeException(msg);
 		}
 		
 		if (StringUtils.isEmpty(purchase.getUser_id())) {
@@ -77,11 +98,6 @@ public class PurchaseServiceImpl implements PurchaseService{
 		
 		if (StringUtils.isEmpty(purchase.getProduct_id())) {
 			throw new IllegalArgumentException("Missing required field: product_id");
-		}
-		
-		ProductEnum product = ProductEnum.getEnum(purchase.getProduct_id());
-		if (product.isNeedVerifyReceipt()) {
-			throw new IllegalArgumentException("RadarFree product already exists");
 		}
 		
 		List<Purchase> purchases = purchaseDao.getPurchase(purchase.getUser_id());
