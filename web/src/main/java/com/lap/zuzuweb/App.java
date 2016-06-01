@@ -1,7 +1,7 @@
 package com.lap.zuzuweb;
 
-import static spark.Spark.before;
 import static spark.Spark.after;
+import static spark.Spark.before;
 import static spark.Spark.delete;
 import static spark.Spark.get;
 import static spark.Spark.halt;
@@ -29,6 +29,7 @@ import com.lap.zuzuweb.dao.Sql2O.Sql2OManager;
 import com.lap.zuzuweb.dao.Sql2O.UserDaoBySql2O;
 import com.lap.zuzuweb.handler.Answer;
 import com.lap.zuzuweb.handler.cognito.CognitoTokenHandler;
+import com.lap.zuzuweb.handler.cognito.SNSSenderHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaCreateHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaModifyHandler;
 import com.lap.zuzuweb.handler.criteria.CriteriaPatchHandler;
@@ -226,6 +227,9 @@ public class App implements SparkApplication
         
         // notifier
         get("/notifier", new NotifierHandler(criteriaSvc, deviceSvc)); // get a list of purchases belonging to some user
+        
+        // others
+        post("/notification/send", new SNSSenderHandler());
         
         get("/alive", new Route() {
             @Override
