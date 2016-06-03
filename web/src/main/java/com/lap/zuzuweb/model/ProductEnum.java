@@ -3,11 +3,11 @@ package com.lap.zuzuweb.model;
 import org.apache.commons.lang3.StringUtils;
 
 public enum ProductEnum {
-	RADAR1("com.lap.zuzurentals.radar1", true, 15, 0),
+	RADAR1("com.lap.zuzurentals.radar1", true, 10, 0),
 	RADAR2("com.lap.zuzurentals.radar2", true, 30, 10),
 	RADAR3("com.lap.zuzurentals.radar3", true, 45, 15),
 	RADARFREE1("com.lap.zuzurentals.radarfree1", false, 15, 0),
-	RADARFREE2("com.lap.zuzurentals.radarfree2", false, 7, 0);
+	RADARFREE2("com.lap.zuzurentals.radarfree2", false, 5, 0);
 	
 	private String productId;
 	private boolean needVerifyReceipt;
