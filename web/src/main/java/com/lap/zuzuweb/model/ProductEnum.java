@@ -8,7 +8,7 @@ public enum ProductEnum {
 	RADAR3("com.lap.zuzurentals.radar3", true, 45, 15),
 	RADAR5("com.lap.zuzurentals.radar5", true, 60, 60),
 	RADARFREE1("com.lap.zuzurentals.radarfree1", false, 15, 0),
-	RADARFREE2("com.lap.zuzurentals.radarfree2", false, 5, 0);
+	RADARFREE2("com.lap.zuzurentals.radarfree2", false, 7, 0);
 	
 	private String productId;
 	private boolean needVerifyReceipt;
