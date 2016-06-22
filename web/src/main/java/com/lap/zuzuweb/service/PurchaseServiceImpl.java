@@ -352,6 +352,15 @@ public class PurchaseServiceImpl implements PurchaseService{
 				validPurchase.set_valid(true);
 				toaddDays += product.getStandardDays();
 				toaddDays += product.getExtraDays();
+				
+				// 等 Apple Store 審核通過： Purchase (com.lap.zuzurentals.radar1) 10天租屋雷達
+				// 就要移除這一段程式碼: Start
+				if (product == ProductEnum.RADAR1) {
+					if (StringUtils.equalsIgnoreCase(validPurchase.getProduct_title(), "10+5天租屋雷達 (加贈5天)")) {
+						toaddDays += 5;
+					}
+				}
+				// 就要移除這一段程式碼: End
 			}
 		}
 		logger.info("toaddDays: " + toaddDays);
